@@ -1796,6 +1796,16 @@ export function renderAdminDashboard(params = {}) {
   return `
     <div class="admin-shell" id="adminShell">
       ${renderSidebar(activeSection)}
+      <div class="admin-sidebar-overlay" id="adminSidebarOverlay" style="
+        position: fixed;
+        inset: 0;
+        background: rgba(17, 29, 66, 0.4);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 250;
+      "></div>
       <div class="admin-main" id="adminMain">
         <header class="admin-topbar" id="adminTopbar">
           <button class="admin-menu-toggle" id="adminMenuToggle" aria-label="Toggle sidebar">
@@ -1807,7 +1817,7 @@ export function renderAdminDashboard(params = {}) {
             <span style="font-weight:600;">${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace("-", " ")}</span>
           </div>
           <div class="admin-topbar-actions">
-            <a href="#/" class="admin-topbar-link" target="_blank" rel="noopener">
+            <a href="#/" class="admin-topbar-link">
               <i data-lucide="external-link"></i>
               View Site
             </a>
@@ -1831,10 +1841,16 @@ export function initAdminDashboardDelegates() {
   // Sidebar toggle for mobile
   const menuToggle = document.getElementById("adminMenuToggle");
   const sidebar = document.getElementById("adminSidebar");
-  if (menuToggle && sidebar) {
-    menuToggle.addEventListener("click", () => {
+  const overlay = document.getElementById("adminSidebarOverlay");
+  if (menuToggle && sidebar && overlay) {
+    const toggleSidebar = () => {
       sidebar.classList.toggle("admin-sidebar--open");
-    });
+      const isOpen = sidebar.classList.contains("admin-sidebar--open");
+      overlay.style.opacity = isOpen ? "1" : "0";
+      overlay.style.visibility = isOpen ? "visible" : "hidden";
+    };
+    menuToggle.addEventListener("click", toggleSidebar);
+    overlay.addEventListener("click", toggleSidebar);
   }
 
   // Logout button

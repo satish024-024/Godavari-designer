@@ -191,8 +191,6 @@ export async function initAuth() {
         if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
           const currentHash = window.location.hash;
           const isOnAuthPage = currentHash.includes('/auth') || 
-                               currentHash === '#/' || 
-                               currentHash === '' || 
                                currentHash.includes('access_token') ||
                                currentHash.includes('error_description');
           if (isOnAuthPage && user) {
@@ -201,6 +199,7 @@ export async function initAuth() {
             }, 100);
           }
         }
+
       } catch (e) {
         currentUser = null;
         currentProfile = null;
