@@ -327,6 +327,7 @@ document.addEventListener("click", (event) => {
   const action = trigger.dataset.action;
 
   if (action === "scroll-to") {
+    closePanels();
     // If not on Home page, navigate to Home first, then scroll
     if (ui.page !== "home") {
       window.location.hash = "#/";

@@ -27,7 +27,7 @@ export function renderMobileDrawer() {
         ` : ""}
         <a href="#/" class="drawer-link" data-action="close-panels">Home</a>
         <div class="drawer-divider"></div>
-        <a href="#/catalog" class="drawer-link" data-action="close-panels">Collections</a>
+        <button type="button" class="drawer-link" data-action="scroll-to" data-target="collections">Collections</button>
         <a href="#/catalog?category=blouses" class="drawer-link" data-action="close-panels">Designer Blouses</a>
         <a href="#/catalog?category=saree" class="drawer-link" data-action="close-panels">Saree Borders</a>
         <a href="#/catalog?category=kids-wear" class="drawer-link" data-action="close-panels">Kids Wear</a>

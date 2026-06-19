@@ -53,7 +53,7 @@ export function renderHeader(isMobile) {
       <!-- Primary Navigation — 5 focused links only -->
       <nav class="main-nav" aria-label="Main navigation">
         <a href="#/catalog" class="nav-link nav-link--page">Design Library</a>
-        <a href="#/catalog?collection=bridal" class="nav-link nav-link--page">Collections</a>
+        <button type="button" class="nav-link" data-action="scroll-to" data-target="collections">Collections</button>
         <a href="#/custom-order" class="nav-link nav-link--page">Custom Order</a>
         <button type="button" class="nav-link" data-action="scroll-to" data-target="stories">About</button>
         <button type="button" class="nav-link" data-action="scroll-to" data-target="footer">Contact</button>
