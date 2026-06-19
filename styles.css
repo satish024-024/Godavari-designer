@@ -162,12 +162,14 @@ select:focus-visible {
 /* Reset for both <button> and <a> nav items */
 .nav-link,
 .footer-columns button,
+.footer-columns a,
 .contact-row button,
 .logo-row button {
   border: 0;
   background: transparent;
   color: inherit;
   cursor: pointer;
+  text-decoration: none;
 }
 
 /* Shared nav link style — covers <button> and <a> */
@@ -1253,7 +1255,8 @@ select:focus-visible {
   letter-spacing: 0;
 }
 
-.footer-columns button {
+.footer-columns button,
+.footer-columns a {
   display: block;
   width: fit-content;
   margin: 10px 0;
@@ -1262,6 +1265,12 @@ select:focus-visible {
   font-size: 14px;
   font-weight: 600;
   text-align: left;
+  transition: color 200ms ease;
+}
+
+.footer-columns button:hover,
+.footer-columns a:hover {
+  color: var(--gold);
 }
 
 .newsletter {

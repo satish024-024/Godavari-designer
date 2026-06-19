@@ -18,6 +18,21 @@ const routes = {
   "/track-order": { page: "track-order", title: "Track Your Order | Godavari" },
   "/account": { page: "account", title: "Customer Dashboard | Godavari", requiresAuth: true },
   "/auth": { page: "auth", title: "Sign In / Register | Godavari" },
+  
+  // Company pages
+  "/about-us": { page: "about-us", title: "About Us | Godavari Designer" },
+  "/our-process": { page: "our-process", title: "Our Process | Godavari Designer" },
+  "/why-godavari": { page: "why-godavari", title: "Why Godavari | Godavari Designer" },
+  "/reviews": { page: "reviews", title: "Customer Reviews | Godavari Designer" },
+  "/careers": { page: "careers", title: "Careers | Godavari Designer" },
+  
+  // Support pages
+  "/faqs": { page: "faqs", title: "Frequently Asked Questions | Godavari" },
+  "/shipping-delivery": { page: "shipping-delivery", title: "Shipping & Delivery | Godavari" },
+  "/returns-refunds": { page: "returns-refunds", title: "Returns & Refunds | Godavari" },
+  "/terms-of-service": { page: "terms-of-service", title: "Terms of Service | Godavari" },
+  "/privacy-policy": { page: "privacy-policy", title: "Privacy Policy | Godavari" },
+
   // Admin login alias – redirects authenticated admins, no bare auth access
   "/admin/login": { page: "auth", title: "Admin Login | Godavari" },
   // Admin portal root

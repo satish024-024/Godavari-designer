@@ -79,6 +79,22 @@ import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js";
 import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js";
 import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js";
 
+// Company & Support Pages
+import {
+  renderAboutUs,
+  renderOurProcess,
+  renderWhyGodavari,
+  renderReviews,
+  renderCareers
+} from "./pages/CompanyPages.js";
+import {
+  renderFAQs,
+  renderShippingDelivery,
+  renderReturnsRefunds,
+  renderTermsService,
+  renderPrivacyPolicy
+} from "./pages/SupportPages.js";
+
 const app = document.getElementById("app");
 let lastLoadedPage = "";
 let notFoundAnalyticsEmitted = false;
@@ -150,6 +166,36 @@ function render() {
       break;
     case "loading-auth":
       pageContent = renderLoadingAuth();
+      break;
+    case "about-us":
+      pageContent = renderAboutUs();
+      break;
+    case "our-process":
+      pageContent = renderOurProcess();
+      break;
+    case "why-godavari":
+      pageContent = renderWhyGodavari();
+      break;
+    case "reviews":
+      pageContent = renderReviews();
+      break;
+    case "careers":
+      pageContent = renderCareers();
+      break;
+    case "faqs":
+      pageContent = renderFAQs();
+      break;
+    case "shipping-delivery":
+      pageContent = renderShippingDelivery();
+      break;
+    case "returns-refunds":
+      pageContent = renderReturnsRefunds();
+      break;
+    case "terms-of-service":
+      pageContent = renderTermsService();
+      break;
+    case "privacy-policy":
+      pageContent = renderPrivacyPolicy();
       break;
     case "404":
       pageContent = renderNotFound();

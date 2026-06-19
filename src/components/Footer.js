@@ -1,6 +1,35 @@
 import { site } from "../services/store.js";
 import { escapeHtml, attr, icon } from "../utils/helpers.js";
 
+const FOOTER_LINKS_MAP = {
+  // Company
+  "About Us": "#/about-us",
+  "Our Process": "#/our-process",
+  "Why Godavari": "#/why-godavari",
+  "Reviews": "#/reviews",
+  "Careers": "#/careers",
+  // Support
+  "FAQs": "#/faqs",
+  "Shipping & Delivery": "#/shipping-delivery",
+  "Returns & Refunds": "#/returns-refunds",
+  "Terms of Service": "#/terms-of-service",
+  "Privacy Policy": "#/privacy-policy",
+  // Shop
+  "Design Library": "#/catalog",
+  "Custom Digitizing": "#/custom-order"
+};
+
+function renderFooterLink(link) {
+  const hash = FOOTER_LINKS_MAP[link];
+  if (hash) {
+    return `<a href="${hash}">${escapeHtml(link)}</a>`;
+  }
+  if (link === "All Collections") {
+    return `<button type="button" data-action="scroll-to" data-target="collections">${escapeHtml(link)}</button>`;
+  }
+  return `<button type="button" data-action="open-search" data-query="${attr(link)}">${escapeHtml(link)}</button>`;
+}
+
 export function renderFooter() {
   return `
     <footer class="site-footer" id="footer">
@@ -25,7 +54,7 @@ export function renderFooter() {
             (column) => `
               <div>
                 <h3>${escapeHtml(column.title)}</h3>
-                ${column.links.map((link) => `<button type="button" data-action="open-search" data-query="${attr(link)}">${escapeHtml(link)}</button>`).join("")}
+                ${column.links.map((link) => renderFooterLink(link)).join("")}
               </div>
             `
           )

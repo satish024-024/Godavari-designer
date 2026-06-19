@@ -431,6 +431,11 @@ export function setPage(page, params = {}) {
   ui.pageParams = params;
   closePanels();
   triggerRender();
+  try {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  } catch (e) {
+    // ignore scroll errors in testing environments without window
+  }
 }
 
 export async function loginWithGoogle() {
