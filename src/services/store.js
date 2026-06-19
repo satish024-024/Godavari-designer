@@ -24,6 +24,9 @@ export let site = clone(defaultSite);
 export let wishlist = new Set(DB.load(WISHLIST_KEY, []));
 export let cart = DB.load(CART_KEY, []);
 export let currentUser = DB.getActiveUser();
+export let currentProfile = null;
+export let authInitialized = false;
+export let authLoading = false;
 export let faqs = [];
 
 export const ui = {
@@ -152,28 +155,46 @@ export async function processPendingCartItem() {
 
 export async function initAuth() {
   initSupabase();
+  authLoading = true;
+  triggerRender();
+
   try {
     const user = await authService.getCurrentUser();
     currentUser = user;
+    currentProfile = user;
     DB.setActiveUser(user);
   } catch (e) {
     currentUser = null;
+    currentProfile = null;
     DB.setActiveUser(null);
+  } finally {
+    authLoading = false;
+    authInitialized = true;
+    notifyAuthChange();
+    triggerRender();
   }
-  notifyAuthChange();
 
   // Bind session state change listener
   supabase.auth.onAuthStateChange(async (event, session) => {
+    authLoading = true;
+    triggerRender();
+
     if (session) {
       try {
         const user = await authService.getCurrentUser();
         currentUser = user;
+        currentProfile = user;
         DB.setActiveUser(user);
         await processPendingCartItem();
+        
         // On OAuth sign-in, route to appropriate dashboard
-        if (event === 'SIGNED_IN') {
+        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
           const currentHash = window.location.hash;
-          const isOnAuthPage = currentHash.includes('/auth') || currentHash === '#/' || currentHash === '';
+          const isOnAuthPage = currentHash.includes('/auth') || 
+                               currentHash === '#/' || 
+                               currentHash === '' || 
+                               currentHash.includes('access_token') ||
+                               currentHash.includes('error_description');
           if (isOnAuthPage && user) {
             setTimeout(() => {
               window.location.hash = user.role === 'admin' ? '#/admin-dashboard' : '#/account';
@@ -182,12 +203,25 @@ export async function initAuth() {
         }
       } catch (e) {
         currentUser = null;
+        currentProfile = null;
         DB.setActiveUser(null);
       }
     } else {
       currentUser = null;
+      currentProfile = null;
       DB.setActiveUser(null);
+
+      // If signed out, and we are on a protected route, redirect to auth
+      if (event === 'SIGNED_OUT') {
+        const currentHash = window.location.hash;
+        if (currentHash.includes('/admin') || currentHash.includes('/account') || currentHash.includes('/admin-dashboard')) {
+          window.location.hash = '#/auth';
+        }
+      }
     }
+    
+    authLoading = false;
+    authInitialized = true;
     notifyAuthChange();
     triggerRender();
   });
@@ -413,6 +447,7 @@ export async function login(email, password) {
   try {
     const user = await authService.login(email, password);
     currentUser = user;
+    currentProfile = user;
     DB.setActiveUser(user);
     showToast(`Welcome back, ${user.name}`);
     await processPendingCartItem();
@@ -425,7 +460,27 @@ export async function login(email, password) {
     }
     return true;
   } catch (error) {
-    showToast(error.message || "Invalid email or password");
+    // Check if the user exists but is registered with Google OAuth
+    let isGoogleUser = false;
+    try {
+      initSupabase();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('auth_provider')
+        .eq('email', email)
+        .maybeSingle();
+      if (profile && profile.auth_provider === 'google') {
+        isGoogleUser = true;
+      }
+    } catch (dbErr) {
+      console.warn("Failed to check auth_provider on login error:", dbErr);
+    }
+
+    if (isGoogleUser) {
+      showToast("This account uses Google Sign-In. Continue with Google.");
+    } else {
+      showToast(error.message || "Invalid email or password. New user? Please click 'Create Account' below to sign up first.");
+    }
     return false;
   }
 }
@@ -434,6 +489,7 @@ export async function register(email, password, name, phone, addressFields = {})
   try {
     const user = await authService.signUp(email, password, name, phone, addressFields);
     currentUser = user;
+    currentProfile = user;
     DB.setActiveUser(user);
     showToast(`Account created! Welcome, ${user.name}`);
     await processPendingCartItem();
@@ -446,7 +502,27 @@ export async function register(email, password, name, phone, addressFields = {})
     }
     return true;
   } catch (error) {
-    showToast(error.message || "Failed to create account");
+    // Check if the user exists but is registered with Google OAuth
+    let isGoogleUser = false;
+    try {
+      initSupabase();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('auth_provider')
+        .eq('email', email)
+        .maybeSingle();
+      if (profile && profile.auth_provider === 'google') {
+        isGoogleUser = true;
+      }
+    } catch (dbErr) {
+      console.warn("Failed to check auth_provider on registration error:", dbErr);
+    }
+
+    if (isGoogleUser) {
+      showToast("This email is already registered using Google Sign-In. Please sign in with Google.");
+    } else {
+      showToast(error.message || "Failed to create account");
+    }
     return false;
   }
 }
@@ -466,6 +542,7 @@ export async function updateUserProfile(name, phone, addressFields = {}) {
       country: addressFields.country || "",
       postalCode: addressFields.postalCode || ""
     };
+    currentProfile = currentUser;
     DB.setActiveUser(currentUser);
     showToast("Profile updated successfully");
     triggerRender();
@@ -480,6 +557,7 @@ export async function logout() {
   try {
     await authService.logout();
     currentUser = null;
+    currentProfile = null;
     DB.setActiveUser(null);
     showToast("Logged out successfully");
     triggerRender();

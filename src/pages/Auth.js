@@ -1,5 +1,5 @@
 import { ui, login, register, triggerRender, showToast } from "../services/store.js";
-import { authService } from "../services/supabase.js";
+import { authService, supabase, initSupabase } from "../services/supabase.js";
 import { escapeHtml, icon } from "../utils/helpers.js";
 
 // Local Page State
@@ -606,6 +606,26 @@ export function initAuthDelegates() {
       triggerRender();
 
       try {
+        // Check if the user is registered with Google OAuth
+        let isGoogleUser = false;
+        try {
+          initSupabase();
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('auth_provider')
+            .eq('email', email)
+            .maybeSingle();
+          if (profile && profile.auth_provider === 'google') {
+            isGoogleUser = true;
+          }
+        } catch (dbErr) {
+          console.warn("Failed to check auth_provider on password reset request:", dbErr);
+        }
+
+        if (isGoogleUser) {
+          throw new Error("Password recovery is not available for Google Sign-In accounts. Please log in with Google.");
+        }
+
         await authService.sendPasswordResetEmail(email);
         showToast(`Reset email instructions sent to ${email}`);
         authMode = "signin";

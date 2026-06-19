@@ -91,6 +91,23 @@ function applyTheme() {
   });
 }
 
+function renderLoadingAuth() {
+  return `
+    <div class="loading-auth-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; font-family: var(--font-sans); color: var(--navy); text-align: center; padding: 24px;">
+      <!-- Elegant Spinner -->
+      <div class="luxury-spinner" style="width: 48px; height: 48px; border: 2px solid var(--border); border-top: 2px solid var(--gold); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 24px;"></div>
+      <h2 style="font-family: var(--font-serif); font-size: 24px; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.01em;">Godavari Designer</h2>
+      <p style="color: var(--ink-soft); font-size: 14px; margin: 0;">Restoring secure session...</p>
+    </div>
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+  `;
+}
+
 // Master Render loop
 function render() {
   applyTheme();
@@ -131,6 +148,9 @@ function render() {
     case "admin-dashboard":
       pageContent = renderAdminDashboard(ui.pageParams);
       break;
+    case "loading-auth":
+      pageContent = renderLoadingAuth();
+      break;
     case "404":
       pageContent = renderNotFound();
       break;
@@ -138,10 +158,10 @@ function render() {
       pageContent = renderHome();
   }
 
-  // Admin dashboard gets its own full-screen shell — no site header/footer
-  if (ui.page === "admin-dashboard") {
+  // Admin dashboard and loading state get their own full-screen shell — no site header/footer
+  if (ui.page === "admin-dashboard" || ui.page === "loading-auth") {
     app.innerHTML = `
-      <div class="admin-page-wrapper">
+      <div class="full-screen-wrapper">
         ${pageContent}
         ${renderToast()}
       </div>

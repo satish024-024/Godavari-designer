@@ -1,4 +1,4 @@
-import { setPage, currentUser, showToast } from "./store.js";
+import { setPage, currentUser, showToast, authInitialized } from "./store.js";
 import { DB } from "./db.js";
 
 // ==========================================
@@ -72,17 +72,34 @@ export function initRouter() {
 export function handleRouting() {
   const hash = window.location.hash || "#/";
 
+  // Parse parameters from hash (which can be formatted like query params, e.g. #access_token=... or #error_description=...)
+  const hashParams = {};
+  const hashString = hash.replace("#", "");
+  if (hashString) {
+    const paramString = hashString.includes("?") ? hashString.split("?")[1] : hashString;
+    paramString.split("&").forEach((pair) => {
+      const [key, value] = pair.split("=");
+      if (key) {
+        hashParams[decodeURIComponent(key)] = decodeURIComponent(value || "");
+      }
+    });
+  }
+
   // Split hash into path and query parameters
   const [hashPath, queryString] = hash.replace("#", "").split("?");
   const path = hashPath || "/";
 
-  // Intercept Supabase OAuth token redirects to prevent 404 errors
-  if (
-    path.startsWith("access_token") ||
-    path.includes("access_token=") ||
-    path.includes("error_description")
-  ) {
-    window.location.hash = "#/";
+  // Handle OAuth authentication errors
+  if (hashParams.error_description || hashParams.error) {
+    const errorDesc = hashParams.error_description || hashParams.error || "Authentication failed";
+    showToast(`Authentication failed: ${errorDesc}`);
+    window.location.hash = "#/auth";
+    return;
+  }
+
+  // Handle successful OAuth redirects: pause routing so Supabase client can process the token from the URL hash
+  if (hashParams.access_token) {
+    console.log("Router: OAuth redirect detected, postponing routing until session is established.");
     return;
   }
 
@@ -99,10 +116,10 @@ export function handleRouting() {
 
   // ------------------------------------------
   // WILDCARD ADMIN ROUTE GUARD
-  // Any path starting with /admin that isn't in
+  // Any path starting with /admin, /cms, or /dashboard that isn't in
   // the routes table is denied immediately.
   // ------------------------------------------
-  if (path.startsWith("/admin") && !routes[path]) {
+  if ((path.startsWith("/admin") || path.startsWith("/cms") || path.startsWith("/dashboard")) && !routes[path]) {
     // Unknown admin sub-path → deny, send to admin login
     showToast("Access denied: Admins only");
     window.location.hash = "#/admin/login";
@@ -177,25 +194,32 @@ export function handleRouting() {
     }
   }
 
-  // 3. Redirect already-authenticated users away from auth page
+  // 3. Pause routing for protected routes if Auth is not yet initialized
+  if (!authInitialized && (matchedRoute.requiresAuth || matchedRoute.requiresAdmin)) {
+    setPage("loading-auth");
+    return;
+  }
+
+  // 4. Redirect already-authenticated users away from auth page
   if (matchedRoute.page === "auth" && isAuthenticated()) {
     window.location.hash = isAuthenticatedAdmin() ? "#/admin-dashboard" : "#/account";
     return;
   }
 
-  // 4. Admin route guard — CRITICAL SECURITY CHECK
-  //    Role is always read from currentUser.role which is populated
-  //    by authService.getCurrentUser() → queries profiles.role from Supabase.
-  //    localStorage/sessionStorage are never consulted here.
+  // 5. Admin route guard — CRITICAL SECURITY CHECK
   if (matchedRoute.requiresAdmin) {
-    if (!isAuthenticatedAdmin()) {
-      showToast("Access denied: Admin credentials required");
+    if (!isAuthenticated()) {
+      showToast("Please sign in to access the admin portal");
       window.location.hash = "#/admin/login";
+      return;
+    } else if (!isAuthenticatedAdmin()) {
+      showToast("Access denied: Admin credentials required");
+      window.location.hash = "#/account";
       return;
     }
   }
 
-  // 5. Auth-required route guard (customer-facing protected routes)
+  // 6. Auth-required route guard (customer-facing protected routes)
   if (matchedRoute.requiresAuth) {
     if (!isAuthenticated()) {
       showToast("Please sign in to access your account");
