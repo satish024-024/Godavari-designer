@@ -103,7 +103,7 @@ Please confirm my order.`;
               ${icon("phone", 18)} Confirm Order via WhatsApp
             </a>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%;">
+            <div class="checkout-actions-row">
               <!-- Placeholder: Download Invoice -->
               <button type="button" onclick="alert('Invoice PDF generation is upcoming.')" class="button button-secondary" style="min-height: 44px; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; font-weight: 600;">
                 ${icon("file-text", 16)} Download Invoice
@@ -184,7 +184,7 @@ Please confirm my order.`;
           <p style="color: var(--ink-soft); font-size: 15px; margin: 0;">Provide your customer details to submit your embroidery order.</p>
         </div>
 
-        <div class="checkout-layout" style="display: grid; grid-template-columns: 1fr 400px; gap: 32px;">
+        <div class="checkout-layout">
           <!-- Left: Information Form -->
           <form id="checkoutSubmitForm" style="display: grid; gap: 20px; align-content: start;">
             
@@ -217,7 +217,7 @@ Please confirm my order.`;
                   <input type="text" name="customerName" required value="${attr(defaultName)}" placeholder="e.g. Sameer Kumar" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                 </label>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="checkout-contact-grid">
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Email Address *</span>
                     <input type="email" name="customerEmail" required value="${attr(defaultEmail)}" placeholder="name@designer.com" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />

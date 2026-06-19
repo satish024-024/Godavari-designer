@@ -48,3 +48,8 @@ export function mediaUrl(id) {
   }
   return MediaLibrary.getMediaUrl(id, id);
 }
+
+export function isMobileViewport() {
+  return window.innerWidth <= 768;
+}
+

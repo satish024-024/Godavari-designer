@@ -37,7 +37,7 @@ import {
   onAuthChange
 } from "./services/store.js";
 import { storageService } from "./services/supabase.js";
-import { clone, escapeHtml, attr, icon, money } from "./utils/helpers.js";
+import { clone, escapeHtml, attr, icon, money, isMobileViewport } from "./utils/helpers.js";
 
 // Components
 import { renderHeader } from "./components/Header.js";
@@ -62,6 +62,8 @@ import {
 import { renderQuickViewModal } from "./components/QuickViewModal.js";
 import { renderBottomNavigation } from "./components/BottomNavigation.js";
 import { renderMobileDrawer } from "./components/MobileDrawer.js";
+import { renderMobileShell } from "./components/mobile/MobileShell.js";
+
 
 // Pages
 import { renderHome } from "./pages/Home.js";
@@ -148,28 +150,8 @@ function render() {
     return;
   }
 
-  const isMobile = window.innerWidth <= 768;
-
-  if (isMobile) {
-    app.innerHTML = `
-      <div class="site-shell mobile-shell">
-        ${renderHeader(true)}
-        <main>
-          ${pageContent}
-          ${renderFooter()}
-        </main>
-        ${renderBottomNavigation()}
-        ${renderMobileDrawer()}
-        ${renderFloatingActions()}
-        ${ui.searchOpen ? renderSearchOverlay() : ""}
-        ${ui.cartOpen ? renderCartDrawer() : ""}
-        ${ui.quoteOpen ? renderQuoteModal() : ""}
-        ${ui.storyOpen ? renderStoryModal() : ""}
-        ${ui.adminOpen && currentUser && currentUser.role === "admin" ? renderAdminDrawer() : ""}
-        ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
-        ${renderToast()}
-      </div>
-    `;
+  if (isMobileViewport()) {
+    app.innerHTML = renderMobileShell(pageContent);
   } else {
     app.innerHTML = `
       <div class="site-shell desktop-shell">
@@ -849,9 +831,9 @@ window.addEventListener("mousemove", (event) => {
 });
 
 // Switch layouts dynamically on threshold crossing
-let wasMobile = window.innerWidth <= 768;
+let wasMobile = isMobileViewport();
 window.addEventListener("resize", () => {
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = isMobileViewport();
   if (isMobile !== wasMobile) {
     wasMobile = isMobile;
     triggerRender();

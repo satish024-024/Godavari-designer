@@ -1,6 +1,6 @@
 import { site, wishlist, ui, addToCart, toggleWishlist, currentUser, showToast, triggerRender } from "../services/store.js";
 import { customRequestService } from "../services/supabase.js";
-import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
+import { escapeHtml, attr, icon, money, mediaUrl, isMobileViewport } from "../utils/helpers.js";
 
 // Local State
 let lastProductId = null;
@@ -132,6 +132,418 @@ export function renderProductDetail() {
     .sort((a, b) => b.score - a.score);
 
   const relatedProducts = scoredProducts.slice(0, 6).map(item => item.product);
+
+  const isMobile = isMobileViewport();
+  if (isMobile) {
+    return `
+      <section class="content-section product-detail-section" style="padding-top: var(--header-height); background: var(--ivory);">
+        <div style="width: min(100%, 1280px); margin: 0 auto; padding: 0 16px 80px;">
+          
+          <!-- Breadcrumbs -->
+          <div class="breadcrumbs" style="padding: 16px 0 12px; font-size: 11px; color: var(--ink-soft); font-weight: 500; display: flex; flex-wrap: wrap; gap: 4px;">
+            <a href="#/" style="color: inherit; text-decoration: none;">Home</a>
+            <span style="color: var(--border);">&gt;</span>
+            <a href="#/catalog" style="color: inherit; text-decoration: none;">Design Library</a>
+            <span style="color: var(--border);">&gt;</span>
+            <a href="#/catalog?category=${attr(product.category)}" style="color: inherit; text-decoration: none;">${escapeHtml(product.category)}</a>
+            <span style="color: var(--border);">&gt;</span>
+            <span style="color: var(--gold); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">${escapeHtml(product.title)}</span>
+          </div>
+
+          <!-- Title & Metadata -->
+          <div style="margin-bottom: 16px;">
+            <span class="product-detail-label">${escapeHtml(product.bestSeller ? "Bestseller" : "Product Details")}</span>
+            <h1 class="product-detail-title" style="margin-bottom: 6px; font-size: 28px; font-family: var(--font-serif); font-weight: 700; color: var(--navy); line-height: 1.2;">${escapeHtml(productName)}</h1>
+            <div class="product-detail-meta" style="font-size: 12px; color: var(--ink-soft); display: flex; gap: 12px; flex-wrap: wrap;">
+              <span>Code: <strong>${escapeHtml(product.code || "N/A")}</strong></span>
+              <span>Category: <strong>${escapeHtml(product.category || "N/A")}</strong></span>
+              ${product.collection ? `<span>Collection: <strong>${escapeHtml(product.collection.toUpperCase())}</strong></span>` : ""}
+            </div>
+          </div>
+
+          <!-- Gallery -->
+          <div class="detail-gallery-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+            <!-- Main Image Box -->
+            <div id="detailMainImgContainer" class="detail-main-image-wrapper mode-${activeGalleryMode}" data-action="open-lightbox" style="border: 1px solid var(--border); border-radius: 8px; background: #fff; overflow: hidden; aspect-ratio: 1/1; display: grid; place-items: center; width: 100%;">
+              <img id="detailMainImg" src="${attr(mediaUrl(activeImageSrc))}" alt="${attr(product.title)}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" />
+            </div>
+            
+            <!-- Thumbnails -->
+            <div class="detail-gallery-thumbs" style="display: flex; flex-direction: row; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+              ${(product.gallery && product.gallery.length > 0 ? product.gallery : [product.image])
+                .map(
+                  (thumbId) => `
+                    <button type="button" class="detail-thumb-btn ${activeImageSrc === thumbId ? "active" : ""}" data-action="select-thumb" data-src="${attr(thumbId)}" style="width: 60px; height: 60px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; padding: 0;">
+                      <img src="${attr(mediaUrl(thumbId))}" alt="Thumbnail" style="width:100%; height:100%; object-fit:cover;" />
+                    </button>
+                  `
+                )
+                .join("")}
+            </div>
+
+            <!-- Gallery Interactive Controls Bar -->
+            <div class="gallery-controls-bar" style="display: flex; gap: 6px; justify-content: center; font-size: 11px;">
+              <button type="button" class="gallery-control-btn ${activeGalleryMode === "zoom" ? "active" : ""}" data-action="set-gallery-mode" data-mode="zoom" style="padding: 6px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid ${activeGalleryMode === "zoom" ? "var(--navy)" : "var(--border)"}; background: ${activeGalleryMode === "zoom" ? "var(--navy)" : "#fff"}; color: ${activeGalleryMode === "zoom" ? "#fff" : "var(--navy)"};">
+                ${icon("search", 12)} Zoom
+              </button>
+              <button type="button" class="gallery-control-btn ${activeGalleryMode === "pan" ? "active" : ""}" data-action="set-gallery-mode" data-mode="pan" style="padding: 6px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid ${activeGalleryMode === "pan" ? "var(--navy)" : "var(--border)"}; background: ${activeGalleryMode === "pan" ? "var(--navy)" : "#fff"}; color: ${activeGalleryMode === "pan" ? "#fff" : "var(--navy)"};">
+                ${icon("hand", 12)} Pan
+              </button>
+              <button type="button" class="gallery-control-btn" data-action="open-lightbox" style="padding: 6px 10px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); background: #fff; color: var(--navy);">
+                ${icon("maximize-2", 12)} Full
+              </button>
+            </div>
+          </div>
+
+          <!-- Price & Short Description -->
+          <div style="margin-bottom: 20px;">
+            <div class="product-detail-price" style="font-size: 28px; font-weight: 700; color: var(--navy); margin-bottom: 10px;">
+              ${money(displayPrice)}
+            </div>
+            
+            ${
+              productTags.length > 0
+                ? `
+                  <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom: 12px;">
+                    ${productTags
+                      .map(
+                        (tag) => `
+                          <span style="display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px; border:1px solid var(--border); background:#fff; color:var(--navy); font-size: 10px; font-weight:600; text-transform: uppercase;">
+                            ${escapeHtml(tag)}
+                          </span>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                `
+                : ""
+            }
+
+            <p style="font-size: 14px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 16px;">
+              ${escapeHtml(product.description || "Soft premium embroidery design pattern.")}
+            </p>
+          </div>
+
+          <!-- Select Machine Format -->
+          <div style="border: 1px solid var(--border); border-radius: 12px; background: #fff; padding: 16px; margin-bottom: 20px;">
+            <div class="format-section-title" style="font-size: 14px; font-weight: 700; color: var(--navy); text-transform: uppercase; margin-bottom: 4px;">Select Machine Format</div>
+            <div style="font-size: 12px; color: var(--ink-soft); margin-bottom: 12px;">
+              Selected: <strong style="color: var(--navy);">${escapeHtml(selectedFormatLabel)}</strong>
+            </div>
+            <div class="format-cards-grid">
+              ${product.formats
+                .map(
+                  (f) => `
+                    <div class="format-card ${activeFormatCode === f.format ? "active" : ""}" data-action="select-format" data-format="${attr(f.format)}">
+                      <div class="format-card-brand">${escapeHtml(f.machineBrand)}</div>
+                      <div class="format-card-badge">${escapeHtml(f.label || f.format)}</div>
+                      <div class="format-card-model" style="display:none;">${escapeHtml(f.machineModel)}</div>
+                      <div class="format-card-hoop">Hoop: ${escapeHtml(f.hoopSize)}</div>
+                      <div class="format-card-price" style="font-weight:700; color:var(--gold); margin-top:2px;">${money(f.price)}</div>
+                    </div>
+                  `
+                )
+                .join("")}
+            </div>
+          </div>
+
+          <!-- Purchase Actions -->
+          <div style="display: grid; gap: 10px; margin-bottom: 24px;">
+            <button type="button" class="button button-primary" data-action="add-cart" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; width: 100%; min-height: 48px;">
+              <span>Add to Studio Cart</span>
+              ${icon("shopping-bag", 18)}
+            </button>
+
+            <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+              <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; color: #fff; border: none; text-decoration: none; font-weight: 700; border-radius: 4px; height: 48px; font-size: 13px; padding: 0; min-height:48px;">
+                ${icon("phone", 16)} WhatsApp Inquiry
+              </a>
+              <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0; min-height:48px;">
+                ${icon("heart", 18)}
+              </button>
+            </div>
+
+            <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; width: 100%; min-height: 48px;">
+              <span>Request Custom Version</span>
+              ${icon("sliders", 18)}
+            </a>
+          </div>
+
+          <!-- Product Technical Specs Table -->
+          <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 16px; margin-bottom: 20px;">
+            <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--navy); margin: 0 0 12px;">Technical Specifications</h3>
+            <div style="display:grid; gap:12px; font-size: 13px;">
+              <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
+                <span style="color: var(--ink-soft); font-weight: 600;">Dimensions</span>
+                <span style="color: var(--navy); font-weight: 700;">${escapeHtml(formatDimensionValue(product, product.width))} x ${escapeHtml(formatDimensionValue(product, product.height))}</span>
+              </div>
+              <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
+                <span style="color: var(--ink-soft); font-weight: 600;">Stitches Breakdown</span>
+                <span style="color: var(--navy); font-weight: 700;">${product.totalStitchCount.toLocaleString()} total (${(product.backStitchCount || 0).toLocaleString()} back)</span>
+              </div>
+              <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
+                <span style="color: var(--ink-soft); font-weight: 600;">Thread Colors</span>
+                <span style="color: var(--navy); font-weight: 700;">${product.threadColors} colors</span>
+              </div>
+              <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
+                <span style="color: var(--ink-soft); font-weight: 600;">Difficulty</span>
+                <span style="color: var(--navy); font-weight: 700;">${escapeHtml(product.difficultyLevel)}</span>
+              </div>
+              <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
+                <span style="color: var(--ink-soft); font-weight: 600;">Compatible Machines</span>
+                <span style="color: var(--navy); font-weight: 700; text-align: right;">
+                  ${(() => {
+                    const brands = [...new Set(product.formats.map(f => f.machineBrand).filter(Boolean))];
+                    return escapeHtml(brands.join(", "));
+                  })()}
+                </span>
+              </div>
+              <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
+                <span style="color: var(--ink-soft); font-weight: 600;">Available Formats</span>
+                <span style="color: var(--navy); font-weight: 700; text-align: right;">${escapeHtml(uniqueFormatsList)}</span>
+              </div>
+              <div class="spec-row" style="display: flex; justify-content: space-between; padding-bottom: 4px;">
+                <span style="color: var(--ink-soft); font-weight: 600;">Recommended Fabrics</span>
+                <span style="color: var(--navy); font-weight: 700; text-align: right;">${escapeHtml(fabricsList)}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Range Input & Est Time display -->
+          <div style="border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: #fff; margin-bottom: 20px; box-shadow: var(--shadow);">
+            <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--navy); margin: 0 0 14px;">
+              ${icon("activity", 16)} Speed & Time Calculator
+            </h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; color: var(--ink-soft); font-weight: 500;">Embroidery Speed</span>
+              <span style="font-size: 15px; color: var(--navy); font-weight: 700;" id="rpmValueDisplay">${product.rpm || 850} RPM</span>
+            </div>
+            
+            <input 
+              type="range" 
+              id="rpmSlider" 
+              min="300" 
+              max="1200" 
+              step="50" 
+              value="${product.rpm || 850}" 
+              style="width: 100%; cursor: pointer; margin-bottom: 16px;"
+            />
+            
+            <div id="estTimeDisplay" style="background: #eef7fe; border-radius: 8px; padding: 12px; text-align: center; color: #1677d2; font-size: 16px; font-weight: 700;">
+              Estimated Time: ${formattedDuration}
+            </div>
+          </div>
+
+          <!-- Use Cases card -->
+          ${
+            useCases.length > 0
+              ? `
+                <div class="use-cases-card" style="margin-bottom: 20px; border: 1px solid var(--border); border-radius:12px; background:#fff; padding:16px;">
+                  <div class="use-cases-title" style="font-size:14px; font-weight:700; color:var(--navy); margin-bottom:12px;">Suitable Use Cases</div>
+                  <div class="use-cases-list" style="display:grid; gap:8px;">
+                    ${useCases
+                      .map(
+                        (uc) => `
+                          <div class="use-case-item" style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--navy);">
+                            <span class="use-case-check" style="color:var(--gold); display:flex; align-items:center;">${icon("check-circle-2", 14)}</span>
+                            <span>${escapeHtml(uc)}</span>
+                          </div>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+              : ""
+          }
+
+          <!-- Design Download Center Preview -->
+          <div class="download-section" style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; margin-bottom: 24px;">
+            <h3 style="font-family: var(--font-serif); font-size: 16px; margin-bottom: 6px; color: var(--navy);">Design Download Center</h3>
+            <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 12px;">Attach preview vectors, fabric mockups, and digitizing specifications sheets.</p>
+            <div style="display: grid; gap: 8px;">
+              ${product.designFile ? `
+                <a href="${attr(mediaUrl(product.designFile))}" class="button button-secondary" download style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0;">
+                  ${icon("download", 14)} Production File
+                </a>
+              ` : `
+                <button type="button" class="button button-secondary" disabled style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; opacity: 0.6; cursor: not-allowed; height: 38px; padding: 0;">
+                  ${icon("lock", 14)} Production File
+                </button>
+              `}
+              <button type="button" class="button button-secondary" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0;" onclick="alert('Spec Sheet PDF will download here.')">
+                ${icon("file-text", 14)} Spec Sheet (PDF)
+              </button>
+            </div>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0 24px;" />
+
+          <!-- Digitizing Process Section -->
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h2 style="font-family: var(--font-serif); font-size: 24px; color: var(--navy); margin-bottom: 6px;">Godavari Digitizing Process</h2>
+            <p style="color: var(--ink-soft); font-size: 13px; max-width: 100%; margin: 0;">Rigorous design simulations and quality testing.</p>
+          </div>
+
+          <div class="timeline-container" style="display:grid; gap:16px; margin-bottom: 40px;">
+            <div class="timeline-step" style="display:flex; gap:12px; text-align:left; background:#fff; border:1px solid var(--border); border-radius:8px; padding:12px;">
+              <div class="timeline-dot" style="width:24px; height:24px; border-radius:50%; background:var(--gold); color:#fff; display:grid; place-items:center; font-size:12px; font-weight:700; flex-shrink:0;">1</div>
+              <div class="timeline-text">
+                <h3 class="timeline-title" style="font-size:14px; font-weight:700; color:var(--navy); margin:0 0 2px;">Art Digitizing</h3>
+                <p class="timeline-desc" style="font-size:12px; color:var(--ink-soft); margin:0;">Artwork converted to vector curves.</p>
+              </div>
+            </div>
+            <div class="timeline-step" style="display:flex; gap:12px; text-align:left; background:#fff; border:1px solid var(--border); border-radius:8px; padding:12px;">
+              <div class="timeline-dot" style="width:24px; height:24px; border-radius:50%; background:var(--gold); color:#fff; display:grid; place-items:center; font-size:12px; font-weight:700; flex-shrink:0;">2</div>
+              <div class="timeline-text">
+                <h3 class="timeline-title" style="font-size:14px; font-weight:700; color:var(--navy); margin:0 0 2px;">Stitch Simulation</h3>
+                <p class="timeline-desc" style="font-size:12px; color:var(--ink-soft); margin:0;">3D simulation to density calibrate speeds.</p>
+              </div>
+            </div>
+            <div class="timeline-step" style="display:flex; gap:12px; text-align:left; background:#fff; border:1px solid var(--border); border-radius:8px; padding:12px;">
+              <div class="timeline-dot" style="width:24px; height:24px; border-radius:50%; background:var(--gold); color:#fff; display:grid; place-items:center; font-size:12px; font-weight:700; flex-shrink:0;">3</div>
+              <div class="timeline-text">
+                <h3 class="timeline-title" style="font-size:14px; font-weight:700; color:var(--navy); margin:0 0 2px;">Color Calibration</h3>
+                <p class="timeline-desc" style="font-size:12px; color:var(--ink-soft); margin:0;">Matching thread layers to prevent warp.</p>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border: 0; border-top: 1px solid var(--border); margin: 30px 0 24px;" />
+
+          <!-- Related Products Section -->
+          ${
+            relatedProducts.length > 0
+              ? `
+                <div style="margin-top: 30px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h2 style="font-family: var(--font-serif); font-size: 20px; color: var(--navy); margin:0;">You May Also Like</h2>
+                    <div style="display:flex; gap: 6px;">
+                      <button type="button" class="icon-button" data-action="scroll-carousel" data-target="relatedCarousel" data-direction="-1" aria-label="Scroll left" style="width:30px; height:30px; padding:0;">${icon("chevron-left", 14)}</button>
+                      <button type="button" class="icon-button" data-action="scroll-carousel" data-target="relatedCarousel" data-direction="1" aria-label="Scroll right" style="width:30px; height:30px; padding:0;">${icon("chevron-right", 14)}</button>
+                    </div>
+                  </div>
+                  
+                  <div id="relatedCarousel" class="related-products-slider" style="display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 10px;">
+                    ${relatedProducts
+                      .map(
+                        (p) => `
+                          <article class="product-card reveal is-visible" style="min-width: 200px; max-width: 200px; border-radius: 8px; border: 1px solid var(--border); background:#fff; overflow:hidden; box-shadow: var(--shadow);">
+                            <div class="product-media" style="position:relative; aspect-ratio: 1 / 1; background: #faf8f5; overflow:hidden; display:grid; place-items:center;">
+                              <a href="#/product/${p.slug}" style="display:block; width:100%; height:100%;">
+                                <img src="${attr(mediaUrl(p.image))}" alt="${attr(p.title)}" loading="lazy" style="width:100%; height:100%; object-fit:cover;" />
+                              </a>
+                            </div>
+                            <div class="product-info" style="padding: 10px;">
+                              <a href="#/product/${p.slug}" style="text-decoration:none; color:inherit; display:block;">
+                                <h3 style="font-family: var(--font-serif); font-size: 14px; font-weight: 700; margin: 0 0 2px; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(p.title)}</h3>
+                              </a>
+                              <p style="font-size: 9px; color: var(--ink-soft); font-weight: 500; text-transform: uppercase; margin-bottom: 8px;">${escapeHtml(p.code)}</p>
+                              <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:6px; font-size: 11px;">
+                                <span style="font-weight: 700; color: var(--navy);">${money(p.price)}</span>
+                                <a href="#/product/${p.slug}" style="font-weight: 700; color: var(--gold); text-decoration: none;">View</a>
+                              </div>
+                            </div>
+                          </article>
+                        `
+                      )
+                      .join("")}
+                  </div>
+                </div>
+              `
+              : ""
+          }
+
+        </div>
+      </section>
+
+      <!-- Custom Request Form Modal overlay -->
+      ${
+        isCustomModalOpen
+          ? `
+            <div class="overlay-panel" role="dialog" aria-modal="true" style="position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;">
+              <div class="overlay-scrim" data-action="close-custom-modal" style="position: absolute; inset: 0; background: rgba(17,29,66,0.6); backdrop-filter: blur(4px);"></div>
+              <section style="position: relative; width: min(90vw, 500px); background: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow-deep); z-index: 2;">
+                <button type="button" class="icon-button" data-action="close-custom-modal" style="position: absolute; top: 16px; right: 16px;">${icon("x", 16)}</button>
+                
+                <h2 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin-top: 0; margin-bottom: 8px;">Request Changes / Custom Version</h2>
+                <p style="color: var(--ink-soft); font-size: 12px; margin-bottom: 20px;">Our designers will adjust dimensions, stitch densities, or formats for you.</p>
+                
+                ${
+                  currentUser
+                    ? `
+                      <form id="customVersionForm" style="display: grid; gap: 12px;">
+                        <label style="display: grid; gap: 4px; font-size: 11px; font-weight: 700; color: var(--navy);">
+                          <span>Full Name</span>
+                          <input type="text" name="name" value="${attr(currentUser.name)}" required style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" />
+                        </label>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
+                          <label style="display: grid; gap: 4px; font-size: 11px; font-weight: 700; color: var(--navy);">
+                            <span>Email</span>
+                            <input type="email" name="email" value="${attr(currentUser.email)}" required style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" />
+                          </label>
+                          <label style="display: grid; gap: 4px; font-size: 11px; font-weight: 700; color: var(--navy);">
+                            <span>Phone Number</span>
+                            <input type="tel" name="phone" placeholder="+91" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" />
+                          </label>
+                        </div>
+
+                        <label style="display: grid; gap: 4px; font-size: 11px; font-weight: 700; color: var(--navy);">
+                          <span>Customization Request Type</span>
+                          <select name="projectType" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px; background: #fff; font-size: 12px;">
+                            <option value="Resize Design">Resize Design (Width/Height)</option>
+                            <option value="Additional Format">Additional Format Compatibility</option>
+                            <option value="Stitch Modification">Adjust Density / Remove Fill Stitches</option>
+                            <option value="Fabric Optimization">Optimize for Velvet/Leather/Chiffon</option>
+                          </select>
+                        </label>
+                        
+                        <label style="display: grid; gap: 4px; font-size: 11px; font-weight: 700; color: var(--navy);">
+                          <span>Modification Notes / Instructions</span>
+                          <textarea name="notes" placeholder="Specify your exact changes..." required style="width: 100%; height: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 4px; resize: none; font-size: 12px;"></textarea>
+                        </label>
+                        
+                        <button type="submit" class="button button-primary" style="width: 100%; min-height: 44px; border: none; margin-top: 6px;">
+                          Submit Modification Request
+                        </button>
+                      </form>
+                    `
+                    : `
+                      <div style="border: 1px dashed var(--border); padding: 20px; border-radius: 6px; text-align: center; background: var(--surface);">
+                        ${icon("lock", 24, "color: var(--gold); margin-bottom: 10px;")}
+                        <h4 style="font-family: var(--font-serif); font-size: 16px; margin: 0 0 6px; color: var(--navy);">Authentication Required</h4>
+                        <p style="font-size: 12px; color: var(--ink-soft); line-height: 1.4; margin-bottom: 14px;">
+                          Only registered studio accounts can save customization requests directly to their workspace.
+                        </p>
+                        <a href="#/auth" class="button button-primary" style="display: inline-flex; width: 100%; justify-content: center; margin-bottom: 8px; height: 40px; align-items: center;">Sign In to Account</a>
+                        <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button button-secondary" style="display: inline-flex; width: 100%; justify-content: center; gap: 6px; height: 40px; align-items: center;">
+                          ${icon("phone", 14)} Inquiry via WhatsApp
+                        </a>
+                      </div>
+                    `
+                }
+              </section>
+            </div>
+          `
+          : ""
+      }
+
+      <!-- Lightbox Fullscreen Image Modal -->
+      ${
+        isLightboxOpen
+          ? `
+            <div class="lightbox-overlay" data-action="close-lightbox">
+              <div class="lightbox-content">
+                <button type="button" class="lightbox-close" data-action="close-lightbox">${icon("x", 20)}</button>
+                <img src="${attr(mediaUrl(activeImageSrc))}" alt="${attr(product.title)}" />
+              </div>
+            </div>
+          `
+          : ""
+      }
+    `;
+  }
 
   return `
     <section class="content-section product-detail-section" style="padding-top: var(--header-height); background: var(--ivory);">
@@ -266,18 +678,18 @@ export function renderProductDetail() {
 
             <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 24px; margin-bottom: 20px;">
               <div style="display:grid; gap:20px;">
-                <div style="display:grid; grid-template-columns: minmax(120px, 180px) 1fr; gap: 14px;">
+                <div class="spec-row">
                   <span style="font-weight:700; color:var(--navy);">Product Name</span>
                   <strong style="color:var(--navy);">${escapeHtml(productName)}</strong>
                 </div>
-                <div style="display:grid; grid-template-columns: minmax(120px, 180px) 1fr; gap: 14px;">
+                <div class="spec-row">
                   <span style="font-weight:700; color:var(--navy);">Dimensions</span>
                   <div style="display:grid; gap:4px; color:var(--navy);">
                     <strong>Height: ${escapeHtml(formatDimensionValue(product, product.height))}</strong>
                     <strong>Width: ${escapeHtml(formatDimensionValue(product, product.width))}</strong>
                   </div>
                 </div>
-                <div style="display:grid; grid-template-columns: minmax(120px, 180px) 1fr; gap: 14px;">
+                <div class="spec-row">
                   <span style="font-weight:700; color:var(--navy);">Stitch Details</span>
                   <div style="display:grid; gap:4px; color:var(--navy);">
                     <strong>Back: ${product.backStitchCount.toLocaleString()}</strong>

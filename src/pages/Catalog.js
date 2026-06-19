@@ -382,11 +382,11 @@ export function renderCatalog() {
       <!-- Dynamic Featured Collection Banner (Visual QA Match) -->
       ${
         catalogState.selectedCategory === "All" && !query
-          ? `<div class="featured-banner-wrapper" style="max-width: 1540px; margin: 0 auto 36px; padding: 0 clamp(22px, 5vw, 78px);">
-              <div class="trending-collection-banner" style="background-image: url('https://images.pexels.com/photos/14111325/pexels-photo-14111325.jpeg?auto=compress&cs=tinysrgb&w=2000'); background-size: cover; background-position: center 30%; border-radius: 8px; min-height: 380px; display: flex; align-items: center; padding: 48px; position: relative; border: 1px solid var(--border); box-shadow: var(--shadow);">
-                <div class="banner-veil" style="position: absolute; inset:0; background: linear-gradient(90deg, rgba(248, 246, 242, 0.96) 0%, rgba(248, 246, 242, 0.78) 45%, rgba(248, 246, 242, 0) 100%); border-radius:7px; z-index:1;"></div>
+          ? `<div class="featured-banner-wrapper">
+              <div class="trending-collection-banner">
+                <div class="banner-veil"></div>
                 
-                <div class="banner-content" style="position: relative; z-index: 2; max-width: 440px;">
+                <div class="banner-content">
                   <p class="section-kicker" style="font-size:12px; font-weight:700; color:var(--gold); margin-bottom:8px;">TRENDING COLLECTION</p>
                   <h2 style="font-family: var(--font-serif); font-size: clamp(32px, 4vw, 44px); color: var(--navy); line-height: 1.1; margin-bottom: 12px; font-weight:700;">
                     2026 Bridal Luxury Collection
@@ -411,7 +411,7 @@ export function renderCatalog() {
         <div class="catalog-controls" style="margin-bottom: 24px;">
           <span class="results-count" style="font-size:15px;">Showing ${totalCount} Designs</span>
           
-          <div style="display: flex; gap: 14px; align-items:center;">
+          <div class="catalog-actions">
             <select class="sort-select" data-action="sort-catalog" aria-label="Sort designs" style="border-radius:4px; font-size: 13px; padding: 8px 16px;">
               <option value="default" ${catalogState.sortBy === "default" ? "selected" : ""}>Sort by: Newest First</option>
               <option value="price-asc" ${catalogState.sortBy === "price-asc" ? "selected" : ""}>Price: Low to High</option>
@@ -422,7 +422,7 @@ export function renderCatalog() {
             </select>
             
             <!-- Grid / List Icons -->
-            <div style="display:flex; border: 1px solid var(--border); border-radius: 4px; overflow:hidden;">
+            <div style="display:flex; border: 1px solid var(--border); border-radius: 4px; overflow:hidden; flex-shrink: 0;">
               <button type="button" class="icon-button" style="width:34px; height:34px; border:none; border-radius:0; background:rgba(255,255,255,0.8); color: var(--navy);">
                 ${icon("layout-grid", 16)}
               </button>
@@ -534,27 +534,27 @@ export function renderCatalog() {
       </div>
 
       <!-- Trust Badges row (Direct QA Match) -->
-      <div style="background: #FAF8F5; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-top: 72px;">
-        <div style="max-width: 1540px; margin: 0 auto; padding: 48px clamp(22px, 5vw, 78px); display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 36px; text-align: center;">
-          <div style="display:grid; gap: 8px; justify-items:center;">
+      <div class="trust-badges-wrapper">
+        <div class="trust-badges-grid">
+          <div class="trust-badge-card">
             ${icon("gem", 28)}
-            <h3 style="font-family: var(--font-serif); font-size: 22px; font-weight:700; margin:0; color:var(--navy);">10,000+</h3>
-            <p style="font-size:12px; color: var(--ink-soft); font-weight:600; text-transform:uppercase; margin:0;">Embroidery Designs<br />Premium & Exclusive</p>
+            <h3>10,000+</h3>
+            <p>Embroidery Designs<br />Premium & Exclusive</p>
           </div>
-          <div style="display:grid; gap: 8px; justify-items:center;">
+          <div class="trust-badge-card">
             ${icon("crown", 28)}
-            <h3 style="font-family: var(--font-serif); font-size: 22px; font-weight:700; margin:0; color:var(--navy);">2,500+</h3>
-            <p style="font-size:12px; color: var(--ink-soft); font-weight:600; text-transform:uppercase; margin:0;">Fashion Brands<br />Worldwide Trust</p>
+            <h3>2,500+</h3>
+            <p>Fashion Brands<br />Worldwide Trust</p>
           </div>
-          <div style="display:grid; gap: 8px; justify-items:center;">
+          <div class="trust-badge-card">
             ${icon("star", 28)}
-            <h3 style="font-family: var(--font-serif); font-size: 22px; font-weight:700; margin:0; color:var(--navy);">98%</h3>
-            <p style="font-size:12px; color: var(--ink-soft); font-weight:600; text-transform:uppercase; margin:0;">Client Satisfaction<br />Quality You Can Trust</p>
+            <h3>98%</h3>
+            <p>Client Satisfaction<br />Quality You Can Trust</p>
           </div>
-          <div style="display:grid; gap: 8px; justify-items:center;">
+          <div class="trust-badge-card">
             ${icon("clock", 28)}
-            <h3 style="font-family: var(--font-serif); font-size: 22px; font-weight:700; margin:0; color:var(--navy);">24 Hours</h3>
-            <p style="font-size:12px; color: var(--ink-soft); font-weight:600; text-transform:uppercase; margin:0;">Quote Delivery<br />Fast & Reliable</p>
+            <h3>24 Hours</h3>
+            <p>Quote Delivery<br />Fast & Reliable</p>
           </div>
         </div>
       </div>

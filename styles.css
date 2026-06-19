@@ -2281,15 +2281,30 @@ select:focus-visible {
   align-items: center;
 }
 
-.catalog-search-field i {
+.catalog-search-field i,
+.catalog-search-field [data-lucide="search"],
+.catalog-search-field svg.lucide-search {
   position: absolute;
-  left: 16px;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
   color: var(--gold);
+  pointer-events: none;
+}
+
+.catalog-search-field [data-lucide="sparkles"],
+.catalog-search-field svg.lucide-sparkles {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gold);
+  cursor: pointer;
 }
 
 .catalog-search-field input {
   width: 100%;
-  padding: 12px 16px 12px 48px;
+  padding: 12px 48px 12px 48px;
   border: 1px solid var(--border);
   border-radius: 99px;
   background: #fff;
@@ -4643,6 +4658,7 @@ main:has(.admin-shell) {
     height: 100vh !important;
     border-radius: 0 !important;
     border: none !important;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px) !important;
   }
 
   .site-shell {
@@ -5044,6 +5060,593 @@ main:has(.admin-shell) {
   max-height: 100% !important;
   overflow-y: auto !important;
 }
+
+/* ==========================================================================
+   PHASE 16 - MOBILE APP SHELL FOUNDATION
+   ========================================================================== */
+
+.mobile-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--ivory);
+}
+
+.mobile-header {
+  position: sticky;
+  top: 0;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(230, 222, 209, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 150;
+  box-shadow: 0 2px 10px rgba(17, 29, 66, 0.02);
+}
+
+.mobile-brand-lockup {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+}
+
+.mobile-brand-name {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mobile-brand-sub {
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 1px;
+  font-weight: 700;
+}
+
+.mobile-menu-btn,
+.mobile-cart-btn {
+  background: transparent;
+  border: none;
+  color: var(--navy);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  position: relative;
+  transition: opacity 0.2s;
+}
+
+.mobile-menu-btn:active,
+.mobile-cart-btn:active {
+  opacity: 0.6;
+}
+
+.mobile-cart-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 50%;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 9px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.mobile-cart-badge--empty {
+  display: none;
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(230, 222, 209, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  box-shadow: 0 -4px 20px rgba(17, 29, 66, 0.05);
+  z-index: 200;
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--ink-soft);
+  text-decoration: none;
+  width: 20%;
+  height: 100%;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.mobile-nav-item.active {
+  color: var(--gold);
+}
+
+.mobile-nav-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.mobile-nav-icon-container svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.mobile-nav-label {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.mobile-nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: var(--navy);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.mobile-shell-main {
+  flex: 1;
+  width: 100%;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 20px);
+}
+
+/* Featured collections slider overrides on mobile (< 768px) */
+@media (max-width: 768px) {
+  .collection-card {
+    min-height: 240px !important;
+  }
+  .collection-card img {
+    min-height: 240px !important;
+  }
+}
+@media (max-width: 360px) {
+  .collection-card {
+    min-height: 200px !important;
+  }
+  .collection-card img {
+    min-height: 200px !important;
+  }
+}
+
+/* Responsive pill scrollers for Catalog page */
+@media (max-width: 768px) {
+  .category-pills-row, .subcategory-pills-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+    padding: 6px 16px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 8px !important;
+  }
+  .category-pills-row::-webkit-scrollbar, .subcategory-pills-row::-webkit-scrollbar {
+    display: none;
+  }
+  .filter-pill {
+    flex-shrink: 0;
+  }
+}
+
+/* Responsive Controls & Banner on Catalog */
+.catalog-actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .catalog-controls {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+    padding-bottom: 12px !important;
+  }
+  .catalog-actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .catalog-actions .sort-select {
+    flex: 1;
+    width: auto !important;
+  }
+}
+
+/* Stacking detail action buttons on mobile */
+@media (max-width: 480px) {
+  .detail-actions-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .detail-actions-full {
+    margin-top: 0 !important;
+  }
+}
+
+/* Spec Rows Responsive Styles */
+.spec-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr;
+  gap: 14px;
+}
+@media (max-width: 480px) {
+  .spec-row {
+    grid-template-columns: 1fr !important;
+    gap: 4px !important;
+  }
+}
+
+/* Stacking checkout grids */
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+}
+.checkout-contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.checkout-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+}
+
+@media (max-width: 991px) {
+  .checkout-layout {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .checkout-contact-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .checkout-actions-row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Stacking urgency selections on mobile */
+@media (max-width: 600px) {
+  .urgency-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Cart Page Overrides for Jio Phone (<= 360px) */
+@media (max-width: 360px) {
+  .cart-item-img-wrapper {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  .cart-page-item h3 {
+    font-size: 15px !important;
+  }
+  .qty-row {
+    height: 28px !important;
+  }
+  .qty-row button {
+    width: 28px !important;
+  }
+}
+
+.project-spec-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 480px) {
+  .project-spec-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.trust-badges-wrapper {
+  background: #FAF8F5;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-top: 72px;
+}
+
+.trust-badges-grid {
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: 48px clamp(22px, 5vw, 78px);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 36px;
+  text-align: center;
+}
+
+.trust-badge-card {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.trust-badge-card h3 {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--navy);
+}
+
+.trust-badge-card p {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.3;
+}
+
+@media (max-width: 768px) {
+  .trust-badges-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    padding: 32px 16px !important;
+    gap: 20px 12px !important;
+  }
+  .trust-badge-card {
+    gap: 6px !important;
+  }
+  .trust-badge-card svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .trust-badge-card h3 {
+    font-size: 16px !important;
+  }
+  .trust-badge-card p {
+    font-size: 9.5px !important;
+    letter-spacing: 0.04em !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Featured Trending Collection Banner Styles */
+.trending-collection-banner {
+  background-image: url('https://images.pexels.com/photos/14111325/pexels-photo-14111325.jpeg?auto=compress&cs=tinysrgb&w=2000');
+  background-size: cover;
+  background-position: center 30%;
+  border-radius: 8px;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  padding: 48px;
+  position: relative;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.banner-veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(248, 246, 242, 0.96) 0%, rgba(248, 246, 242, 0.78) 45%, rgba(248, 246, 242, 0) 100%);
+  border-radius: 7px;
+  z-index: 1;
+}
+
+.banner-content {
+  position: relative;
+  z-index: 2;
+  max-width: 440px;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .featured-banner-wrapper {
+    padding: 0 16px !important;
+  }
+  .trending-collection-banner {
+    min-height: 280px !important;
+    padding: 24px !important;
+    background-position: center !important;
+  }
+  .banner-veil {
+    background: linear-gradient(180deg, rgba(248, 246, 242, 0.95) 0%, rgba(248, 246, 242, 0.88) 100%) !important;
+  }
+  .banner-content {
+    max-width: 100% !important;
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+}
+
+/* Responsive Testimonials and Client Showcase (Stories Section) on Mobile */
+@media (max-width: 768px) {
+  .testimonial {
+    min-height: auto !important;
+    padding: 24px 20px !important;
+  }
+  .quote-mark {
+    font-size: 54px !important;
+    line-height: 0.5 !important;
+    margin-bottom: 8px !important;
+  }
+  .testimonial p {
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+    margin: 0 0 16px !important;
+  }
+  .rating {
+    margin-bottom: 16px !important;
+    gap: 3px !important;
+  }
+  .rating svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .rating span {
+    font-size: 12px !important;
+    margin-left: 6px !important;
+  }
+  .testimonial-person {
+    gap: 12px !important;
+  }
+  .testimonial-person img {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .testimonial-person strong {
+    font-size: 14px !important;
+  }
+  .testimonial-person span {
+    font-size: 11px !important;
+  }
+  
+  /* Client Showcase adjustments */
+  .client-showcase {
+    gap: 16px !important;
+  }
+  
+  .logo-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .logo-row button {
+    min-height: 56px !important;
+    padding: 8px !important;
+  }
+  .logo-row button span {
+    font-size: 9px !important;
+  }
+  .logo-row button strong {
+    font-size: 11px !important;
+  }
+  
+  /* Make the story gallery cards smaller on mobile */
+  .story-gallery {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    min-height: auto !important;
+  }
+  .story-gallery article {
+    min-height: 180px !important;
+  }
+  .story-gallery img {
+    min-height: 180px !important;
+    max-height: 220px !important;
+    object-fit: cover !important;
+  }
+  .story-gallery article div {
+    left: 14px !important;
+    right: 14px !important;
+    bottom: 14px !important;
+    gap: 2px !important;
+  }
+  .story-gallery strong {
+    font-size: 16px !important;
+  }
+  .story-gallery span {
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* Mobile Quick View Modal Fullscreen Overrides */
+@media (max-width: 768px) {
+  .quickview-overlay {
+    padding: 0 !important;
+    z-index: 250 !important;
+  }
+  .quickview-modal {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+  }
+  .quickview-grid {
+    grid-template-columns: 1fr !important;
+    min-height: auto !important;
+  }
+  .quickview-gallery {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+  .main-image-wrapper img {
+    max-height: 280px !important;
+  }
+  .quickview-info {
+    padding: 24px 20px !important;
+    overflow-y: visible !important;
+  }
+  .quickview-modal .modal-close {
+    position: fixed !important;
+    top: 16px !important;
+    right: 16px !important;
+    z-index: 10 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 4px 12px rgba(17, 29, 66, 0.08) !important;
+    border-radius: 50% !important;
+    width: 38px !important;
+    height: 38px !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+}
+
+
+
+
+
 
 
 

@@ -1,6 +1,7 @@
 import { site, wishlist } from "../services/store.js";
-import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
+import { escapeHtml, attr, icon, money, mediaUrl, isMobileViewport } from "../utils/helpers.js";
 import { renderThreads } from "../components/ThreadLayer.js";
+
 
 function renderSectionHeading(kicker, title, actionLabel, targetHref) {
   return `
@@ -126,7 +127,8 @@ function renderCollections() {
 }
 
 function renderProcess() {
-  const isMobile = window.innerWidth <= 768;
+  const isMobile = isMobileViewport();
+
 
   if (isMobile) {
     return `
