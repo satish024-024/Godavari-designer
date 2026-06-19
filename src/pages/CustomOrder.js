@@ -64,20 +64,20 @@ export function renderCustomOrder() {
             Thank you for requesting a custom digitizing quote! Our digitizers will review your artwork and specifications. A digital sampling draft and quote details will be sent to your email.
           </p>
 
-          <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px; max-width: 440px; margin: 0 auto 36px; text-align: left; display: grid; gap: 8px;">
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
+          <div class="tracking-info-card" style="max-width: 440px; margin: 0 auto 36px;">
+            <div class="info-row">
               <span style="color:var(--ink-soft);">Reference ID:</span>
               <strong style="color:var(--navy); font-family:monospace; font-size:14px;">${escapeHtml(submissionResult.referenceNumber)}</strong>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <div class="info-row">
               <span style="color:var(--ink-soft);">Client Name:</span>
               <strong style="color:var(--navy);">${escapeHtml(submissionResult.name)}</strong>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <div class="info-row">
               <span style="color:var(--ink-soft);">Project Type:</span>
               <strong style="color:var(--navy);">${escapeHtml(submissionResult.projectType)}</strong>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:13px;">
+            <div class="info-row">
               <span style="color:var(--ink-soft);">Submission Status:</span>
               <span style="border-radius:99px; background: ${isGuest ? "#ffe58f" : "#b7eb8f"}; color: ${isGuest ? "#ad6800" : "#389e0d"}; font-size:11px; font-weight:700; padding:2px 8px;">
                 ${escapeHtml(submissionResult.status)}
@@ -87,36 +87,58 @@ export function renderCustomOrder() {
 
           <!-- Step Progress Tracker Timeline -->
           <div style="font-weight:700; font-size:12px; color:var(--navy); text-transform:uppercase; margin-bottom:12px;">Track Process Flow</div>
-          <div class="tracking-timeline">
-            <div class="tracking-step active">
-              <div class="tracking-dot">1</div>
-              <span class="tracking-label" style="font-size: 10px;">${isGuest ? "Guest Lead" : "Submitted"}</span>
-            </div>
-            <div class="tracking-step">
-              <div class="tracking-dot">2</div>
-              <span class="tracking-label" style="font-size: 10px;">Quote Sent</span>
-            </div>
-            <div class="tracking-step">
-              <div class="tracking-dot">3</div>
-              <span class="tracking-label" style="font-size: 10px;">Approved</span>
-            </div>
-            <div class="tracking-step">
-              <div class="tracking-dot">4</div>
-              <span class="tracking-label" style="font-size: 10px;">Digitizing</span>
-            </div>
-            <div class="tracking-step">
-              <div class="tracking-dot">5</div>
-              <span class="tracking-label" style="font-size: 10px;">Production</span>
-            </div>
-            <div class="tracking-step">
-              <div class="tracking-dot">6</div>
-              <span class="tracking-label" style="font-size: 10px;">Delivered</span>
+          <div class="tracking-timeline-container" style="max-width: 500px; margin: 24px auto 36px; position: relative;">
+            <div style="position: absolute; top: 16px; left: 24px; right: 24px; height: 2px; background: var(--border); z-index: 1;"></div>
+            <div class="tracking-timeline-flow" style="display: flex; justify-content: space-between; align-items: flex-start; position: relative;">
+              
+              <div class="tracking-step active" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: var(--gold); color: #fff; border: 2px solid var(--gold);">1</div>
+                <div>
+                  <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--gold);">${isGuest ? "Guest Lead" : "Submitted"}</span>
+                </div>
+              </div>
+
+              <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">2</div>
+                <div>
+                  <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Quote Sent</span>
+                </div>
+              </div>
+
+              <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">3</div>
+                <div>
+                  <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Approved</span>
+                </div>
+              </div>
+
+              <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">4</div>
+                <div>
+                  <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Digitizing</span>
+                </div>
+              </div>
+
+              <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">5</div>
+                <div>
+                  <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Production</span>
+                </div>
+              </div>
+
+              <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">6</div>
+                <div>
+                  <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Delivered</span>
+                </div>
+              </div>
+
             </div>
           </div>
 
-          <div style="display:flex; gap:16px; justify-content:center; margin-top:24px;">
-            <button type="button" class="button button-secondary" data-action="reset-custom-order">Request Another Quote</button>
-            <a href="#/" class="button button-primary" style="display:inline-flex; align-items:center;">Back to Home</a>
+          <div class="tracking-actions-row" style="max-width: 440px; margin: 24px auto 0;">
+            <button type="button" class="button button-secondary" data-action="reset-custom-order" style="min-height: 48px; font-weight: 700; border-radius: 4px;">Request Another Quote</button>
+            <a href="#/" class="button button-primary" style="min-height: 48px; font-weight: 700; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Back to Home</a>
           </div>
         </div>
       </section>

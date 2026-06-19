@@ -77,22 +77,38 @@ Please confirm my order.`;
           <!-- Process Flow Tracker -->
           <div style="width: 100%; margin-top: 10px;">
             <div style="font-weight:700; font-size:12px; color:var(--navy); text-transform:uppercase; margin-bottom:16px; text-align: left;">Order Tracking Progress</div>
-            <div class="tracking-timeline" style="display: flex; justify-content: space-between; position: relative;">
-              <div class="tracking-step active">
-                <div class="tracking-dot">1</div>
-                <span class="tracking-label" style="font-size: 10px;">Submitted</span>
-              </div>
-              <div class="tracking-step">
-                <div class="tracking-dot">2</div>
-                <span class="tracking-label" style="font-size: 10px;">Paid</span>
-              </div>
-              <div class="tracking-step">
-                <div class="tracking-dot">3</div>
-                <span class="tracking-label" style="font-size: 10px;">Processing</span>
-              </div>
-              <div class="tracking-step">
-                <div class="tracking-dot">4</div>
-                <span class="tracking-label" style="font-size: 10px;">Completed</span>
+            <div class="tracking-timeline-container" style="position: relative; width: 100%;">
+              <div style="position: absolute; top: 16px; left: 24px; right: 24px; height: 2px; background: var(--border); z-index: 1;"></div>
+              <div class="tracking-timeline-flow" style="display: flex; justify-content: space-between; align-items: flex-start; position: relative;">
+                
+                <div class="tracking-step active" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                  <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: var(--gold); color: #fff; border: 2px solid var(--gold);">1</div>
+                  <div>
+                    <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--gold);">Submitted</span>
+                  </div>
+                </div>
+
+                <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                  <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">2</div>
+                  <div>
+                    <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Paid</span>
+                  </div>
+                </div>
+
+                <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                  <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">3</div>
+                  <div>
+                    <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Processing</span>
+                  </div>
+                </div>
+
+                <div class="tracking-step pending" style="flex: 1; display: grid; gap: 8px; justify-items: center; text-align: center; position: relative; z-index: 2;">
+                  <div class="tracking-dot" style="width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: #e5e5e5; color: var(--navy); border: 2px solid var(--border);">4</div>
+                  <div>
+                    <span class="tracking-label" style="font-size: 10px; font-weight: 700; color: var(--ink-soft);">Completed</span>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
