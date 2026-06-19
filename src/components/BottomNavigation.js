@@ -4,9 +4,7 @@ import { escapeHtml, attr, icon } from "../utils/helpers.js";
 export function renderBottomNavigation() {
   const currentTab = ui.page;
   const isAdmin = currentUser && currentUser.role === "admin";
-  const accountLink = currentUser
-    ? (isAdmin ? "#/admin-dashboard" : "#/account")
-    : "#/auth";
+  const accountLink = currentUser ? "#/account" : "#/auth";
 
   // Match active state for account tabs
   const isAccountActive = ["account", "auth", "admin-dashboard"].includes(currentTab);

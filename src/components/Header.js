@@ -39,10 +39,7 @@ export function renderHeader(isMobile) {
 
   // Desktop Header
   const isAdmin = currentUser && currentUser.role === "admin";
-  const adminIcon = isAdmin ? "shield-check" : "user-round";
-  const userProfileLink = currentUser
-    ? (isAdmin ? "#/admin-dashboard" : "#/account")
-    : "#/auth";
+  const userProfileLink = currentUser ? "#/account" : "#/auth";
 
   return `
     <header class="site-header" id="siteHeader">
@@ -64,11 +61,33 @@ export function renderHeader(isMobile) {
 
       <!-- Action Icons -->
       <div class="header-actions">
+        ${isAdmin ? `
+          <a href="#/admin-dashboard" class="admin-portal-badge" style="
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            padding: 6px 14px; 
+            border: 1px solid var(--gold); 
+            border-radius: 4px; 
+            background: transparent; 
+            color: var(--gold); 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            text-decoration: none; 
+            transition: all 200ms;
+            margin-right: 8px;
+          " onmouseover="this.style.background='rgba(200, 161, 90, 0.08)'" onmouseout="this.style.background='transparent'">
+            <span style="display: flex;">${icon("shield-check", 13)}</span>
+            <span>Admin Portal</span>
+          </a>
+        ` : ""}
         <button type="button" class="icon-button" data-action="open-search" aria-label="Search designs">
           ${icon("search", 20)}
         </button>
         <a href="${userProfileLink}" class="icon-button header-profile-btn" aria-label="${currentUser ? "My account" : "Sign in"}">
-          ${icon(adminIcon, 20)}
+          ${icon("user-round", 20)}
         </a>
         <a href="#/wishlist" class="icon-button wishlist-button" aria-label="Saved designs (${wishlist.size})">
           ${icon("heart", 20)}

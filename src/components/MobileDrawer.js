@@ -1,4 +1,4 @@
-import { site, ui } from "../services/store.js";
+import { site, ui, currentUser } from "../services/store.js";
 import { escapeHtml, attr, icon } from "../utils/helpers.js";
 
 export function renderMobileDrawer() {
@@ -18,6 +18,13 @@ export function renderMobileDrawer() {
       </div>
       
       <nav class="drawer-nav">
+        ${currentUser && currentUser.role === "admin" ? `
+          <a href="#/admin-dashboard" class="drawer-link admin-drawer-link" style="color: var(--gold); font-weight: 700; display: flex; align-items: center; gap: 8px;" data-action="close-panels">
+            <span style="display: flex;">${icon("shield-check", 16)}</span>
+            <span>Admin Portal</span>
+          </a>
+          <div class="drawer-divider"></div>
+        ` : ""}
         <a href="#/" class="drawer-link" data-action="close-panels">Home</a>
         <div class="drawer-divider"></div>
         <a href="#/catalog" class="drawer-link" data-action="close-panels">Collections</a>

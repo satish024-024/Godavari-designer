@@ -238,6 +238,35 @@ export function renderAccount() {
           </div>
         </div>
 
+        ${currentUser && currentUser.role === "admin" ? `
+          <!-- Admin Access Banner -->
+          <div style="
+            background: #fafaf9; 
+            border: 1px solid var(--gold); 
+            border-radius: 8px; 
+            padding: 24px 32px; 
+            margin-bottom: 32px; 
+            box-shadow: var(--shadow-deep); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 16px;
+          ">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <span style="color: var(--gold); display: flex; flex-shrink: 0;">${icon("shield-check", 24)}</span>
+              <div>
+                <strong style="font-family: var(--font-serif); font-size: 16px; color: var(--navy); display: block; margin-bottom: 4px;">Administrator Credentials Detected</strong>
+                <p style="color: var(--ink-soft); font-size: 13px; margin: 0;">You have full administrative access. Navigate to the Admin Portal to manage the store catalog, orders, and content settings.</p>
+              </div>
+            </div>
+            <a href="#/admin-dashboard" class="button button-primary" style="text-decoration: none; padding: 10px 20px; font-size: 12px; font-weight: 700; border-radius: 4px; display: inline-flex; align-items: center; gap: 8px;">
+              <span>Enter Admin Portal</span>
+              ${icon("arrow-right", 14)}
+            </a>
+          </div>
+        ` : ""}
+
         <!-- Dashboard Layout columns -->
         <div class="account-dashboard-layout" style="display: grid; grid-template-columns: 240px 1fr; gap: 40px; align-items: start;">
           ${sidebarHtml}

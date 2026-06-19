@@ -101,15 +101,15 @@ function renderSidebar(activeSection) {
         ${navItems}
       </nav>
       <div class="admin-sidebar-footer">
-        <div class="admin-user-card">
+        <a href="#/account" class="admin-user-card" title="View Profile Settings" style="text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); color: inherit; transition: background 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.04)'">
           <div class="admin-user-avatar">
             ${currentUser ? currentUser.name.charAt(0).toUpperCase() : "A"}
           </div>
           <div class="admin-user-info">
-            <span class="admin-user-name">${currentUser ? currentUser.name : "Admin"}</span>
-            <span class="admin-user-email">${currentUser ? currentUser.email : ""}</span>
+            <span class="admin-user-name" style="display: block; font-size: 13px; font-weight: 600; color: #ffffff;">${currentUser ? currentUser.name : "Admin"}</span>
+            <span class="admin-user-email" style="display: block; font-size: 11px; color: rgba(255, 255, 255, 0.4); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 140px;">${currentUser ? currentUser.email : ""}</span>
           </div>
-        </div>
+        </a>
         <button class="admin-logout-btn" id="adminLogoutBtn" aria-label="Logout">
           <i data-lucide="log-out"></i>
           <span>Logout</span>

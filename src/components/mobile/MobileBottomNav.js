@@ -5,10 +5,7 @@ export function renderMobileBottomNav() {
   const currentTab = ui.page;
   const wishlistSize = wishlist.size;
 
-  const isAdmin = currentUser && currentUser.role === "admin";
-  const accountLink = currentUser
-    ? (isAdmin ? "#/admin-dashboard" : "#/account")
-    : "#/auth";
+  const accountLink = currentUser ? "#/account" : "#/auth";
 
   const isAccountActive = ["account", "auth", "admin-dashboard"].includes(currentTab);
 
