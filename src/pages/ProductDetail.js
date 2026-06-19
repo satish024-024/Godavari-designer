@@ -9,6 +9,7 @@ let activeImageSrc = "";
 let activeGalleryMode = "zoom"; // 'zoom' | 'pan'
 let isCustomModalOpen = false;
 let isLightboxOpen = false;
+let currentProduct = null;
 
 // Fallback Default Use Cases mapping
 function getDefaultUseCases(product) {
@@ -25,6 +26,38 @@ function getDefaultUseCases(product) {
     return ["Designer Wear", "Boutique Orders"];
   }
   return ["Designer Wear", "Boutique Orders", "Bulk Production"];
+}
+
+function formatEmbroideryDuration(totalMinutes) {
+  const safeMinutes = Number(totalMinutes || 0);
+  if (!safeMinutes) return "N/A";
+
+  const hours = Math.floor(safeMinutes / 60);
+  const minutes = safeMinutes % 60;
+
+  if (!hours) return `${minutes} M`;
+  if (!minutes) return `${hours} H`;
+  return `${hours} H ${minutes} M`;
+}
+
+function getDimensionUnit(product) {
+  const dimensionsText = String(product.dimensions || "").toLowerCase();
+  if (dimensionsText.includes("inch")) return "inch";
+  if (dimensionsText.includes("in")) return "inch";
+  return "mm";
+}
+
+function formatDimensionValue(product, value) {
+  if (value === undefined || value === null || value === "") return "N/A";
+  return `${value} ${getDimensionUnit(product)}`;
+}
+
+function getRpmProgress(rpm) {
+  const safeRpm = Number(rpm || 0);
+  const min = 0;
+  const max = 1200;
+  const clamped = Math.max(min, Math.min(max, safeRpm));
+  return (clamped / max) * 100;
 }
 
 export function renderProductDetail() {
@@ -51,6 +84,8 @@ export function renderProductDetail() {
     isLightboxOpen = false;
   }
 
+  currentProduct = product;
+
   const isSaved = wishlist.has(product.id);
   const selectedFormat = product.formats.find(f => f.format === activeFormatCode) || product.formats[0];
   const displayPrice = selectedFormat ? selectedFormat.price : product.price;
@@ -61,6 +96,11 @@ export function renderProductDetail() {
 
   // Custom Use Cases fallback
   const useCases = product.recommendedUseCases || product.recommended_use_cases || getDefaultUseCases(product);
+  const formattedDuration = formatEmbroideryDuration(product.estimatedEmbroideryTime);
+  const productTags = Array.isArray(product.tags) ? product.tags.filter(Boolean) : [];
+  const productName = product.title || product.code || "Untitled Product";
+  const selectedFormatLabel = selectedFormat?.label || selectedFormat?.format || activeFormatCode || "N/A";
+  const rpmProgress = getRpmProgress(product.rpm);
 
   // WhatsApp prefills
   const whatsappNumber = (site.brand.contact.phone || "+91 98765 43210").replace(/[^0-9+]/g, '');
@@ -168,102 +208,165 @@ export function renderProductDetail() {
                 </button>
               </div>
             </div>
+
+            <div style="border: 1px solid var(--border); border-radius: 16px; padding: 28px; background: #fff; margin-top: 24px; box-shadow: 0 14px 40px rgba(17, 29, 66, 0.08);">
+              <h3 style="font-family: var(--font-serif); font-size: 20px; color: var(--navy); margin: 0 0 18px;">
+                ${icon("scroll-text", 18)} Stitch Details (Back + Hands)
+              </h3>
+              
+              <!-- Back and Hands Stitch Counts Breakdown -->
+              <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--ink-soft); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
+                <span>Back Stitches: <strong style="color: var(--navy);">${(product.backStitchCount || 0).toLocaleString()}</strong></span>
+                <span>Hands Stitches: <strong style="color: var(--navy);">${(product.handStitchCount || 0).toLocaleString()}</strong></span>
+              </div>
+              
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 15px; color: var(--ink-soft); font-weight: 500;">Embroidery Speed</span>
+                <span style="font-size: 18px; color: var(--navy); font-weight: 700;" id="rpmValueDisplay">${product.rpm || 850} RPM</span>
+              </div>
+              
+              <!-- Interactive Range Input -->
+              <input 
+                type="range" 
+                id="rpmSlider" 
+                min="300" 
+                max="1200" 
+                step="50" 
+                value="${product.rpm || 850}" 
+                style="width: 100%; cursor: pointer;"
+              />
+              
+              <div id="estTimeDisplay" style="background: #eef7fe; border-radius: 12px; padding: 18px; text-align: center; color: #1677d2; font-size: 20px; font-weight: 700; transition: all 0.2s ease;">
+                Estimated Time: ${formattedDuration}
+              </div>
+            </div>
           </div>
 
           <!-- Right Column: Sidebar Info -->
           <div class="product-detail-info">
-            <span class="product-detail-label">${escapeHtml(product.bestSeller ? "Bestseller" : "Luxury Placements")}</span>
-            <h1 class="product-detail-title">${escapeHtml(product.title)}</h1>
-            
-            <div class="product-detail-meta">
-              <span>Code: <strong>${escapeHtml(product.code)}</strong></span>
-              <span>Category: <strong>${escapeHtml(product.category)}</strong></span>
-              ${product.collection ? `<span>Collection: <strong>${escapeHtml(product.collection.toUpperCase())}</strong></span>` : ""}
+            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom: 20px;">
+              <div>
+                <span class="product-detail-label">${escapeHtml(product.bestSeller ? "Bestseller" : "Product Details")}</span>
+                <h1 class="product-detail-title" style="margin-bottom: 8px;">${escapeHtml(productName)}</h1>
+                <div class="product-detail-meta">
+                  <span>Code: <strong>${escapeHtml(product.code || "N/A")}</strong></span>
+                  <span>Category: <strong>${escapeHtml(product.category || "N/A")}</strong></span>
+                  ${product.collection ? `<span>Collection: <strong>${escapeHtml(product.collection.toUpperCase())}</strong></span>` : ""}
+                </div>
+              </div>
+              <button
+                type="button"
+                class="button button-secondary"
+                data-action="share-product"
+                style="min-height: 40px; padding: 0 14px; white-space: nowrap;"
+              >
+                ${icon("share-2", 16)} Share
+              </button>
             </div>
 
-            <div class="product-detail-price">
+            <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 24px; margin-bottom: 20px;">
+              <div style="display:grid; gap:20px;">
+                <div style="display:grid; grid-template-columns: minmax(120px, 180px) 1fr; gap: 14px;">
+                  <span style="font-weight:700; color:var(--navy);">Product Name</span>
+                  <strong style="color:var(--navy);">${escapeHtml(productName)}</strong>
+                </div>
+                <div style="display:grid; grid-template-columns: minmax(120px, 180px) 1fr; gap: 14px;">
+                  <span style="font-weight:700; color:var(--navy);">Dimensions</span>
+                  <div style="display:grid; gap:4px; color:var(--navy);">
+                    <strong>Height: ${escapeHtml(formatDimensionValue(product, product.height))}</strong>
+                    <strong>Width: ${escapeHtml(formatDimensionValue(product, product.width))}</strong>
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns: minmax(120px, 180px) 1fr; gap: 14px;">
+                  <span style="font-weight:700; color:var(--navy);">Stitch Details</span>
+                  <div style="display:grid; gap:4px; color:var(--navy);">
+                    <strong>Back: ${product.backStitchCount.toLocaleString()}</strong>
+                    <strong>Hand: ${product.handStitchCount.toLocaleString()}</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 24px; margin-bottom: 20px;">
+              <h3 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0 0 16px;">Stitch Details (Back + Hands)</h3>
+              <div style="display:grid; gap:12px; color:var(--navy);">
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600;">Embroidery Speed</span>
+                  <strong>${product.rpm} RPM</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600;">Estimated Time</span>
+                  <strong>${formattedDuration}</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600;">Total Stitch Count</span>
+                  <strong>${product.totalStitchCount.toLocaleString()}</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="product-detail-price" style="margin-bottom: 12px;">
               ${money(displayPrice)}
             </div>
 
-            <!-- 1. Highlighted Embroidery Summary Card -->
-            <div class="embroidery-summary-card">
-              <div class="summary-card-title">Embroidery Summary</div>
-              <div class="summary-grid">
-                <div class="summary-item">
-                  <div class="summary-icon-wrapper">${icon("activity", 16)}</div>
-                  <div class="summary-text">
-                    <span class="summary-label">Total Stitches</span>
-                    <span class="summary-value">${product.totalStitchCount.toLocaleString()}</span>
+            ${
+              productTags.length > 0
+                ? `
+                  <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 20px;">
+                    ${productTags
+                      .map(
+                        (tag) => `
+                          <span style="display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid var(--border); background:#fff; color:var(--navy); font-size:12px; font-weight:600;">
+                            ${escapeHtml(tag)}
+                          </span>
+                        `
+                      )
+                      .join("")}
                   </div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-icon-wrapper">${icon("palette", 16)}</div>
-                  <div class="summary-text">
-                    <span class="summary-label">Thread Colors</span>
-                    <span class="summary-value">${product.threadColors} Colors</span>
-                  </div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-icon-wrapper">${icon("clock", 16)}</div>
-                  <div class="summary-text">
-                    <span class="summary-label">Est. Stitch Time</span>
-                    <span class="summary-value">${product.estimatedEmbroideryTime} Mins</span>
-                  </div>
-                </div>
-                <div class="summary-item">
-                  <div class="summary-icon-wrapper">${icon("trending-up", 16)}</div>
-                  <div class="summary-text">
-                    <span class="summary-label">Difficulty</span>
-                    <span class="summary-value">${escapeHtml(product.difficultyLevel)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                `
+                : ""
+            }
 
-            <!-- 2. Technical Production Information Card -->
-            <div class="production-info-card">
-              <div class="production-info-title">Production Details</div>
-              <div class="production-info-grid">
-                <div class="production-row">
-                  <span>Estimated Stitch Time</span>
-                  <strong>~${product.estimatedEmbroideryTime} Mins</strong>
+            <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 24px; margin-bottom: 20px;">
+              <div style="display:grid; gap:10px;">
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600; color:var(--navy);">Thread Colors</span>
+                  <strong style="color:var(--navy);">${product.threadColors}</strong>
                 </div>
-                <div class="production-row">
-                  <span>Machine Speed (RPM)</span>
-                  <strong>${product.rpm} RPM</strong>
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600; color:var(--navy);">Difficulty</span>
+                  <strong style="color:var(--navy);">${escapeHtml(product.difficultyLevel)}</strong>
                 </div>
-                <div class="production-row">
-                  <span>Difficulty Level</span>
-                  <strong>${escapeHtml(product.difficultyLevel)}</strong>
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600; color:var(--navy);">Available Formats</span>
+                  <strong style="color:var(--navy);">${escapeHtml(uniqueFormatsList || "N/A")}</strong>
                 </div>
-                <div class="production-row">
-                  <span>Recommended Fabrics</span>
-                  <strong>${escapeHtml(fabricsList)}</strong>
-                </div>
-                <div class="production-row">
-                  <span>Compatible Machines</span>
-                  <strong>${escapeHtml(
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600; color:var(--navy);">Compatible Machines</span>
+                  <strong style="color:var(--navy);">${escapeHtml(
                     product.formats && product.formats.length > 0
-                      ? [...new Set(product.formats.map(f => f.machineBrand))].join(" & ")
-                      : "Tajima, Brother, Bernina"
+                      ? [...new Set(product.formats.map(f => f.machineBrand).filter(Boolean))].join(", ")
+                      : "N/A"
                   )}</strong>
                 </div>
-                <div class="production-row">
-                  <span>Available Formats</span>
-                  <strong>${escapeHtml(uniqueFormatsList)}</strong>
+                <div style="display:flex; justify-content:space-between; gap:12px;">
+                  <span style="font-weight:600; color:var(--navy);">Recommended Fabrics</span>
+                  <strong style="color:var(--navy); text-align:right;">${escapeHtml(fabricsList || "N/A")}</strong>
                 </div>
               </div>
             </div>
 
-            <!-- 3. Machine Format Selectable Cards -->
             <div class="format-section-title">Select Machine Format</div>
+            <div style="font-size: 13px; color: var(--ink-soft); margin-bottom: 12px;">
+              Selected: <strong style="color: var(--navy);">${escapeHtml(selectedFormatLabel)}</strong>
+            </div>
             <div class="format-cards-grid">
               ${product.formats
                 .map(
                   (f) => `
                     <div class="format-card ${activeFormatCode === f.format ? "active" : ""}" data-action="select-format" data-format="${attr(f.format)}">
                       <div class="format-card-brand">${escapeHtml(f.machineBrand)}</div>
-                      <div class="format-card-badge">${escapeHtml(f.format)}</div>
+                      <div class="format-card-badge">${escapeHtml(f.label || f.format)}</div>
                       <div class="format-card-model">${escapeHtml(f.machineModel)}</div>
                       <div class="format-card-hoop">Hoop: ${escapeHtml(f.hoopSize)}</div>
                       <div class="format-card-price">${money(f.price)}</div>
@@ -274,23 +377,6 @@ export function renderProductDetail() {
                   `
                 )
                 .join("")}
-            </div>
-
-            <!-- 4. Suitable Use Cases Section -->
-            <div class="use-cases-card">
-              <div class="use-cases-title">Suitable Use Cases</div>
-              <div class="use-cases-list">
-                ${useCases
-                  .map(
-                    (uc) => `
-                      <div class="use-case-item">
-                        <span class="use-case-check">${icon("check-circle-2", 14)}</span>
-                        <span>${escapeHtml(uc)}</span>
-                      </div>
-                    `
-                  )
-                  .join("")}
-              </div>
             </div>
 
             <!-- Purchase Actions -->
@@ -317,9 +403,34 @@ export function renderProductDetail() {
               </a>
             </div>
 
-            <p style="font-size: 13px; color: var(--ink-soft); line-height: 1.6; margin-top: 16px;">
-              ${escapeHtml(product.description)}
-            </p>
+            <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 24px; margin-top: 20px;">
+              <h3 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0 0 16px;">Product Description</h3>
+              <p style="font-size: 14px; color: var(--ink-soft); line-height: 1.7; margin: 0;">
+                ${escapeHtml(product.description || "No product description available.")}
+              </p>
+            </div>
+
+            ${
+              useCases.length > 0
+                ? `
+                  <div class="use-cases-card" style="margin-top: 20px;">
+                    <div class="use-cases-title">Suitable Use Cases</div>
+                    <div class="use-cases-list">
+                      ${useCases
+                        .map(
+                          (uc) => `
+                            <div class="use-case-item">
+                              <span class="use-case-check">${icon("check-circle-2", 14)}</span>
+                              <span>${escapeHtml(uc)}</span>
+                            </div>
+                          `
+                        )
+                        .join("")}
+                    </div>
+                  </div>
+                `
+                : ""
+            }
           </div>
         </div>
 
@@ -578,6 +689,36 @@ export function initProductDetailEvents() {
   
   if (eventsBound) return;
   eventsBound = true;
+
+  document.addEventListener("input", (e) => {
+    if (e.target.id === "rpmSlider") {
+      const currentRpm = parseInt(e.target.value);
+      
+      // Update RPM Text Display
+      const rpmDisplay = document.getElementById("rpmValueDisplay");
+      if (rpmDisplay) {
+        rpmDisplay.textContent = `${currentRpm} RPM`;
+      }
+      
+      // Calculate and Update Estimated Time
+      if (currentProduct) {
+        let estimatedMinutes = 0;
+        if (currentProduct.rpm && currentProduct.estimatedEmbroideryTime) {
+          // Scale based on default RPM and default time
+          estimatedMinutes = Math.round(currentProduct.estimatedEmbroideryTime * (currentProduct.rpm / currentRpm));
+        } else {
+          // Fallback simple calculation
+          const stitches = currentProduct.totalStitchCount || currentProduct.stitchCount || 0;
+          estimatedMinutes = Math.round(stitches / currentRpm);
+        }
+        
+        const estTimeDisplay = document.getElementById("estTimeDisplay");
+        if (estTimeDisplay) {
+          estTimeDisplay.textContent = `Estimated Time: ${formatEmbroideryDuration(estimatedMinutes)}`;
+        }
+      }
+    }
+  });
   
   document.addEventListener("click", (e) => {
     const target = e.target.closest("[data-action]");

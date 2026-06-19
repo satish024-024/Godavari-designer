@@ -60,6 +60,8 @@ import {
   cancelCategoryForm
 } from "./components/AdminDrawer.js";
 import { renderQuickViewModal } from "./components/QuickViewModal.js";
+import { renderBottomNavigation } from "./components/BottomNavigation.js";
+import { renderMobileDrawer } from "./components/MobileDrawer.js";
 
 // Pages
 import { renderHome } from "./pages/Home.js";
@@ -146,24 +148,47 @@ function render() {
     return;
   }
 
-  // Shell Layout (all non-admin pages)
-  app.innerHTML = `
-    <div class="site-shell">
-      ${renderHeader()}
-      <main>
-        ${pageContent}
-      </main>
-      ${renderFooter()}
-      ${renderFloatingActions()}
-      ${ui.searchOpen ? renderSearchOverlay() : ""}
-      ${ui.cartOpen ? renderCartDrawer() : ""}
-      ${ui.quoteOpen ? renderQuoteModal() : ""}
-      ${ui.storyOpen ? renderStoryModal() : ""}
-      ${ui.adminOpen ? renderAdminDrawer() : ""}
-      ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
-      ${renderToast()}
-    </div>
-  `;
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    app.innerHTML = `
+      <div class="site-shell mobile-shell">
+        ${renderHeader(true)}
+        <main>
+          ${pageContent}
+          ${renderFooter()}
+        </main>
+        ${renderBottomNavigation()}
+        ${renderMobileDrawer()}
+        ${renderFloatingActions()}
+        ${ui.searchOpen ? renderSearchOverlay() : ""}
+        ${ui.cartOpen ? renderCartDrawer() : ""}
+        ${ui.quoteOpen ? renderQuoteModal() : ""}
+        ${ui.storyOpen ? renderStoryModal() : ""}
+        ${ui.adminOpen && currentUser && currentUser.role === "admin" ? renderAdminDrawer() : ""}
+        ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
+        ${renderToast()}
+      </div>
+    `;
+  } else {
+    app.innerHTML = `
+      <div class="site-shell desktop-shell">
+        ${renderHeader(false)}
+        <main>
+          ${pageContent}
+        </main>
+        ${renderFooter()}
+        ${renderFloatingActions()}
+        ${ui.searchOpen ? renderSearchOverlay() : ""}
+        ${ui.cartOpen ? renderCartDrawer() : ""}
+        ${ui.quoteOpen ? renderQuoteModal() : ""}
+        ${ui.storyOpen ? renderStoryModal() : ""}
+        ${ui.adminOpen && currentUser && currentUser.role === "admin" ? renderAdminDrawer() : ""}
+        ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
+        ${renderToast()}
+      </div>
+    `;
+  }
 
   afterRender();
 }
@@ -311,6 +336,11 @@ document.addEventListener("click", (event) => {
     }
   }
 
+  if (action === "toggle-mobile-menu") {
+    ui.mobileMenuOpen = !ui.mobileMenuOpen;
+    triggerRender();
+  }
+
   if (action === "open-search") {
     ui.searchQuery = trigger.dataset.query || ui.searchQuery;
     ui.searchOpen = true;
@@ -320,11 +350,11 @@ document.addEventListener("click", (event) => {
 
   if (action === "open-admin") {
     if (currentUser && currentUser.role === "admin") {
-      window.location.hash = "#/admin-dashboard";
-    } else {
       ui.adminOpen = true;
       ui.searchOpen = false;
       triggerRender();
+    } else {
+      showToast("Access Denied: Admin privileges required");
     }
   }
 
@@ -816,6 +846,16 @@ window.addEventListener("mousemove", (event) => {
   const y = (event.clientY / window.innerHeight - 0.5).toFixed(3);
   document.documentElement.style.setProperty("--mouse-x", x);
   document.documentElement.style.setProperty("--mouse-y", y);
+});
+
+// Switch layouts dynamically on threshold crossing
+let wasMobile = window.innerWidth <= 768;
+window.addEventListener("resize", () => {
+  const isMobile = window.innerWidth <= 768;
+  if (isMobile !== wasMobile) {
+    wasMobile = isMobile;
+    triggerRender();
+  }
 });
 
 // Bootstrap Application

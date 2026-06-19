@@ -525,6 +525,7 @@ export const DB = {
     if (p.rpm === undefined) { p.rpm = 850; modified = true; }
     if (p.estimatedEmbroideryTime === undefined) { p.estimatedEmbroideryTime = Math.round(p.totalStitchCount / 850) + 2; modified = true; }
     if (p.difficultyLevel === undefined) { p.difficultyLevel = "Intermediate"; modified = true; }
+    if (p.tags === undefined) { p.tags = []; modified = true; }
     
     // Fabrics
     if (p.recommendedFabrics === undefined) { p.recommendedFabrics = ["Silk", "Net", "Organza"]; modified = true; }

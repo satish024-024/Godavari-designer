@@ -36,7 +36,8 @@ export const ui = {
   storyOpen: false,
   quickViewProductId: null,
   searchQuery: "",
-  toast: ""
+  toast: "",
+  mobileMenuOpen: false
 };
 
 let renderCallback = () => {};
@@ -259,8 +260,10 @@ export async function saveSite() {
     for (const sec of sections) {
       await settingsService.updateWebsiteSettings(sec, site[sec]);
     }
+    showToast("Settings synchronized with database!");
   } catch (error) {
     console.error("Failed to save site settings to Supabase:", error);
+    showToast(`Offline mode: Settings saved locally but failed to sync to cloud (${error.message || error})`);
   }
 }
 
@@ -361,6 +364,7 @@ export function closePanels() {
   ui.quoteOpen = false;
   ui.storyOpen = false;
   ui.quickViewProductId = null;
+  ui.mobileMenuOpen = false;
 }
 
 export function syncAdminFields() {

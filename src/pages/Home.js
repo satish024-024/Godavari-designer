@@ -126,23 +126,64 @@ function renderCollections() {
 }
 
 function renderProcess() {
+  const isMobile = window.innerWidth <= 768;
+
+  if (isMobile) {
+    return `
+      <section class="content-section process-section" id="process">
+        ${renderSectionHeading("How It Works", "From Sketch To Stitch File", "", "")}
+        <div class="timeline-vertical-refined">
+          <div class="timeline-vertical-thread"></div>
+          ${site.steps
+            .map(
+              (step, index) => `
+                <article class="timeline-vertical-step reveal" style="--delay:${index * 60}ms">
+                  <div class="timeline-vertical-hoop">
+                    <div class="timeline-vertical-hoop-inner">
+                      ${icon(step.icon, 18)}
+                    </div>
+                  </div>
+                  <div class="timeline-vertical-content">
+                    <h3>
+                      <span class="timeline-vertical-num">${index + 1}</span>
+                      ${escapeHtml(step.title)}
+                    </h3>
+                    <p>${escapeHtml(step.body)}</p>
+                  </div>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+      </section>
+    `;
+  }
+
   return `
     <section class="content-section process-section" id="process">
       ${renderSectionHeading("How It Works", "From Sketch To Stitch File", "", "")}
-      <div class="timeline reveal">
-        <div class="timeline-thread" aria-hidden="true"></div>
-        ${site.steps
-          .map(
-            (step, index) => `
-              <article class="timeline-step" style="--step:${index}">
-                <div class="step-number">${index + 1}</div>
-                <div class="step-icon">${icon(step.icon, 30)}</div>
-                <h3>${escapeHtml(step.title)}</h3>
-                <p>${escapeHtml(step.body)}</p>
-              </article>
-            `
-          )
-          .join("")}
+      <div class="carousel-shell">
+        <button type="button" class="round-control left timeline-scroll-btn" data-action="scroll-carousel" data-target="timelineTrack" data-direction="-1" aria-label="Previous step">
+          ${icon("arrow-left", 18)}
+        </button>
+        <div class="timeline reveal" id="timelineTrack">
+          <div class="timeline-thread" aria-hidden="true"></div>
+          ${site.steps
+            .map(
+              (step, index) => `
+                <article class="timeline-step" style="--step:${index}">
+                  <div class="step-number">${index + 1}</div>
+                  <div class="step-icon">${icon(step.icon, 30)}</div>
+                  <h3>${escapeHtml(step.title)}</h3>
+                  <p>${escapeHtml(step.body)}</p>
+                </article>
+              `
+            )
+            .join("")}
+        </div>
+        <button type="button" class="round-control right timeline-scroll-btn" data-action="scroll-carousel" data-target="timelineTrack" data-direction="1" aria-label="Next step">
+          ${icon("arrow-right", 18)}
+        </button>
       </div>
     </section>
   `;
@@ -246,16 +287,12 @@ function renderCta() {
       <img src="${attr(mediaUrl(site.cta.image))}" alt="" loading="lazy" />
       <div class="premium-cta-copy reveal">
         <p class="section-kicker">Custom Digitizing Studio</p>
-        <h2>${escapeHtml(site.cta.headline)}</h2>
-        <p>${escapeHtml(site.cta.text)}</p>
-        <div class="hero-actions">
-          <a href="#/custom-order" class="button button-primary" style="text-decoration:none; display:inline-flex; align-items:center;">
-            <span>${escapeHtml(site.cta.primaryButton)}</span>
-            ${icon("arrow-right", 20)}
-          </a>
-          <a href="#/catalog" class="button button-secondary">
-            <span>${escapeHtml(site.cta.secondaryButton)}</span>
-            ${icon("sparkles", 18)}
+        <h2 class="cta-headline">Bring Your Design To Life</h2>
+        <p class="cta-subtext">Upload blouse photos, saree references, sketches, logos, or inspiration.</p>
+        <div class="hero-actions cta-actions">
+          <a href="#/custom-order" class="button button-secondary upload-promo-btn">
+            <span>Upload Reference Photos</span>
+            ${icon("upload-cloud", 20)}
           </a>
         </div>
       </div>

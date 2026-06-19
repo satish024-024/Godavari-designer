@@ -5,17 +5,47 @@ function cartCount() {
   return cart.reduce((total, item) => total + item.qty, 0);
 }
 
-export function renderHeader() {
+export function renderHeader(isMobile) {
+  const count = cartCount();
+
+  if (isMobile) {
+    return `
+      <header class="site-header" id="siteHeader">
+        <!-- Hamburger Menu for Mobile -->
+        <button type="button" class="mobile-menu-btn" data-action="toggle-mobile-menu" aria-label="Open menu">
+          ${icon("menu", 24)}
+        </button>
+
+        <!-- Brand Logo (Centered on Mobile) -->
+        <a class="brand-lockup" href="#/" aria-label="${attr(site.brand.name)} home">
+          <span class="brand-name">${escapeHtml(site.brand.name.split(" ")[0] || site.brand.name)}</span>
+          <span class="brand-sub">${escapeHtml(site.brand.name.split(" ").slice(1).join(" ") || "Designer")}</span>
+          <span class="brand-tagline">${escapeHtml(site.brand.tagline)}</span>
+        </a>
+
+        <!-- Mobile Header Actions -->
+        <div class="header-actions">
+          <button type="button" class="icon-button mobile-search-btn" data-action="open-search" aria-label="Search designs">
+            ${icon("search", 20)}
+          </button>
+          <button type="button" class="icon-button cart-button" data-action="open-cart" aria-label="Cart (${count} items)">
+            ${icon("shopping-bag", 20)}
+            <span class="header-badge${count === 0 ? " header-badge--empty" : ""}">${count}</span>
+          </button>
+        </div>
+      </header>
+    `;
+  }
+
+  // Desktop Header
   const isAdmin = currentUser && currentUser.role === "admin";
   const adminIcon = isAdmin ? "shield-check" : "user-round";
   const userProfileLink = currentUser
     ? (isAdmin ? "#/admin-dashboard" : "#/account")
     : "#/auth";
-  const count = cartCount();
 
   return `
     <header class="site-header" id="siteHeader">
-
       <!-- Brand -->
       <a class="brand-lockup" href="#/" aria-label="${attr(site.brand.name)} home">
         <span class="brand-name">${escapeHtml(site.brand.name.split(" ")[0] || site.brand.name)}</span>
@@ -49,7 +79,6 @@ export function renderHeader() {
           <span class="header-badge${count === 0 ? " header-badge--empty" : ""}">${count}</span>
         </button>
       </div>
-
     </header>
   `;
 }
