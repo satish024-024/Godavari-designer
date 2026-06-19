@@ -4222,6 +4222,8 @@ select:focus-visible {
   color: var(--navy);
   font-family: var(--font-sans);
   position: relative;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ── Sidebar ── */
@@ -4428,7 +4430,30 @@ select:focus-visible {
   flex-direction: column;
   min-height: 100vh;
   overflow: hidden;
+  max-width: 100%;
 }
+
+.admin-grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.admin-grid-2-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .admin-grid-2-1,
+  .admin-grid-2-col {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
 
 .admin-topbar {
   display: flex;

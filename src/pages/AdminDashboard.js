@@ -918,7 +918,7 @@ function renderOrdersModule() {
           </button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+        <div class="admin-grid-2-1">
           <div class="admin-form" style="padding: 24px;">
             <h2 class="admin-form-title">Order Details</h2>
             <div style="font-size: 13px; color:rgba(17,29,66,0.5); border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:12px;">
@@ -1080,7 +1080,7 @@ function renderCustomRequestsModule() {
           </button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+        <div class="admin-grid-2-1">
           <div class="admin-form" style="padding: 24px;">
             <h2 class="admin-form-title">Custom Digitizing Request</h2>
             <div style="font-size: 13px; color:rgba(17,29,66,0.5); border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:12px;">
@@ -1327,7 +1327,7 @@ function renderContentModule() {
         <p class="admin-module-subtitle">Edit brand details, contact info (phone, email, address), homepage text, and footer parameters.</p>
       </div>
 
-      <form id="adminSiteContentForm" class="admin-form" style="grid-template-columns: 1fr 1fr;">
+      <form id="adminSiteContentForm" class="admin-form admin-grid-2-col">
         
         <!-- Section 1: Brand & Contact Info -->
         <div style="grid-column: span 2; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:10px;">
