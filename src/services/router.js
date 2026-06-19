@@ -1,7 +1,12 @@
 import { setPage, currentUser, showToast } from "./store.js";
 import { DB } from "./db.js";
 
-// Routes config mapping path names to page keys
+// ==========================================
+// ROUTE CONFIGURATION
+// ==========================================
+// requiresAuth  → user must be signed in
+// requiresAdmin → user must have role = 'admin' (verified server-side)
+
 const routes = {
   "/": { page: "home", title: "Godavari Designer | Luxury Embroidery" },
   "/catalog": { page: "catalog", title: "Design Library | Godavari Designer" },
@@ -13,37 +18,78 @@ const routes = {
   "/track-order": { page: "track-order", title: "Track Your Order | Godavari" },
   "/account": { page: "account", title: "Customer Dashboard | Godavari", requiresAuth: true },
   "/auth": { page: "auth", title: "Sign In / Register | Godavari" },
+  // Admin login alias – redirects authenticated admins, no bare auth access
   "/admin/login": { page: "auth", title: "Admin Login | Godavari" },
+  // Admin portal root
   "/admin": { page: "admin-dashboard", title: "Admin Portal | Godavari", requiresAdmin: true },
   "/admin-dashboard": { page: "admin-dashboard", title: "Admin Portal | Godavari", requiresAdmin: true },
+  // Admin sub-routes — all protected
+  "/admin/products": { page: "admin-dashboard", title: "Products | Admin Portal", requiresAdmin: true },
+  "/admin/categories": { page: "admin-dashboard", title: "Categories | Admin Portal", requiresAdmin: true },
+  "/admin/collections": { page: "admin-dashboard", title: "Collections | Admin Portal", requiresAdmin: true },
+  "/admin/orders": { page: "admin-dashboard", title: "Orders | Admin Portal", requiresAdmin: true },
+  "/admin/custom-requests": { page: "admin-dashboard", title: "Custom Requests | Admin Portal", requiresAdmin: true },
+  "/admin/customers": { page: "admin-dashboard", title: "Customers | Admin Portal", requiresAdmin: true },
+  "/admin/content": { page: "admin-dashboard", title: "Content | Admin Portal", requiresAdmin: true },
+  "/admin/testimonials": { page: "admin-dashboard", title: "Testimonials | Admin Portal", requiresAdmin: true },
+  "/admin/faqs": { page: "admin-dashboard", title: "FAQs | Admin Portal", requiresAdmin: true },
+  "/admin/settings": { page: "admin-dashboard", title: "Settings | Admin Portal", requiresAdmin: true },
+  "/admin/media": { page: "admin-dashboard", title: "Media Library | Admin Portal", requiresAdmin: true },
   "/404": { page: "404", title: "Page Not Found | Godavari" }
 };
 
+// ==========================================
+// ADMIN ROUTE GUARD — Server-Authoritative
+// ==========================================
+
+/**
+ * Checks if the current user has admin role.
+ * NEVER trusts localStorage, sessionStorage, or URL state.
+ * Always reads from currentUser which is populated by authService.getCurrentUser()
+ * (which queries profiles.role from Supabase on every session restore).
+ */
+function isAuthenticatedAdmin() {
+  return !!(currentUser && currentUser.role === "admin");
+}
+
+function isAuthenticated() {
+  return !!currentUser;
+}
+
+// ==========================================
+// ROUTER INIT
+// ==========================================
+
 export function initRouter() {
   window.addEventListener("hashchange", handleRouting);
-  // Initial routing check on load
   handleRouting();
 }
 
+// ==========================================
+// ROUTING LOGIC
+// ==========================================
+
 export function handleRouting() {
   const hash = window.location.hash || "#/";
-  
+
   // Split hash into path and query parameters
   const [hashPath, queryString] = hash.replace("#", "").split("?");
-  
   const path = hashPath || "/";
-  
-  // Intercept Supabase OAuth token redirects in the hash to prevent 404 errors
-  if (path.startsWith("access_token") || path.includes("access_token=") || path.includes("error_description")) {
+
+  // Intercept Supabase OAuth token redirects to prevent 404 errors
+  if (
+    path.startsWith("access_token") ||
+    path.includes("access_token=") ||
+    path.includes("error_description")
+  ) {
     window.location.hash = "#/";
     return;
   }
-  
+
   // Parse query parameters
   const queryParams = {};
   if (queryString) {
-    const pairs = queryString.split("&");
-    pairs.forEach((pair) => {
+    queryString.split("&").forEach((pair) => {
       const [key, value] = pair.split("=");
       if (key) {
         queryParams[decodeURIComponent(key)] = decodeURIComponent(value || "");
@@ -51,7 +97,21 @@ export function handleRouting() {
     });
   }
 
-  // Match routes including dynamic routes (e.g. /product/:slug)
+  // ------------------------------------------
+  // WILDCARD ADMIN ROUTE GUARD
+  // Any path starting with /admin that isn't in
+  // the routes table is denied immediately.
+  // ------------------------------------------
+  if (path.startsWith("/admin") && !routes[path]) {
+    // Unknown admin sub-path → deny, send to admin login
+    showToast("Access denied: Admins only");
+    window.location.hash = "#/admin/login";
+    return;
+  }
+
+  // ------------------------------------------
+  // MATCH ROUTE (including dynamic :param routes)
+  // ------------------------------------------
   let matchedRoute = null;
   let matchedParams = {};
 
@@ -65,8 +125,7 @@ export function handleRouting() {
 
       for (let i = 0; i < patternParts.length; i++) {
         if (patternParts[i].startsWith(":")) {
-          const paramName = patternParts[i].slice(1);
-          params[paramName] = pathParts[i];
+          params[patternParts[i].slice(1)] = pathParts[i];
         } else if (patternParts[i] !== pathParts[i]) {
           isMatch = false;
           break;
@@ -81,38 +140,34 @@ export function handleRouting() {
     }
   }
 
-  // Redirect to 404 if no matched route pattern
+  // Redirect to 404 if no matched route
   if (!matchedRoute) {
     window.location.hash = "#/404";
     return;
   }
 
-  // --- SECURITY VALIDATIONS ---
-  
-  // 1. Validate Product Slug for Product Details Route
+  // ------------------------------------------
+  // SECURITY VALIDATIONS
+  // ------------------------------------------
+
+  // 1. Validate product slug
   if (matchedRoute.page === "product-detail") {
-    const productSlug = matchedParams.slug;
     const products = DB.getProducts();
-    const productExists = products.some(p => p.slug === productSlug);
-    if (!productExists) {
+    if (!products.some((p) => p.slug === matchedParams.slug)) {
       window.location.hash = "#/404";
       return;
     }
   }
 
-  // 2. Validate Category Slugs and Collection Slugs in Catalog Query Parameters
+  // 2. Validate catalog query params
   if (matchedRoute.page === "catalog") {
-    // Validate Category Query Param
     if (queryParams.category) {
       const cats = DB.getCategories();
-      const catExists = cats.some(c => c.slug === queryParams.category);
-      if (!catExists) {
+      if (!cats.some((c) => c.slug === queryParams.category)) {
         window.location.hash = "#/404";
         return;
       }
     }
-    
-    // Validate Collection Query Param
     if (queryParams.collection) {
       const allowedCollections = ["bridal", "blouses", "saree", "kids", "floral"];
       if (!allowedCollections.includes(queryParams.collection)) {
@@ -122,37 +177,51 @@ export function handleRouting() {
     }
   }
 
-  // 3. Route Guard Checks
-  if (matchedRoute.page === "auth" && currentUser) {
-    if (currentUser.role === "admin") {
-      window.location.hash = "#/admin-dashboard";
-    } else {
-      window.location.hash = "#/account";
-    }
+  // 3. Redirect already-authenticated users away from auth page
+  if (matchedRoute.page === "auth" && isAuthenticated()) {
+    window.location.hash = isAuthenticatedAdmin() ? "#/admin-dashboard" : "#/account";
     return;
   }
 
+  // 4. Admin route guard — CRITICAL SECURITY CHECK
+  //    Role is always read from currentUser.role which is populated
+  //    by authService.getCurrentUser() → queries profiles.role from Supabase.
+  //    localStorage/sessionStorage are never consulted here.
   if (matchedRoute.requiresAdmin) {
-    if (!currentUser || currentUser.role !== "admin") {
-      showToast("Access denied: Admins only");
+    if (!isAuthenticatedAdmin()) {
+      showToast("Access denied: Admin credentials required");
       window.location.hash = "#/admin/login";
       return;
     }
   }
 
+  // 5. Auth-required route guard (customer-facing protected routes)
   if (matchedRoute.requiresAuth) {
-    if (!currentUser) {
+    if (!isAuthenticated()) {
       showToast("Please sign in to access your account");
       window.location.hash = "#/auth";
       return;
     }
   }
 
-  // Update Dynamic Document Title
+  // ------------------------------------------
+  // NAVIGATION — pass sub-route to page component
+  // ------------------------------------------
   document.title = matchedRoute.title;
 
-  // Set page and parameters in State Store (merge dynamic path params and query params)
-  const mergedParams = { ...matchedParams, ...queryParams };
+  // Derive admin section from path (e.g. /admin/products → 'products')
+  let adminSection = null;
+  if (matchedRoute.page === "admin-dashboard" && path !== "/admin" && path !== "/admin-dashboard") {
+    const parts = path.split("/");
+    adminSection = parts[2] || null; // e.g. 'products', 'orders', 'settings'
+  }
+
+  const mergedParams = {
+    ...matchedParams,
+    ...queryParams,
+    ...(adminSection ? { adminSection } : {})
+  };
+
   setPage(matchedRoute.page, mergedParams);
 }
 
