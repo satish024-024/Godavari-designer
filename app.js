@@ -1,6 +1,235 @@
 const STORAGE_KEY = "godavari-designer-site-v1";
 const WISHLIST_KEY = "godavari-designer-wishlist-v1";
 const CART_KEY = "godavari-designer-cart-v1";
+const USERS_KEY = "godavari-designer-users-v1";
+const PRODUCTS_KEY = "godavari-designer-products-v1";
+const ORDERS_KEY = "godavari-designer-orders-v1";
+const REQUESTS_KEY = "godavari-designer-requests-v1";
+const FAQS_KEY = "godavari-designer-faqs-v1";
+const SUBSCRIBERS_KEY = "godavari-designer-subscribers-v1";
+const ACTIVE_USER_KEY = "godavari-designer-active-user-v1";
+
+// Schema Definitions for validation
+const Schemas = {
+  User: {
+    email: { type: "string", required: true, email: true },
+    name: { type: "string", required: true },
+    role: { type: "string", required: true }, // 'admin' | 'customer'
+    password: { type: "string", required: true }
+  },
+  Product: {
+    id: { type: "string", required: true },
+    title: { type: "string", required: true },
+    price: { type: "number", required: true },
+    label: { type: "string", required: true },
+    image: { type: "string", required: true },
+    categoryId: { type: "string", required: true },
+    description: { type: "string", required: true },
+    stitchCount: { type: "number", required: true },
+    dimensions: { type: "string", required: true },
+    threadColorsCount: { type: "number", required: true },
+    stitchType: { type: "string", required: true },
+    fileFormats: { type: "array", required: true }
+  },
+  Order: {
+    id: { type: "string", required: true },
+    userId: { type: "string", required: true },
+    items: { type: "array", required: true },
+    total: { type: "number", required: true },
+    paymentStatus: { type: "string", required: true }, // 'pending' | 'paid'
+    createdAt: { type: "string", required: true }
+  },
+  CustomRequest: {
+    id: { type: "string", required: true },
+    name: { type: "string", required: true },
+    email: { type: "string", required: true, email: true },
+    phone: { type: "string", required: false },
+    projectType: { type: "string", required: true },
+    notes: { type: "string", required: true },
+    status: { type: "string", required: true }, // 'received' | 'quoted' | 'sampling' | 'approved' | 'completed'
+    quoteAmount: { type: "number", required: false },
+    paymentStatus: { type: "string", required: true }, // 'unpaid' | 'paid'
+    createdAt: { type: "string", required: true }
+  },
+  FAQ: {
+    id: { type: "string", required: true },
+    question: { type: "string", required: true },
+    answer: { type: "string", required: true },
+    category: { type: "string", required: true }
+  }
+};
+
+// Runtime Schema Validator
+function validateInput(data, schema) {
+  const errors = [];
+  for (const [key, rules] of Object.entries(schema)) {
+    const value = data[key];
+    if (rules.required && (value === undefined || value === null || value === "")) {
+      errors.push(`${key} is required`);
+      continue;
+    }
+    if (value !== undefined && value !== null && value !== "") {
+      if (rules.type === "string" && typeof value !== "string") {
+        errors.push(`${key} must be a string`);
+      } else if (rules.type === "number" && typeof value !== "number") {
+        errors.push(`${key} must be a number`);
+      } else if (rules.type === "array" && !Array.isArray(value)) {
+        errors.push(`${key} must be an array`);
+      } else if (rules.type === "boolean" && typeof value !== "boolean") {
+        errors.push(`${key} must be a boolean`);
+      }
+      if (rules.email && typeof value === "string" && !value.includes("@")) {
+        errors.push(`${key} must be a valid email`);
+      }
+    }
+  }
+  if (errors.length > 0) {
+    throw new Error("Validation Error: " + errors.join(", "));
+  }
+  return true;
+}
+
+// Client-side Database Controller
+const DB = {
+  load(key, defaultValue) {
+    try {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : defaultValue;
+    } catch {
+      return defaultValue;
+    }
+  },
+  save(key, data) {
+    localStorage.setItem(key, JSON.stringify(data));
+  },
+  
+  getUsers() { return this.load(USERS_KEY, []); },
+  saveUsers(users) { this.save(USERS_KEY, users); },
+  
+  getProducts() { return this.load(PRODUCTS_KEY, []); },
+  saveProducts(products) { this.save(PRODUCTS_KEY, products); },
+  
+  getOrders() { return this.load(ORDERS_KEY, []); },
+  saveOrders(orders) { this.save(ORDERS_KEY, orders); },
+  
+  getRequests() { return this.load(REQUESTS_KEY, []); },
+  saveRequests(requests) { this.save(REQUESTS_KEY, requests); },
+  
+  getFaqs() { return this.load(FAQS_KEY, []); },
+  saveFaqs(faqs) { this.save(FAQS_KEY, faqs); },
+  
+  getSubscribers() { return this.load(SUBSCRIBERS_KEY, []); },
+  saveSubscribers(subs) { this.save(SUBSCRIBERS_KEY, subs); },
+
+  getActiveUser() { return this.load(ACTIVE_USER_KEY, null); },
+  setActiveUser(user) { this.save(ACTIVE_USER_KEY, user); }
+};
+
+function initDB() {
+  if (DB.getUsers().length === 0) {
+    const defaultUsers = [
+      { email: "admin@godavari.com", name: "Sameer (Founder)", role: "admin", password: "admin123" },
+      { email: "designer@label.com", name: "Ananya Mehta", role: "customer", password: "designer123" }
+    ];
+    defaultUsers.forEach(u => validateInput(u, Schemas.User));
+    DB.saveUsers(defaultUsers);
+  }
+
+  if (DB.getProducts().length === 0) {
+    const defaultProducts = [
+      {
+        id: "royal-peony",
+        title: "Royal Peony Motif",
+        price: 45,
+        label: "Bestseller",
+        image: "https://images.pexels.com/photos/10566050/pexels-photo-10566050.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        gallery: ["https://images.pexels.com/photos/10566050/pexels-photo-10566050.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+        description: "An exquisite royal peony motif designed for luxury blouses and centerpieces.",
+        categoryId: "floral",
+        stitchCount: 18400,
+        dimensions: "140mm x 165mm",
+        threadColorsCount: 6,
+        stitchType: "Satin & Fill",
+        fileFormats: ["DST", "EXP", "PES", "JEF", "XXX"]
+      },
+      {
+        id: "floral-vine",
+        title: "Floral Vine Border",
+        price: 38,
+        label: "New",
+        image: "https://images.pexels.com/photos/6045282/pexels-photo-6045282.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        gallery: ["https://images.pexels.com/photos/6045282/pexels-photo-6045282.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+        description: "Elegant trailing floral vine border, perfect for saree borders, necklines, and panels.",
+        categoryId: "saree",
+        stitchCount: 12500,
+        dimensions: "80mm x 250mm",
+        threadColorsCount: 4,
+        stitchType: "Run & Satin",
+        fileFormats: ["DST", "EXP", "PES", "JEF", "XXX"]
+      },
+      {
+        id: "paisley-patch",
+        title: "Regal Paisley Patch",
+        price: 42,
+        label: "Couture",
+        image: "https://images.pexels.com/photos/12715935/pexels-photo-12715935.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        gallery: ["https://images.pexels.com/photos/12715935/pexels-photo-12715935.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+        description: "Ornate regal paisley patch with rich gold embroidery details for bridal lehengas and ethnic wear back-necks.",
+        categoryId: "bridal",
+        stitchCount: 22100,
+        dimensions: "150mm x 180mm",
+        threadColorsCount: 5,
+        stitchType: "Zari & Satin",
+        fileFormats: ["DST", "EXP", "PES", "JEF", "XXX"]
+      },
+      {
+        id: "luxury-net",
+        title: "Luxury Net Embroidery",
+        price: 55,
+        label: "Limited",
+        image: "https://images.pexels.com/photos/10542570/pexels-photo-10542570.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        gallery: ["https://images.pexels.com/photos/10542570/pexels-photo-10542570.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+        description: "Intricate all-over net style embroidery pattern designed for designer blouse backs and heavy sleeves.",
+        categoryId: "blouses",
+        stitchCount: 29500,
+        dimensions: "200mm x 220mm",
+        threadColorsCount: 7,
+        stitchType: "Fill & Satin",
+        fileFormats: ["DST", "EXP", "PES", "JEF", "XXX"]
+      },
+      {
+        id: "golden-leaf",
+        title: "Golden Leaf Trail",
+        price: 36,
+        label: "Studio Pick",
+        image: "https://images.pexels.com/photos/37218091/pexels-photo-37218091.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        gallery: ["https://images.pexels.com/photos/37218091/pexels-photo-37218091.jpeg?auto=compress&cs=tinysrgb&w=1200"],
+        description: "Delicate golden leaf trailing motif, suitable for soft festive kids wear, lehengas, and borders.",
+        categoryId: "kids",
+        stitchCount: 9200,
+        dimensions: "70mm x 130mm",
+        threadColorsCount: 3,
+        stitchType: "Satin & Run",
+        fileFormats: ["DST", "EXP", "PES", "JEF", "XXX"]
+      }
+    ];
+    defaultProducts.forEach(p => validateInput(p, Schemas.Product));
+    DB.saveProducts(defaultProducts);
+  }
+
+  if (DB.getFaqs().length === 0) {
+    const defaultFaqs = [
+      { id: "faq-1", question: "What formats do the machine-ready files come in?", answer: "We support DST, EXP, PES, JEF, and XXX formats. You can download all or any format after purchasing.", category: "Formats" },
+      { id: "faq-2", question: "What is your turnaround time for custom digitizing?", answer: "Custom digitizing designs are reviewed, quoted, and sampled within 24-48 hours.", category: "Digitizing" },
+      { id: "faq-3", question: "Do you supply physical samples of designs?", answer: "No, we provide high-resolution digital stitch-out rendering files and video previews. Once approved, the digital files are ready for production on your machine.", category: "Sampling" },
+      { id: "faq-4", question: "How do I download my purchases?", answer: "Once payment is verified, you can download files directly from your order tracking screen or user profile area.", category: "Orders" }
+    ];
+    defaultFaqs.forEach(f => validateInput(f, Schemas.FAQ));
+    DB.saveFaqs(defaultFaqs);
+  }
+}
+
+initDB();
 
 const defaultSite = {
   theme: {
@@ -253,7 +482,9 @@ function loadJson(key, fallback) {
 }
 
 function loadSite() {
-  return mergeDefaults(defaultSite, loadJson(STORAGE_KEY, null));
+  const loadedSite = mergeDefaults(defaultSite, loadJson(STORAGE_KEY, null));
+  loadedSite.products = DB.getProducts();
+  return loadedSite;
 }
 
 function saveSite() {

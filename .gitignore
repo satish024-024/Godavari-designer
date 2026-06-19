@@ -1,0 +1,17 @@
+# Supabase configuration temp files
+supabase/.temp/
+
+# Environment secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config.json
+
+# Dependency directories
+node_modules/
+
+# OS/System files
+.DS_Store
+Thumbs.db

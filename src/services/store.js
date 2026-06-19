@@ -1,0 +1,515 @@
+import { DB } from "./db.js";
+import { defaultSite } from "../data/defaultSite.js";
+import { mergeDefaults, clone } from "../utils/helpers.js";
+import {
+  initSupabase,
+  supabase,
+  authService,
+  categoryService,
+  collectionService,
+  productService,
+  settingsService,
+  customRequestService,
+  testimonialService,
+  faqService,
+  orderService
+} from "./supabase.js";
+
+const STORAGE_KEY = "godavari-designer-site-v1";
+const WISHLIST_KEY = "godavari-designer-wishlist-v1";
+const CART_KEY = "godavari-designer-cart-v1";
+
+// In-Memory App State (Initially loads local defaults, updated asynchronously during bootstrapping)
+export let site = clone(defaultSite);
+export let wishlist = new Set(DB.load(WISHLIST_KEY, []));
+export let cart = DB.load(CART_KEY, []);
+export let currentUser = DB.getActiveUser();
+export let faqs = [];
+
+export const ui = {
+  page: "home",
+  pageParams: {},
+  adminOpen: false,
+  searchOpen: false,
+  cartOpen: false,
+  quoteOpen: false,
+  storyOpen: false,
+  quickViewProductId: null,
+  searchQuery: "",
+  toast: ""
+};
+
+let renderCallback = () => {};
+
+export function onStateChange(callback) {
+  renderCallback = callback;
+}
+
+export function triggerRender() {
+  renderCallback();
+}
+
+// Map testimonials database rows back to site.stories template structure
+function mapStoriesFromTestimonials(rows) {
+  if (!rows || rows.length === 0) return defaultSite.stories;
+  const main = rows.find(r => r.display_order === 1) || rows[0];
+  const clients = rows.filter(r => r.id !== main.id).map(r => ({
+    name: r.name,
+    type: r.role,
+    quote: r.quote,
+    image: r.image
+  }));
+  return {
+    quote: main.quote,
+    person: main.name,
+    role: main.role,
+    rating: Number(main.rating || 5.0).toFixed(1),
+    clients: clients.length > 0 ? clients : defaultSite.stories.clients
+  };
+}
+
+// ==========================================
+// ASYNC INITIALIZATION & SYNC LAYER
+// ==========================================
+
+export async function syncFromSupabase() {
+  initSupabase();
+  try {
+    // 1. Fetch website settings (section rows)
+    const settings = await settingsService.getWebsiteSettings();
+    const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
+    sections.forEach((sec) => {
+      if (settings[sec]) {
+        site[sec] = mergeDefaults(defaultSite[sec], settings[sec]);
+      }
+    });
+
+    // 2. Fetch testimonials & map to stories
+    const testimonials = await testimonialService.getTestimonials();
+    if (testimonials && testimonials.length > 0) {
+      site.stories = mapStoriesFromTestimonials(testimonials);
+    }
+
+    // 3. Fetch categories
+    const cats = await categoryService.getCategories();
+    DB.saveCategories(cats); // Cache categories in LocalStorage
+
+    // 4. Fetch collections
+    const cols = await collectionService.getCollections();
+    site.collections = cols;
+
+    // 5. Fetch products
+    const prods = await productService.getProducts();
+    site.products = prods;
+    DB.saveProducts(prods); // Cache products in LocalStorage
+
+    // 6. Fetch FAQs
+    faqs = await faqService.getFaqs();
+
+    triggerRender();
+  } catch (err) {
+    console.error("Failed to sync state from Supabase:", err);
+    showToast("Running in offline mode");
+    
+    // Fallback: restore from local cache
+    const cachedCats = DB.getCategories();
+    const cachedProds = DB.getProducts();
+    if (cachedProds.length > 0) site.products = cachedProds;
+    triggerRender();
+  }
+}
+
+const authCallbacks = [];
+export function onAuthChange(callback) {
+  authCallbacks.push(callback);
+}
+
+function notifyAuthChange() {
+  authCallbacks.forEach(cb => {
+    try { cb(currentUser); } catch(e) { console.error(e); }
+  });
+}
+
+export async function processPendingCartItem() {
+  try {
+    const pendingItemJson = sessionStorage.getItem("godavari_pending_cart_item");
+    if (pendingItemJson) {
+      const item = JSON.parse(pendingItemJson);
+      sessionStorage.removeItem("godavari_pending_cart_item");
+      if (item && item.id) {
+        // Wait briefly for active state to propagate
+        setTimeout(() => {
+          addToCart(item.id, item.format);
+          triggerRender();
+        }, 100);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to process pending cart item:", e);
+  }
+}
+
+export async function initAuth() {
+  initSupabase();
+  try {
+    const user = await authService.getCurrentUser();
+    currentUser = user;
+    DB.setActiveUser(user);
+  } catch (e) {
+    currentUser = null;
+    DB.setActiveUser(null);
+  }
+  notifyAuthChange();
+
+  // Bind session state change listener
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (session) {
+      try {
+        const user = await authService.getCurrentUser();
+        currentUser = user;
+        DB.setActiveUser(user);
+        await processPendingCartItem();
+      } catch (e) {
+        currentUser = null;
+        DB.setActiveUser(null);
+      }
+    } else {
+      currentUser = null;
+      DB.setActiveUser(null);
+    }
+    notifyAuthChange();
+    triggerRender();
+  });
+}
+
+// ==========================================
+// REALTIME SUBSCRIPTION
+// ==========================================
+
+export function initRealtimeSubscriptions() {
+  initSupabase();
+  supabase
+    .channel('schema-db-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+      console.log("Realtime: products table updated");
+      const prods = await productService.getProducts();
+      site.products = prods;
+      DB.saveProducts(prods);
+      triggerRender();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, async () => {
+      console.log("Realtime: categories table updated");
+      const cats = await categoryService.getCategories();
+      DB.saveCategories(cats);
+      triggerRender();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'collections' }, async () => {
+      console.log("Realtime: collections table updated");
+      const cols = await collectionService.getCollections();
+      site.collections = cols;
+      triggerRender();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, async () => {
+      console.log("Realtime: testimonials table updated");
+      const testimonials = await testimonialService.getTestimonials();
+      if (testimonials && testimonials.length > 0) {
+        site.stories = mapStoriesFromTestimonials(testimonials);
+      }
+      triggerRender();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, async () => {
+      console.log("Realtime: faqs table updated");
+      faqs = await faqService.getFaqs();
+      triggerRender();
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'website_settings' }, async () => {
+      console.log("Realtime: website_settings table updated");
+      const settings = await settingsService.getWebsiteSettings();
+      const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
+      sections.forEach((sec) => {
+        if (settings[sec]) {
+          site[sec] = mergeDefaults(defaultSite[sec], settings[sec]);
+        }
+      });
+      triggerRender();
+    })
+    .subscribe();
+}
+
+// ==========================================
+// STORE ACTIONS & MUTATIONS
+// ==========================================
+
+export async function saveSite() {
+  DB.save(STORAGE_KEY, site); // local cache
+  
+  // Push site sections to website_settings table on Supabase
+  try {
+    const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
+    for (const sec of sections) {
+      await settingsService.updateWebsiteSettings(sec, site[sec]);
+    }
+  } catch (error) {
+    console.error("Failed to save site settings to Supabase:", error);
+  }
+}
+
+export function saveCommerce() {
+  DB.save(WISHLIST_KEY, [...wishlist]);
+  DB.save(CART_KEY, cart);
+}
+
+export function addToCart(id, format = null) {
+  const product = site.products.find((p) => p.id === id);
+  if (!product) return;
+  const chosenFormat = format || (product.formats && product.formats[0] ? product.formats[0].format : "DST");
+  
+  // Gatekeeper: Require auth to add items to cart
+  if (!currentUser) {
+    sessionStorage.setItem("godavari_pending_cart_item", JSON.stringify({ id, format: chosenFormat }));
+    showToast("Please sign in to add this design to your cart");
+    window.location.hash = "#/auth";
+    return;
+  }
+
+  const existing = cart.find((item) => item.id === id && item.format === chosenFormat);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ id, qty: 1, format: chosenFormat });
+  }
+  saveCommerce();
+  showToast(`${product.title} (${chosenFormat}) added to cart`);
+}
+
+export function updateCartQty(id, delta, format = null) {
+  const item = format
+    ? cart.find((entry) => entry.id === id && entry.format === format)
+    : cart.find((entry) => entry.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    if (format) {
+      cart = cart.filter((entry) => !(entry.id === id && entry.format === format));
+    } else {
+      cart = cart.filter((entry) => entry.id !== id);
+    }
+  }
+  saveCommerce();
+  triggerRender();
+}
+
+export function removeFromCart(id, format = null) {
+  if (format) {
+    cart = cart.filter((item) => !(item.id === id && item.format === format));
+  } else {
+    cart = cart.filter((item) => item.id !== id);
+  }
+  saveCommerce();
+  triggerRender();
+}
+
+export function updateCartItemFormat(id, oldFormat, newFormat) {
+  const item = cart.find((entry) => entry.id === id && entry.format === oldFormat);
+  if (!item) return;
+  const existing = cart.find((entry) => entry.id === id && entry.format === newFormat);
+  if (existing) {
+    existing.qty += item.qty;
+    cart = cart.filter((entry) => !(entry.id === id && entry.format === oldFormat));
+  } else {
+    item.format = newFormat;
+  }
+  saveCommerce();
+  triggerRender();
+}
+
+export function toggleWishlist(id) {
+  if (wishlist.has(id)) {
+    wishlist.delete(id);
+  } else {
+    wishlist.add(id);
+  }
+  saveCommerce();
+  triggerRender();
+}
+
+let toastTimer = null;
+export function showToast(message) {
+  ui.toast = message;
+  triggerRender();
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => {
+    ui.toast = "";
+    triggerRender();
+  }, 2400);
+}
+
+export function closePanels() {
+  ui.adminOpen = false;
+  ui.searchOpen = false;
+  ui.cartOpen = false;
+  ui.quoteOpen = false;
+  ui.storyOpen = false;
+  ui.quickViewProductId = null;
+}
+
+export function syncAdminFields() {
+  document.querySelectorAll("[data-setting]").forEach((field) => {
+    setByPath(site, field.dataset.setting, field.value);
+  });
+  saveSite();
+  triggerRender();
+}
+
+export function resetSite() {
+  site = clone(defaultSite);
+  saveSite();
+  triggerRender();
+}
+
+export function applyJson(jsonString) {
+  try {
+    site = mergeDefaults(defaultSite, JSON.parse(jsonString));
+    saveSite();
+    ui.adminOpen = false;
+    showToast("JSON applied successfully");
+  } catch (error) {
+    showToast("Invalid JSON structure");
+  }
+}
+
+export function setPage(page, params = {}) {
+  ui.page = page;
+  ui.pageParams = params;
+  closePanels();
+  triggerRender();
+}
+
+export async function loginWithGoogle() {
+  try {
+    await authService.loginWithGoogle();
+    return true;
+  } catch (error) {
+    showToast(error.message || "Failed to initiate Google login");
+    return false;
+  }
+}
+
+export async function login(email, password) {
+  try {
+    const user = await authService.login(email, password);
+    currentUser = user;
+    DB.setActiveUser(user);
+    showToast(`Welcome back, ${user.name}`);
+    await processPendingCartItem();
+    triggerRender();
+    return true;
+  } catch (error) {
+    showToast(error.message || "Invalid email or password");
+    return false;
+  }
+}
+
+export async function register(email, password, name, phone, addressFields = {}) {
+  try {
+    const user = await authService.signUp(email, password, name, phone, addressFields);
+    currentUser = user;
+    DB.setActiveUser(user);
+    showToast(`Account created! Welcome, ${user.name}`);
+    await processPendingCartItem();
+    triggerRender();
+    return true;
+  } catch (error) {
+    showToast(error.message || "Failed to create account");
+    return false;
+  }
+}
+
+export async function updateUserProfile(name, phone, addressFields = {}) {
+  try {
+    await authService.updateProfile(name, phone, addressFields);
+    // Update local currentUser state
+    currentUser = {
+      ...currentUser,
+      name,
+      phone,
+      addressLine1: addressFields.addressLine1 || "",
+      addressLine2: addressFields.addressLine2 || "",
+      city: addressFields.city || "",
+      state: addressFields.state || "",
+      country: addressFields.country || "",
+      postalCode: addressFields.postalCode || ""
+    };
+    DB.setActiveUser(currentUser);
+    showToast("Profile updated successfully");
+    triggerRender();
+    return true;
+  } catch (error) {
+    showToast(error.message || "Failed to update profile");
+    return false;
+  }
+}
+
+export async function logout() {
+  try {
+    await authService.logout();
+    currentUser = null;
+    DB.setActiveUser(null);
+    showToast("Logged out successfully");
+    triggerRender();
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+export function setByPath(target, path, value) {
+  const parts = path.split(".");
+  let cursor = target;
+  for (let index = 0; index < parts.length - 1; index += 1) {
+    cursor = cursor[parts[index]];
+  }
+  cursor[parts[parts.length - 1]] = value;
+}
+
+// ==========================================
+// CMS CATEGORIES PASSTHROUGHS
+// ==========================================
+
+export function getCategories() {
+  return DB.getCategories();
+}
+
+export function getFaqs() {
+  return faqs;
+}
+
+export async function saveCategories(cats) {
+  // Not used directly in CMS list reorders anymore, but kept as interface fallback
+  DB.saveCategories(cats);
+  triggerRender();
+}
+
+export async function createCategory(cat) {
+  try {
+    await categoryService.createCategory(cat);
+    // Local state will refresh via Realtime broadcast
+  } catch (error) {
+    showToast(`Error: ${error.message}`);
+  }
+}
+
+export async function updateCategory(id, updatedCat) {
+  try {
+    await categoryService.updateCategory(id, updatedCat);
+  } catch (error) {
+    showToast(`Error: ${error.message}`);
+  }
+}
+
+export async function deleteCategory(id) {
+  try {
+    await categoryService.deleteCategory(id);
+  } catch (error) {
+    showToast(`Error: ${error.message}`);
+  }
+}
