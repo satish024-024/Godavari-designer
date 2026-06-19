@@ -131,7 +131,7 @@ export function renderAccount() {
   ];
 
   const sidebarHtml = `
-    <aside style="display: flex; flex-direction: column; gap: 8px; border-right: 1px solid var(--border); padding-right: 24px;">
+    <aside class="account-sidebar-nav">
       ${tabList.map(tab => {
         const isActive = activeTab === tab.key;
         return `
@@ -139,22 +139,6 @@ export function renderAccount() {
             type="button" 
             class="tab-nav-btn ${isActive ? 'active' : ''}" 
             data-tab="${tab.key}"
-            style="
-              display: flex; 
-              align-items: center; 
-              gap: 12px; 
-              padding: 14px 18px; 
-              width: 100%; 
-              border: none; 
-              border-radius: 6px; 
-              font-size: 14px; 
-              font-weight: 600; 
-              text-align: left; 
-              cursor: pointer;
-              background: ${isActive ? 'var(--navy)' : 'transparent'};
-              color: ${isActive ? '#fff' : 'var(--navy)'};
-              transition: all 200ms;
-            "
           >
             <span style="display: flex;">${icon(tab.icon, 18)}</span>
             <span>${tab.label}</span>
@@ -166,23 +150,8 @@ export function renderAccount() {
 
       <button 
         type="button" 
+        class="account-logout-btn"
         id="accountLogoutBtn"
-        style="
-          display: flex; 
-          align-items: center; 
-          gap: 12px; 
-          padding: 14px 18px; 
-          width: 100%; 
-          border: 1px solid #ffa39e; 
-          border-radius: 6px; 
-          font-size: 14px; 
-          font-weight: 700; 
-          text-align: left; 
-          cursor: pointer;
-          background: #fff1f0;
-          color: #cf1322;
-          transition: all 200ms;
-        "
       >
         <span style="display: flex;">${icon("log-out", 18)}</span>
         <span>Log Out</span>
@@ -222,19 +191,28 @@ export function renderAccount() {
 
   return `
     <section class="content-section" style="padding: 120px 24px; background: var(--ivory); min-height: 90vh;">
-      <div style="max-width: 1100px; margin: 0 auto;">
+      <div style="width: min(100%, 1160px); margin: 0 auto;">
         
         <!-- Welcome Header Banner -->
-        <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 32px; margin-bottom: 32px; box-shadow: var(--shadow-deep); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-          <div>
-            <span style="font-size: 12px; color: var(--gold); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Welcome Back</span>
-            <h1 style="font-family: var(--font-serif); font-size: 28px; color: var(--navy); margin: 4px 0 0 0; font-weight: 700;">
-              ${escapeHtml(currentUser.name)}
-            </h1>
-            <p style="color: var(--ink-soft); font-size: 13px; margin: 6px 0 0 0;">${escapeHtml(currentUser.email)}</p>
+        <div class="account-header-card">
+          <div class="account-profile-info">
+            <div class="account-avatar-circle">
+              ${currentUser.name ? currentUser.name.charAt(0).toUpperCase() : "C"}
+            </div>
+            <div class="account-meta-details">
+              <span class="welcome-text">Welcome Back</span>
+              <h1 class="profile-name">
+                ${escapeHtml(currentUser.name)}
+              </h1>
+              <p class="profile-email">${escapeHtml(currentUser.email)}</p>
+            </div>
           </div>
-          <div style="background: var(--surface); padding: 8px 16px; border: 1px dashed var(--border); border-radius: 4px; font-size: 12px; font-weight: 600; color: var(--navy);">
-            Customer Account ID: <code style="font-family: monospace; font-size: 12px; color: var(--gold);">${currentUser.id.substring(0, 8)}...</code>
+          <div class="account-id-badge">
+            <span>Customer ID:</span>
+            <code>${escapeHtml(currentUser.id.substring(0, 8))}...</code>
+            <button type="button" class="copy-id-btn" data-action="copy-id" data-id="${escapeHtml(currentUser.id)}" title="Copy Account ID">
+              ${icon("copy", 14)}
+            </button>
           </div>
         </div>
 
@@ -243,7 +221,7 @@ export function renderAccount() {
           <div style="
             background: #fafaf9; 
             border: 1px solid var(--gold); 
-            border-radius: 8px; 
+            border-radius: 12px; 
             padding: 24px 32px; 
             margin-bottom: 32px; 
             box-shadow: var(--shadow-deep); 
@@ -268,9 +246,9 @@ export function renderAccount() {
         ` : ""}
 
         <!-- Dashboard Layout columns -->
-        <div class="account-dashboard-layout" style="display: grid; grid-template-columns: 240px 1fr; gap: 40px; align-items: start;">
+        <div class="account-dashboard-layout">
           ${sidebarHtml}
-          <div class="account-workspace" style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 32px; box-shadow: var(--shadow-deep); min-height: 480px;">
+          <div class="account-workspace">
             ${tabWorkspaceHtml}
           </div>
         </div>
@@ -286,37 +264,37 @@ function renderOverviewTab() {
 
   return `
     <div style="display: grid; gap: 32px;">
-      <h2 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Dashboard Overview</h2>
+      <h2>Dashboard Overview</h2>
       
       <!-- Stats Cards Row -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px;">
-        <div style="background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 6px; text-align: center;">
-          <span style="color: var(--ink-soft); font-size: 12px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 8px;">Embroidery Orders</span>
-          <strong style="font-size: 32px; color: var(--navy);">${userOrders.length}</strong>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon">${icon("shopping-bag", 18)}</div>
+          <span class="stat-card-label">Embroidery Orders</span>
+          <strong class="stat-card-number">${userOrders.length}</strong>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 6px; text-align: center;">
-          <span style="color: var(--ink-soft); font-size: 12px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 8px;">Digitizing Quotes</span>
-          <strong style="font-size: 32px; color: var(--navy);">${userRequests.length}</strong>
+        <div class="stat-card">
+          <div class="stat-card-icon">${icon("file-text", 18)}</div>
+          <span class="stat-card-label">Digitizing Quotes</span>
+          <strong class="stat-card-number">${userRequests.length}</strong>
         </div>
-        <div style="background: var(--surface); border: 1px solid var(--border); padding: 20px; border-radius: 6px; text-align: center;">
-          <span style="color: var(--ink-soft); font-size: 12px; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 8px;">Saved Designs</span>
-          <strong style="font-size: 32px; color: var(--navy);">${wishlistCount}</strong>
+        <div class="stat-card">
+          <div class="stat-card-icon">${icon("heart", 18)}</div>
+          <span class="stat-card-label">Saved Designs</span>
+          <strong class="stat-card-number">${wishlistCount}</strong>
         </div>
       </div>
 
       <!-- Recent Activity Feed -->
       <div style="display: grid; gap: 16px; margin-top: 10px;">
-        <h3 style="font-size: 15px; color: var(--navy); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; border-bottom: 1px dashed var(--border); padding-bottom: 8px; margin: 0;">
+        <h3 style="font-size: 14px; color: var(--navy); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em; border-bottom: 1px dashed var(--border); padding-bottom: 10px; margin: 0;">
           Recent Activity
         </h3>
 
         ${userActivities.length === 0 ? `
-          <p style="color: var(--ink-soft); font-size: 13px; font-style: italic; margin: 0; padding: 12px 0;">No recent activities found.</p>
+          <p style="color: var(--ink-soft); font-size: 13.5px; font-style: italic; margin: 0; padding: 12px 0;">No recent activities found.</p>
         ` : `
-          <div style="display: grid; gap: 14px; position: relative; padding-left: 12px;">
-            <!-- Activity vertical bar -->
-            <div style="position: absolute; top: 8px; bottom: 8px; left: 2px; width: 1px; background: var(--border);"></div>
-
+          <div class="activity-timeline">
             ${userActivities.map(act => {
               const timeStr = act.timestamp.toLocaleDateString("en-IN", {
                 day: "numeric",
@@ -325,25 +303,14 @@ function renderOverviewTab() {
                 minute: "2-digit"
               });
               return `
-                <div style="display: flex; gap: 16px; align-items: flex-start; position: relative;">
-                  <div style="
-                    width: 7px; 
-                    height: 7px; 
-                    border-radius: 50%; 
-                    background: var(--gold); 
-                    position: absolute; 
-                    left: -13px; 
-                    top: 6px;
-                    border: 2px solid #fff;
-                  "></div>
-                  
-                  <span style="color: var(--navy); display: flex; flex-shrink: 0; margin-top: 2px; color: var(--ink-soft);">
+                <div class="activity-item">
+                  <div class="activity-node"></div>
+                  <span class="activity-icon-wrapper">
                     ${icon(act.icon, 14)}
                   </span>
-                  
-                  <div style="flex: 1; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px;">
-                    <span style="color: var(--navy); font-weight: 500;">${escapeHtml(act.label)}</span>
-                    <span style="color: var(--ink-soft); font-size: 11px;">${timeStr}</span>
+                  <div class="activity-content">
+                    <span class="activity-text">${escapeHtml(act.label)}</span>
+                    <span class="activity-time">${timeStr}</span>
                   </div>
                 </div>
               `;
@@ -360,7 +327,7 @@ function renderOverviewTab() {
 function renderOrdersTab() {
   return `
     <div style="display: grid; gap: 24px;">
-      <h2 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Purchase History</h2>
+      <h2>Purchase History</h2>
 
       ${userOrders.length === 0 ? `
         <div style="text-align: center; padding: 48px 0; color: var(--ink-soft); font-size: 14px;">
@@ -370,7 +337,7 @@ function renderOrdersTab() {
           </div>
         </div>
       ` : `
-        <div style="display: grid; gap: 20px;">
+        <div class="order-list">
           ${userOrders.map(order => {
             const dateStr = new Date(order.created_at).toLocaleDateString("en-IN", {
               day: "numeric",
@@ -383,51 +350,51 @@ function renderOrdersTab() {
             const orderItemsPayload = encodeURIComponent(JSON.stringify(items));
 
             return `
-              <div style="border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: #fff;">
+              <div class="order-card">
                 
                 <!-- Order Header Block -->
-                <div style="background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px;">
-                  <div>
-                    <span style="color: var(--ink-soft);">Reference:</span>
-                    <strong style="color: var(--navy); font-family: monospace; font-size: 14px; margin-left: 4px;">${escapeHtml(order.reference_number)}</strong>
+                <div class="order-header-block">
+                  <div class="order-ref">
+                    <span>Order Reference:</span>
+                    <strong>${escapeHtml(order.reference_number)}</strong>
                   </div>
-                  <div>
-                    <span style="color: var(--ink-soft); margin-right: 12px;">Placed on ${dateStr}</span>
-                    <span style="border-radius: 99px; font-size: 11px; font-weight: 700; padding: 2px 8px; text-transform: uppercase; background: ${order.status === 'completed' ? '#f6ffed' : '#fff7e6'}; color: ${order.status === 'completed' ? '#389e0d' : '#d46b08'};">
-                      Status: ${escapeHtml(order.status)}
+                  <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <span style="color: var(--ink-soft);">Placed on ${dateStr}</span>
+                    <span class="order-status-badge ${order.status === 'completed' ? 'completed' : 'pending'}">
+                      ${escapeHtml(order.status)}
                     </span>
                   </div>
                 </div>
 
                 <!-- Order items rows -->
-                <div style="padding: 20px; display: grid; gap: 16px;">
+                <div class="order-items-container">
                   ${items.map(item => {
                     const product = item.products || {};
                     return `
-                      <div style="display: flex; gap: 16px; align-items: center; font-size: 13px;">
-                        <img src="${escapeHtml(product.image || 'https://placehold.co/80')}" alt="${escapeHtml(product.title || 'Product')}" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid var(--border); border-radius: 4px;" />
-                        <div style="flex: 1;">
-                          <strong style="color: var(--navy); display: block;">${escapeHtml(product.title || 'Embroidery Design')}</strong>
-                          <span style="color: var(--ink-soft); font-size: 12px;">Format: ${escapeHtml(item.format)}</span>
+                      <div class="order-item-row">
+                        <img src="${escapeHtml(product.image || 'https://placehold.co/80')}" alt="${escapeHtml(product.title || 'Product')}" class="order-item-img" />
+                        <div class="order-item-details">
+                          <strong class="order-item-title">${escapeHtml(product.title || 'Embroidery Design')}</strong>
+                          <span class="order-item-meta">Format: ${escapeHtml(item.format)} | Code: ${escapeHtml(product.code || 'N/A')}</span>
                         </div>
-                        <span style="font-weight: 600; color: var(--navy);">${money(item.price)}</span>
+                        <span class="order-item-price">${money(item.price)}</span>
                       </div>
                     `;
                   }).join("")}
                 </div>
 
                 <!-- Order Action row -->
-                <div style="border-top: 1px dashed var(--border); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                  <div>
-                    <span style="color: var(--ink-soft); font-size: 12px;">Total Paid:</span>
-                    <strong style="color: var(--navy); font-size: 15px; margin-left: 4px;">${money(order.total)}</strong>
+                <div class="order-action-block">
+                  <div class="order-total-paid">
+                    <span>Total Paid:</span>
+                    <strong>${money(order.total)}</strong>
                   </div>
                   
-                  <div style="display: flex; gap: 10px;">
-                    <a href="#/track-order?ref=${order.reference_number}" class="button button-secondary" style="min-height: 38px; font-size: 12px; font-weight: 700; padding: 0 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                  <div class="order-action-btn-group">
+                    <a href="#/track-order?ref=${order.reference_number}" class="button button-secondary" style="min-height: 38px; font-size: 12px; font-weight: 700; padding: 0 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 4px;">
                       ${icon("compass", 13)} View Tracking
                     </a>
-                    <button type="button" class="button" onclick="reorderOrderItems('${orderItemsPayload}')" style="min-height: 38px; font-size: 12px; font-weight: 700; padding: 0 16px; background: var(--navy); color: #fff; border: none; cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px;">
+                    <button type="button" class="button button-primary" onclick="reorderOrderItems('${orderItemsPayload}')" style="min-height: 38px; font-size: 12px; font-weight: 700; padding: 0 16px; border: none; cursor: pointer; border-radius: 4px; display: inline-flex; align-items: center; gap: 6px;">
                       ${icon("rotate-ccw", 13)} Order Again
                     </button>
                   </div>
@@ -446,7 +413,7 @@ function renderOrdersTab() {
 function renderCustomTab() {
   return `
     <div style="display: grid; gap: 24px;">
-      <h2 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Custom Digitizing Requests</h2>
+      <h2>Custom Digitizing Requests</h2>
 
       ${userRequests.length === 0 ? `
         <div style="text-align: center; padding: 48px 0; color: var(--ink-soft); font-size: 14px;">
@@ -466,32 +433,32 @@ function renderCustomTab() {
             const artworkUrls = req.artworkAttachment ? req.artworkAttachment.split(", ").filter(Boolean) : [];
 
             return `
-              <div style="border: 1px solid var(--border); border-radius: 6px; background: #fff; padding: 20px; display: grid; gap: 16px;">
+              <div class="custom-request-card">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
                   <div>
-                    <span style="font-size: 11px; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; display: block;">Quote Reference</span>
+                    <span style="font-size: 11px; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; display: block; letter-spacing: 0.05em; margin-bottom: 2px;">Quote Reference</span>
                     <strong style="font-family: monospace; font-size: 14px; color: var(--navy);">${escapeHtml(req.referenceNumber)}</strong>
                   </div>
                   <div style="text-align: right;">
                     <span style="font-size: 12px; color: var(--ink-soft); display: block;">Requested on ${dateStr}</span>
-                    <span style="border-radius: 99px; font-size: 10px; font-weight: 700; padding: 2px 8px; text-transform: uppercase; background: #b7eb8f; color: #389e0d; display: inline-block; margin-top: 4px;">
+                    <span class="order-status-badge completed" style="margin-top: 4px;">
                       ${escapeHtml(req.status)}
                     </span>
                   </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; font-size: 13px; background: var(--surface); padding: 12px; border-radius: 4px; border: 1px solid var(--border);">
-                  <div>
-                    <span style="color: var(--ink-soft); display: block; font-size: 11px;">Application</span>
-                    <strong style="color: var(--navy);">${escapeHtml(req.projectType)}</strong>
+                <div class="custom-request-meta-grid">
+                  <div class="custom-request-meta-item">
+                    <span>Application</span>
+                    <strong>${escapeHtml(req.projectType)}</strong>
                   </div>
-                  <div>
-                    <span style="color: var(--ink-soft); display: block; font-size: 11px;">Payment State</span>
-                    <strong style="color: var(--navy); text-transform: uppercase;">${escapeHtml(req.paymentStatus)}</strong>
+                  <div class="custom-request-meta-item">
+                    <span>Payment State</span>
+                    <strong style="text-transform: uppercase;">${escapeHtml(req.paymentStatus)}</strong>
                   </div>
-                  <div>
-                    <span style="color: var(--ink-soft); display: block; font-size: 11px;">Quote Amount</span>
-                    <strong style="color: var(--navy);">${req.quoteAmount ? money(req.quoteAmount) : "Awaiting Quote"}</strong>
+                  <div class="custom-request-meta-item">
+                    <span>Quote Amount</span>
+                    <strong style="font-family: var(--font-serif); font-weight: 700; font-size: 16px;">${req.quoteAmount ? money(req.quoteAmount) : "Awaiting Quote"}</strong>
                   </div>
                 </div>
 
@@ -499,15 +466,15 @@ function renderCustomTab() {
                 ${artworkUrls.length > 0 ? `
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                     ${artworkUrls.map(url => `
-                      <div style="width: 50px; height: 50px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden;">
+                      <div style="width: 54px; height: 54px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.02);">
                         <img src="${escapeHtml(url)}" style="width:100%; height:100%; object-fit:cover;" />
                       </div>
                     `).join("")}
                   </div>
                 ` : ""}
 
-                <div style="display: flex; justify-content: flex-end; border-top: 1px dashed var(--border); padding-top: 14px;">
-                  <a href="#/track-order?ref=${req.referenceNumber}" class="button button-secondary" style="min-height: 38px; font-size: 12px; font-weight: 700; padding: 0 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                <div style="display: flex; justify-content: flex-end; border-top: 1px dashed var(--border); padding-top: 16px;">
+                  <a href="#/track-order?ref=${req.referenceNumber}" class="button button-secondary" style="min-height: 38px; font-size: 12px; font-weight: 700; padding: 0 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 4px;">
                     ${icon("compass", 13)} Track Progress
                   </a>
                 </div>
@@ -526,7 +493,7 @@ function renderSavedTab() {
 
   return `
     <div style="display: grid; gap: 24px;">
-      <h2 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Saved Designs</h2>
+      <h2>Saved Designs</h2>
 
       ${wishlistItems.length === 0 ? `
         <div style="text-align: center; padding: 48px 0; color: var(--ink-soft); font-size: 14px;">
@@ -536,24 +503,24 @@ function renderSavedTab() {
           </div>
         </div>
       ` : `
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px;">
           ${wishlistItems.map(prod => `
-            <div style="border: 1px solid var(--border); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; background: #fff; transition: border-color 0.2s;">
-              <a href="#/product/${prod.slug}" style="display: block; aspect-ratio: 1/1; position: relative;">
-                <img src="${escapeHtml(prod.image)}" alt="${escapeHtml(prod.title)}" style="width: 100%; height: 100%; object-fit: cover;" />
+            <div style="border: 1px solid var(--border); border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; background: #fff; transition: all 0.2s ease-in-out; box-shadow: 0 2px 8px rgba(0,0,0,0.015);" onmouseover="this.style.borderColor='rgba(200, 161, 90, 0.4)'; this.style.boxShadow='var(--shadow)'" onmouseout="this.style.borderColor='var(--border)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.015)'">
+              <a href="#/product/${prod.slug}" style="display: block; aspect-ratio: 1.02/1; position: relative; overflow: hidden; background: var(--surface);">
+                <img src="${escapeHtml(prod.image)}" alt="${escapeHtml(prod.title)}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1.0)'" />
               </a>
-              <div style="padding: 14px; display: grid; gap: 6px; flex: 1;">
+              <div style="padding: 16px; display: flex; flex-direction: column; gap: 6px; flex: 1;">
                 <strong style="color: var(--navy); font-size: 14px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                   ${escapeHtml(prod.title)}
                 </strong>
                 <span style="font-size: 12px; color: var(--ink-soft);">Code: ${escapeHtml(prod.code)}</span>
-                <span style="font-weight: 700; color: var(--navy); font-size: 14px; margin-top: 4px;">${money(prod.price)}</span>
+                <span style="font-weight: 700; color: var(--navy); font-size: 15px; margin-top: 4px; font-family: var(--font-serif);">${money(prod.price)}</span>
                 
-                <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px;">
-                  <button type="button" class="button button-primary" data-action="add-cart" data-id="${prod.id}" style="min-height: 32px; font-size: 11px; padding: 0 10px; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: auto; border-top: 1px solid var(--border); padding-top: 12px;">
+                  <button type="button" class="button button-primary" data-action="add-cart" data-id="${prod.id}" style="min-height: 34px; font-size: 11px; padding: 0 10px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 4px;">
                     ${icon("shopping-bag", 12)} Add to Cart
                   </button>
-                  <button type="button" class="button button-secondary" data-action="toggle-wishlist" data-id="${prod.id}" style="min-height: 32px; padding: 0 8px; display: flex; align-items: center; justify-content: center; color: #cf1322;" title="Remove">
+                  <button type="button" class="button button-secondary" data-action="toggle-wishlist" data-id="${prod.id}" style="min-height: 34px; padding: 0 10px; display: flex; align-items: center; justify-content: center; color: #cf1322; border-radius: 4px;" title="Remove">
                     ${icon("trash-2", 12)}
                   </button>
                 </div>
@@ -572,11 +539,11 @@ function renderProfileTab() {
     <div style="
       background: ${profileFormMsgType === 'success' ? '#f6ffed' : '#fff2e8'}; 
       border: 1px solid ${profileFormMsgType === 'success' ? '#b7eb8f' : '#ffbb96'};
-      border-radius: 4px; 
-      padding: 12px 16px; 
+      border-radius: 6px; 
+      padding: 14px 18px; 
       color: ${profileFormMsgType === 'success' ? '#389e0d' : '#d46b08'}; 
-      font-size: 13px; 
-      margin-bottom: 20px;
+      font-size: 13.5px; 
+      margin-bottom: 24px;
     ">
       ${escapeHtml(profileFormMsg)}
     </div>
@@ -584,66 +551,66 @@ function renderProfileTab() {
 
   return `
     <div style="display: grid; gap: 24px;">
-      <h2 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Profile Settings</h2>
+      <h2>Profile Settings</h2>
 
       ${alertHtml}
 
-      <form id="profileUpdateForm" style="display: grid; gap: 20px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-          <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
+      <form id="profileUpdateForm" class="account-form-grid">
+        <div class="account-form-row">
+          <label class="account-form-label">
             <span>Full Name</span>
-            <input type="text" name="name" value="${escapeHtml(currentUser.name)}" required style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+            <input type="text" name="name" class="account-form-input" value="${escapeHtml(currentUser.name)}" required />
           </label>
 
-          <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
+          <label class="account-form-label">
             <span>Phone Number</span>
-            <input type="text" name="phone" value="${escapeHtml(currentUser.phone || '')}" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+            <input type="text" name="phone" class="account-form-input" value="${escapeHtml(currentUser.phone || '')}" placeholder="+91 99999 99999" />
           </label>
         </div>
 
-        <div style="border-top: 1px dashed var(--border); padding-top: 16px; display: grid; gap: 16px;">
-          <h3 style="font-size: 14px; text-transform: uppercase; color: var(--navy); font-weight: 700; margin: 0;">Default Shipping Address</h3>
+        <div style="border-top: 1px dashed var(--border); padding-top: 20px; display: grid; gap: 18px;">
+          <h3 style="font-size: 14px; text-transform: uppercase; color: var(--navy); font-weight: 700; margin: 0; letter-spacing: 0.05em;">Default Shipping Address</h3>
           
-          <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
+          <label class="account-form-label">
             <span>Address Line 1</span>
-            <input type="text" name="addressLine1" value="${escapeHtml(currentUser.addressLine1 || '')}" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+            <input type="text" name="addressLine1" class="account-form-input" value="${escapeHtml(currentUser.addressLine1 || '')}" placeholder="Street address, company name" />
           </label>
 
-          <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
-            <span>Address Line 2</span>
-            <input type="text" name="addressLine2" value="${escapeHtml(currentUser.addressLine2 || '')}" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+          <label class="account-form-label">
+            <span>Address Line 2 (Optional)</span>
+            <input type="text" name="addressLine2" class="account-form-input" value="${escapeHtml(currentUser.addressLine2 || '')}" placeholder="Apartment, suite, unit, building, floor" />
           </label>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px;">
-            <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px;" class="account-form-row">
+            <label class="account-form-label">
               <span>City</span>
-              <input type="text" name="city" value="${escapeHtml(currentUser.city || '')}" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+              <input type="text" name="city" class="account-form-input" value="${escapeHtml(currentUser.city || '')}" />
             </label>
 
-            <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
+            <label class="account-form-label">
               <span>State / Region</span>
-              <input type="text" name="state" value="${escapeHtml(currentUser.state || '')}" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+              <input type="text" name="state" class="account-form-input" value="${escapeHtml(currentUser.state || '')}" />
             </label>
 
-            <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
+            <label class="account-form-label">
               <span>Country</span>
-              <input type="text" name="country" value="${escapeHtml(currentUser.country || '')}" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+              <input type="text" name="country" class="account-form-input" value="${escapeHtml(currentUser.country || '')}" />
             </label>
 
-            <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--navy);">
+            <label class="account-form-label">
               <span>Postal / Zip Code</span>
-              <input type="text" name="postalCode" value="${escapeHtml(currentUser.postalCode || '')}" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+              <input type="text" name="postalCode" class="account-form-input" value="${escapeHtml(currentUser.postalCode || '')}" />
             </label>
           </div>
         </div>
 
-        <div style="border-top: 1px dashed var(--border); padding-top: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="border-top: 1px dashed var(--border); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
           <!-- Forgot Password Trigger -->
-          <button type="button" id="triggerPasswordResetBtn" style="border: none; background: none; color: var(--gold); font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0;">
+          <button type="button" id="triggerPasswordResetBtn" style="border: none; background: none; color: var(--gold); font-size: 13.5px; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0;">
             Forgot Password? Send Reset Email
           </button>
 
-          <button type="submit" class="button button-primary" style="min-height: 44px; padding: 0 24px; font-size: 14px; font-weight: 700; border-radius: 4px; border: none; cursor: pointer;">
+          <button type="submit" class="button button-primary" style="min-height: 44px; padding: 0 28px; font-size: 14px; font-weight: 700; border-radius: 4px; border: none; cursor: pointer;">
             Save Profile Updates
           </button>
         </div>
@@ -665,6 +632,19 @@ export function initAccountDelegates() {
       }
     });
   });
+
+  // Copy Customer ID action
+  const copyBtn = document.querySelector("[data-action='copy-id']");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      const textToCopy = copyBtn.dataset.id;
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("Customer Account ID copied to clipboard!");
+      }).catch(err => {
+        console.error("Copy failed: ", err);
+      });
+    });
+  }
 
   // Logout button
   const logoutBtn = document.getElementById("accountLogoutBtn");
