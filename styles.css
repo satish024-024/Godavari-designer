@@ -4218,8 +4218,8 @@ select:focus-visible {
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100vh;
-  background: #0d0f14;
-  color: #e8e8ec;
+  background: var(--ivory);
+  color: var(--navy);
   font-family: var(--font-sans);
   position: relative;
 }
@@ -4228,20 +4228,20 @@ select:focus-visible {
 .admin-sidebar {
   display: flex;
   flex-direction: column;
-  background: #111318;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: #ffffff;
+  border-right: 1px solid var(--border);
   height: 100vh;
   position: sticky;
   top: 0;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.08) transparent;
+  scrollbar-color: rgba(17, 29, 66, 0.08) transparent;
   z-index: 200;
 }
 
 .admin-sidebar-header {
   padding: 28px 20px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid var(--border);
 }
 
 .admin-brand {
@@ -4266,7 +4266,7 @@ select:focus-visible {
   font-family: var(--font-serif);
   font-size: 17px;
   font-weight: 600;
-  color: #f0ece4;
+  color: var(--navy);
   letter-spacing: 0.04em;
 }
 
@@ -4299,7 +4299,7 @@ select:focus-visible {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.28);
+  color: rgba(17, 29, 66, 0.42);
   padding: 6px 10px 4px;
 }
 
@@ -4310,21 +4310,21 @@ select:focus-visible {
   padding: 9px 12px;
   border-radius: 8px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.58);
+  color: rgba(17, 29, 66, 0.6);
   font-size: 14px;
-  font-weight: 450;
+  font-weight: 500;
   transition: all 0.18s ease;
 }
 
 .admin-nav-item:hover {
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.88);
+  background: rgba(17, 29, 66, 0.05);
+  color: var(--navy);
 }
 
 .admin-nav-item.active {
-  background: rgba(200, 161, 90, 0.14);
+  background: rgba(200, 161, 90, 0.12);
   color: var(--gold);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .admin-nav-icon {
@@ -4342,7 +4342,7 @@ select:focus-visible {
 /* ── Sidebar Footer ── */
 .admin-sidebar-footer {
   padding: 16px 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -4354,7 +4354,7 @@ select:focus-visible {
   gap: 10px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(17, 29, 66, 0.04);
 }
 
 .admin-user-avatar {
@@ -4380,8 +4380,8 @@ select:focus-visible {
 
 .admin-user-name {
   font-size: 13px;
-  font-weight: 500;
-  color: #f0ece4;
+  font-weight: 600;
+  color: var(--navy);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4389,7 +4389,7 @@ select:focus-visible {
 
 .admin-user-email {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.36);
+  color: rgba(17, 29, 66, 0.5);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4402,11 +4402,11 @@ select:focus-visible {
   width: 100%;
   padding: 9px 14px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(17, 29, 66, 0.08);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(17, 29, 66, 0.5);
   font-size: 13px;
-  font-weight: 450;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.18s ease;
 }
@@ -4436,8 +4436,8 @@ select:focus-visible {
   gap: 16px;
   padding: 0 28px;
   height: 60px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: #111318;
+  border-bottom: 1px solid var(--border);
+  background: #ffffff;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -4447,7 +4447,7 @@ select:focus-visible {
   display: none;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(17, 29, 66, 0.5);
   padding: 6px;
   border-radius: 6px;
   cursor: pointer;
@@ -4455,7 +4455,7 @@ select:focus-visible {
 }
 
 .admin-menu-toggle:hover {
-  color: #fff;
+  color: var(--navy);
 }
 
 .admin-menu-toggle svg {
@@ -4468,12 +4468,12 @@ select:focus-visible {
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(17, 29, 66, 0.4);
   flex: 1;
 }
 
 .admin-topbar-breadcrumb span:last-child {
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--navy);
 }
 
 .admin-topbar-breadcrumb svg {
@@ -4492,11 +4492,11 @@ select:focus-visible {
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(17, 29, 66, 0.45);
   text-decoration: none;
   padding: 6px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(17, 29, 66, 0.08);
   transition: all 0.18s ease;
 }
 
@@ -4525,13 +4525,13 @@ select:focus-visible {
   font-family: var(--font-serif);
   font-size: 32px;
   font-weight: 600;
-  color: #f0ece4;
+  color: var(--navy);
   margin: 0 0 6px;
 }
 
 .admin-module-subtitle {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(17, 29, 66, 0.45);
   margin: 0;
 }
 
@@ -4548,8 +4548,8 @@ select:focus-visible {
   align-items: center;
   gap: 16px;
   padding: 20px 22px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #ffffff;
+  border: 1px solid var(--border);
   border-radius: 12px;
   transition: border-color 0.2s;
 }
@@ -4583,14 +4583,14 @@ select:focus-visible {
 
 .admin-stat-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(17, 29, 66, 0.4);
   font-weight: 400;
 }
 
 .admin-stat-value {
   font-size: 24px;
   font-weight: 600;
-  color: #f0ece4;
+  color: var(--navy);
   line-height: 1;
 }
 
@@ -4619,18 +4619,18 @@ select:focus-visible {
 
 .admin-notice-body {
   font-size: 13.5px;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(17, 29, 66, 0.78);
   line-height: 1.6;
 }
 
 .admin-notice-body strong {
-  color: #f0ece4;
+  color: var(--navy);
   display: block;
   margin-bottom: 4px;
 }
 
 .admin-notice-body code {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(17, 29, 66, 0.05);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -4639,9 +4639,8 @@ select:focus-visible {
 
 /* ── Quick Links ── */
 .admin-quick-links-title {
-  font-size: 15px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(17, 29, 66, 0.5);
   margin: 0 0 16px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -4659,17 +4658,17 @@ select:focus-visible {
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: #ffffff;
+  border: 1px solid var(--border);
   border-radius: 10px;
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(17, 29, 66, 0.6);
   font-size: 13px;
   transition: all 0.2s ease;
 }
 
 .admin-quick-link:hover {
-  background: rgba(200, 161, 90, 0.08);
+  background: rgba(200, 161, 90, 0.06);
   border-color: rgba(200, 161, 90, 0.25);
   color: var(--gold);
 }
@@ -4678,7 +4677,7 @@ select:focus-visible {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(17, 29, 66, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4687,7 +4686,7 @@ select:focus-visible {
 }
 
 .admin-quick-link:hover .admin-quick-link-icon {
-  background: rgba(200, 161, 90, 0.15);
+  background: rgba(200, 161, 90, 0.1);
 }
 
 .admin-quick-link-icon svg {
@@ -4723,8 +4722,8 @@ select:focus-visible {
   justify-content: center;
   padding: 80px 40px;
   text-align: center;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px dashed var(--border);
   border-radius: 16px;
 }
 
@@ -4732,7 +4731,7 @@ select:focus-visible {
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  background: rgba(200, 161, 90, 0.1);
+  background: rgba(200, 161, 90, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4749,20 +4748,20 @@ select:focus-visible {
   font-family: var(--font-serif);
   font-size: 24px;
   font-weight: 600;
-  color: #f0ece4;
+  color: var(--navy);
   margin: 0 0 10px;
 }
 
 .admin-coming-soon p {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(17, 29, 66, 0.45);
   max-width: 440px;
   margin: 0 0 28px;
   line-height: 1.65;
 }
 
 .admin-coming-soon code {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(17, 29, 66, 0.06);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
@@ -4774,9 +4773,9 @@ select:focus-visible {
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(17, 29, 66, 0.12);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(17, 29, 66, 0.55);
   text-decoration: none;
   font-size: 13px;
   transition: all 0.18s ease;
@@ -4801,6 +4800,167 @@ select:focus-visible {
 main:has(.admin-shell) {
   padding-top: 0 !important;
   margin-top: 0 !important;
+}
+
+/* ── Admin Dashboard Form & Controls Reset ── */
+.admin-form {
+  display: grid;
+  gap: 20px;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  color: var(--navy);
+}
+
+.admin-form-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  color: var(--navy);
+  margin: 0 0 6px;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-form-label {
+  font-size: 13px;
+  color: rgba(17, 29, 66, 0.7);
+  font-weight: 600;
+}
+
+.admin-form-control {
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--navy);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.admin-form-control:focus {
+  border-color: var(--gold);
+}
+
+.admin-form-control:disabled {
+  background: var(--ivory);
+  color: rgba(17, 29, 66, 0.4);
+}
+
+/* ── Admin Table styles ── */
+.admin-table-wrapper {
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--navy);
+}
+
+.admin-table th {
+  padding: 16px;
+  background: var(--surface);
+  color: var(--navy);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-sans);
+}
+
+.admin-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover {
+  background: var(--ivory);
+}
+
+.admin-btn {
+  padding: 10px 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  border: none;
+}
+
+.admin-btn-primary {
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.admin-btn-primary:hover {
+  opacity: 0.9;
+}
+
+.admin-btn-secondary {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--navy);
+}
+
+.admin-btn-secondary:hover {
+  background: var(--ivory);
+  border-color: rgba(17, 29, 66, 0.2);
+}
+
+.admin-btn-danger {
+  background: rgba(239, 83, 80, 0.1);
+  border: 1px solid rgba(239, 83, 80, 0.25);
+  color: #ef5350;
+}
+
+.admin-btn-danger:hover {
+  background: rgba(239, 83, 80, 0.2);
+}
+
+.admin-pill {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.admin-pill-gold {
+  background: rgba(200, 161, 90, 0.12);
+  color: var(--gold);
+  border: 1px solid rgba(200, 161, 90, 0.2);
+}
+
+.admin-pill-success {
+  background: rgba(141, 155, 131, 0.12);
+  color: var(--sage);
+  border: 1px solid rgba(141, 155, 131, 0.2);
+}
+
+.admin-pill-danger {
+  background: rgba(239, 83, 80, 0.1);
+  color: #ef5350;
+  border: 1px solid rgba(239, 83, 80, 0.2);
 }
 
 /* ── Mobile Responsive ── */

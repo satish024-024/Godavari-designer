@@ -275,6 +275,15 @@ export const authService = {
     const user = await this.getCurrentUser();
     return user ? user.role === 'admin' : false;
   },
+  
+  async getProfiles() {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  },
 
   async signUp(email, password, name, phone, addressFields = {}) {
     const { data, error } = await supabase.auth.signUp({

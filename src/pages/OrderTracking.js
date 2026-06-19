@@ -1,4 +1,4 @@
-import { ui, triggerRender } from "../services/store.js";
+import { site, ui, triggerRender } from "../services/store.js";
 import { trackingService } from "../services/supabase.js";
 import { escapeHtml, attr, icon, money } from "../utils/helpers.js";
 
@@ -93,8 +93,9 @@ export function renderOrderTracking() {
 
     // Support URLs
     const whatsappMsg = `Hello Godavari Designer, I have a query regarding my reference: ${refCode}.`;
-    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(whatsappMsg)}`;
-    const emailUrl = `mailto:support@godavari.com?subject=${encodeURIComponent("Tracking Support - " + refCode)}&body=${encodeURIComponent("Hello,\n\nI need assistance with my reference " + refCode + ". Please help.\n\nThank you.")}`;
+    const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMsg)}`;
+    const emailUrl = `mailto:${site.brand?.contact?.email || 'support@godavari.com'}?subject=${encodeURIComponent("Tracking Support - " + refCode)}&body=${encodeURIComponent("Hello,\n\nI need assistance with my reference " + refCode + ". Please help.\n\nThank you.")}`;
 
     // Format created date
     let createdDateStr = "N/A";
@@ -437,7 +438,7 @@ export function renderOrderTracking() {
             <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="background: #25d366; color: #fff; border: none; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 4px; font-weight: 700; font-size: 14px;">
               ${icon("phone", 16)} WhatsApp Support
             </a>
-            <a href="tel:+919876543210" class="button button-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-weight: 700; font-size: 14px;">
+            <a href="tel:${(site.brand?.contact?.phone || "+919876543210").replace(/\s+/g, '')}" class="button button-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-weight: 700; font-size: 14px;">
               ${icon("phone", 16)} Call Support
             </a>
             <a href="${emailUrl}" class="button button-secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-weight: 700; font-size: 14px;">

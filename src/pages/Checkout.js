@@ -40,7 +40,8 @@ Customer Name: ${submissionResult.name}
 Phone: ${submissionResult.phone}
 Please confirm my order.`;
 
-    const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(whatsappMsg)}`;
+    const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMsg)}`;
 
     return `
       <section class="content-section success-section" style="padding: 120px 24px; background: var(--ivory); min-height: 80vh;">

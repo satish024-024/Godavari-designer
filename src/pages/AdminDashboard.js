@@ -1,7 +1,27 @@
-import { currentUser, logout, showToast, site, getCategories, triggerRender } from "../services/store.js";
+import {
+  currentUser,
+  logout,
+  showToast,
+  site,
+  getCategories,
+  triggerRender,
+  saveSite
+} from "../services/store.js";
 import { navigate } from "../services/router.js";
 import { icon, escapeHtml, attr, mediaUrl } from "../utils/helpers.js";
-import { productService } from "../services/supabase.js";
+import {
+  productService,
+  categoryService,
+  collectionService,
+  orderService,
+  customRequestService,
+  testimonialService,
+  faqService,
+  storageService,
+  authService,
+  supabase,
+  initSupabase
+} from "../services/supabase.js";
 
 // ==========================================
 // ADMIN NAVIGATION STRUCTURE
@@ -47,11 +67,200 @@ const adminNav = [
   }
 ];
 
-// Local Admin Catalog States
-let editingProduct = null;       // Product being edited
-let isAddingProduct = false;      // Flag for showing add product form
-let productSearchQuery = "";     // Filter products by search term
-let productFilterCategory = "";  // Filter products by category
+// ==========================================
+// LOCAL ADMIN STATE
+// ==========================================
+
+let stats = { orders: 0, requests: 0, products: 0, customers: 0 };
+let ordersList = [];
+let requestsList = [];
+let customersList = [];
+let categoriesList = [];
+let testimonialsList = [];
+let faqsList = [];
+let mediaList = [];
+
+let loadingStats = false;
+let loadingOrders = false;
+let loadingRequests = false;
+let loadingCustomers = false;
+let loadingCategories = false;
+let loadingTestimonials = false;
+let loadingFaqs = false;
+let loadingMedia = false;
+
+let dataLoaded = {
+  stats: false,
+  orders: false,
+  requests: false,
+  customers: false,
+  categories: false,
+  testimonials: false,
+  faqs: false,
+  media: false
+};
+
+// Search and Filtering states
+let productSearchQuery = "";
+let productFilterCategory = "";
+let orderSearchQuery = "";
+let requestSearchQuery = "";
+let customerSearchQuery = "";
+
+// Creation / editing states
+let editingProduct = null;
+let isAddingProduct = false;
+
+let editingCategory = null;
+let isAddingCategory = false;
+
+let editingCollection = null;
+let isAddingCollection = false;
+
+let editingTestimonial = null;
+let isAddingTestimonial = false;
+
+let editingFaq = null;
+let isAddingFaq = false;
+
+let selectedOrder = null;
+let selectedRequest = null;
+
+// ==========================================
+// ASYNC DATA LOADER
+// ==========================================
+
+function triggerDataLoad(section) {
+  initSupabase();
+
+  if (section === "dashboard" && !dataLoaded.stats && !loadingStats) {
+    loadingStats = true;
+    Promise.all([
+      orderService.getOrders().catch(() => []),
+      customRequestService.getRequests().catch(() => []),
+      productService.getProducts().catch(() => []),
+      authService.getProfiles().catch(() => [])
+    ]).then(([ords, reqs, prods, custs]) => {
+      stats.orders = ords.length;
+      stats.requests = reqs.length;
+      stats.products = prods.length;
+      stats.customers = custs.length;
+      ordersList = ords || [];
+      dataLoaded.stats = true;
+      loadingStats = false;
+      triggerRender();
+    }).catch(err => {
+      console.error(err);
+      loadingStats = false;
+    });
+  }
+
+  if (section === "orders" && !dataLoaded.orders && !loadingOrders) {
+    loadingOrders = true;
+    orderService.getOrders().then(data => {
+      ordersList = data || [];
+      dataLoaded.orders = true;
+      loadingOrders = false;
+      triggerRender();
+    }).catch(err => {
+      console.error(err);
+      loadingOrders = false;
+    });
+  }
+
+  if (section === "custom-requests" && !dataLoaded.requests && !loadingRequests) {
+    loadingRequests = true;
+    customRequestService.getRequests().then(data => {
+      requestsList = data || [];
+      dataLoaded.requests = true;
+      loadingRequests = false;
+      triggerRender();
+    }).catch(err => {
+      console.error(err);
+      loadingRequests = false;
+    });
+  }
+
+  if (section === "customers" && !dataLoaded.customers && !loadingCustomers) {
+    loadingCustomers = true;
+    authService.getProfiles().then(data => {
+      customersList = data || [];
+      dataLoaded.customers = true;
+      loadingCustomers = false;
+      triggerRender();
+    }).catch(err => {
+      console.error(err);
+      loadingCustomers = false;
+    });
+  }
+
+  if (section === "categories" && !dataLoaded.categories && !loadingCategories) {
+    loadingCategories = true;
+    categoryService.getCategories().then(data => {
+      categoriesList = data || [];
+      dataLoaded.categories = true;
+      loadingCategories = false;
+      triggerRender();
+    }).catch(err => {
+      console.error(err);
+      loadingCategories = false;
+    });
+  }
+
+  if (section === "testimonials" && !dataLoaded.testimonials && !loadingTestimonials) {
+    loadingTestimonials = true;
+    testimonialService.getTestimonials().then(data => {
+      testimonialsList = data || [];
+      dataLoaded.testimonials = true;
+      loadingTestimonials = false;
+      triggerRender();
+    }).catch(err => {
+      console.error(err);
+      loadingTestimonials = false;
+    });
+  }
+
+  if (section === "faqs" && !dataLoaded.faqs && !loadingFaqs) {
+    loadingFaqs = true;
+    faqService.getFaqs().then(data => {
+      faqsList = data || [];
+      dataLoaded.faqs = true;
+      loadingFaqs = false;
+      triggerRender();
+    }).catch(err => {
+      console.error(err);
+      loadingFaqs = false;
+    });
+  }
+
+  if (section === "media" && !dataLoaded.media && !loadingMedia) {
+    loadingMedia = true;
+    supabase.storage.from('media-library').list('images', { limit: 100, sortBy: { column: 'name', order: 'asc' } })
+      .then(({ data, error }) => {
+        if (error) throw error;
+        mediaList = data || [];
+        dataLoaded.media = true;
+        loadingMedia = false;
+        triggerRender();
+      }).catch(err => {
+        console.error("Error listing media:", err);
+        loadingMedia = false;
+      });
+  }
+}
+
+function resetLoadedState() {
+  dataLoaded = {
+    stats: false,
+    orders: false,
+    requests: false,
+    customers: false,
+    categories: false,
+    testimonials: false,
+    faqs: false,
+    media: false
+  };
+}
 
 // ==========================================
 // RENDER HELPERS
@@ -101,13 +310,13 @@ function renderSidebar(activeSection) {
         ${navItems}
       </nav>
       <div class="admin-sidebar-footer">
-        <a href="#/account" class="admin-user-card" title="View Profile Settings" style="text-decoration: none; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); color: inherit; transition: background 0.2s;" onmouseover="this.style.background='rgba(255, 255, 255, 0.08)'" onmouseout="this.style.background='rgba(255, 255, 255, 0.04)'">
+        <a href="#/account" class="admin-user-card" title="View Profile Settings" style="text-decoration: none;">
           <div class="admin-user-avatar">
             ${currentUser ? currentUser.name.charAt(0).toUpperCase() : "A"}
           </div>
           <div class="admin-user-info">
-            <span class="admin-user-name" style="display: block; font-size: 13px; font-weight: 600; color: #ffffff;">${currentUser ? currentUser.name : "Admin"}</span>
-            <span class="admin-user-email" style="display: block; font-size: 11px; color: rgba(255, 255, 255, 0.4); text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 140px;">${currentUser ? currentUser.email : ""}</span>
+            <span class="admin-user-name">${currentUser ? currentUser.name : "Admin"}</span>
+            <span class="admin-user-email">${currentUser ? currentUser.email : ""}</span>
           </div>
         </a>
         <button class="admin-logout-btn" id="adminLogoutBtn" aria-label="Logout">
@@ -124,11 +333,13 @@ function renderSidebar(activeSection) {
 // ==========================================
 
 function renderDashboardOverview() {
+  const recentOrders = ordersList.slice(0, 5);
+
   return `
     <div class="admin-module">
       <div class="admin-module-header">
         <h1 class="admin-module-title">Dashboard Overview</h1>
-        <p class="admin-module-subtitle">Welcome back, ${currentUser ? currentUser.name : "Admin"}. Here's a snapshot of your store.</p>
+        <p class="admin-module-subtitle">Welcome back, ${currentUser ? currentUser.name : "Admin"}. Here is a snapshot of your storefront.</p>
       </div>
 
       <div class="admin-stats-grid">
@@ -136,42 +347,78 @@ function renderDashboardOverview() {
           <div class="admin-stat-icon"><i data-lucide="shopping-bag"></i></div>
           <div class="admin-stat-body">
             <span class="admin-stat-label">Total Orders</span>
-            <span class="admin-stat-value" id="adminStatOrders">—</span>
+            <span class="admin-stat-value">${loadingStats ? "..." : stats.orders}</span>
           </div>
         </div>
         <div class="admin-stat-card">
           <div class="admin-stat-icon"><i data-lucide="pencil-ruler"></i></div>
           <div class="admin-stat-body">
             <span class="admin-stat-label">Custom Requests</span>
-            <span class="admin-stat-value" id="adminStatRequests">—</span>
+            <span class="admin-stat-value">${loadingStats ? "..." : stats.requests}</span>
           </div>
         </div>
         <div class="admin-stat-card">
           <div class="admin-stat-icon"><i data-lucide="package"></i></div>
           <div class="admin-stat-body">
             <span class="admin-stat-label">Products</span>
-            <span class="admin-stat-value" id="adminStatProducts">—</span>
+            <span class="admin-stat-value">${loadingStats ? "..." : stats.products}</span>
           </div>
         </div>
         <div class="admin-stat-card">
           <div class="admin-stat-icon"><i data-lucide="users"></i></div>
           <div class="admin-stat-body">
             <span class="admin-stat-label">Customers</span>
-            <span class="admin-stat-value" id="adminStatCustomers">—</span>
+            <span class="admin-stat-value">${loadingStats ? "..." : stats.customers}</span>
           </div>
         </div>
       </div>
 
-      <div class="admin-module-notice">
-        <div class="admin-notice-icon"><i data-lucide="info"></i></div>
-        <div class="admin-notice-body">
-          <strong>Admin CMS modules are coming in Phase 16.</strong>
-          This dashboard is fully secured — navigation and structure are in place.
-          All routes require <code>profiles.role = 'admin'</code> verified server-side.
+      <!-- Recent Orders Section -->
+      <div style="margin-top: 40px;">
+        <h2 style="font-family: var(--font-serif); font-size: 20px; color: var(--navy); margin: 0 0 16px;">Recent Orders</h2>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recentOrders.map(o => `
+                <tr>
+                  <td><strong>${escapeHtml(o.reference_number || o.id.slice(0, 8).toUpperCase())}</strong></td>
+                  <td>
+                    <div style="font-weight:600;">${escapeHtml(o.customer_name || "Guest")}</div>
+                    <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(o.customer_email || "")}</div>
+                  </td>
+                  <td>${new Date(o.created_at).toLocaleDateString()}</td>
+                  <td><strong>$${o.total}</strong></td>
+                  <td><span class="admin-pill ${o.payment_status === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${o.payment_status}</span></td>
+                  <td><span class="admin-pill admin-pill-gold">${o.status}</span></td>
+                  <td style="text-align: center;">
+                    <button class="admin-btn admin-btn-secondary view-order-details-btn" data-id="${o.id}">
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              `).join("")}
+              ${recentOrders.length === 0 ? `
+                <tr>
+                  <td colspan="7" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No orders placed recently.</td>
+                </tr>
+              ` : ""}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="admin-quick-links">
+      <div class="admin-quick-links" style="margin-top: 40px;">
         <h2 class="admin-quick-links-title">Quick Access</h2>
         <div class="admin-quick-links-grid">
           ${adminNav.flatMap(g => g.items).filter(i => i.id !== "dashboard").map(item => `
@@ -193,147 +440,143 @@ function renderProductsModule() {
   if (isAddingProduct || editingProduct) {
     const isEdit = !!editingProduct;
     const p = editingProduct || {};
-    
-    // Convert array values to comma-separated strings for easy input
     const tagsString = Array.isArray(p.tags) ? p.tags.join(", ") : "";
     const fabricsString = Array.isArray(p.recommendedFabrics) ? p.recommendedFabrics.join(", ") : "Silk, Organza, Velvet";
     
     return `
       <div class="admin-module">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
-          <button class="admin-product-cancel-btn" style="background: transparent; border: none; color: rgba(255,255,255,0.6); cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600;">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary admin-product-cancel-btn">
             ${icon("arrow-left", 16)} Back to Catalog
           </button>
         </div>
 
-        <form id="adminProductForm" style="display: grid; gap: 20px; grid-template-columns: 1fr 1fr; background: rgba(255, 255, 255, 0.02); padding: 30px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.06); color: #e8e8ec;">
+        <form id="adminProductForm" class="admin-form">
           <input type="hidden" name="id" value="${p.id || ''}">
           
           <div style="grid-column: span 2;">
-            <h2 style="font-family: var(--font-serif); font-size: 24px; color: #f0ece4; margin: 0 0 6px;">
-              ${isEdit ? 'Edit Product Design' : 'Add New Product Design'}
-            </h2>
-            <p style="font-size: 13px; color: rgba(255, 255, 255, 0.45); margin: 0;">Configure design attributes, file associations, and stitch technical parameters.</p>
+            <h2 class="admin-form-title">${isEdit ? 'Edit Product Design' : 'Add New Product Design'}</h2>
+            <p style="font-size: 13px; color: rgba(17,29,66,0.5); margin: 0;">Configure design attributes, file associations, and stitch technical parameters.</p>
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Design Title</label>
-            <input type="text" name="title" value="${isEdit ? escapeHtml(p.title) : ''}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;" placeholder="e.g. Royal Peony Floral">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Design Title</label>
+            <input type="text" name="title" value="${isEdit ? escapeHtml(p.title) : ''}" required class="admin-form-control" placeholder="e.g. Royal Peony Floral">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Design Code</label>
-            <input type="text" name="code" value="${isEdit ? escapeHtml(p.code) : ''}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;" placeholder="e.g. JC-1028">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Design Code</label>
+            <input type="text" name="code" value="${isEdit ? escapeHtml(p.code) : ''}" required class="admin-form-control" placeholder="e.g. JC-1028">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">URL Slug</label>
-            <input type="text" name="slug" value="${isEdit ? escapeHtml(p.slug) : ''}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;" placeholder="e.g. royal-peony-floral">
+          <div class="admin-form-group">
+            <label class="admin-form-label">URL Slug</label>
+            <input type="text" name="slug" value="${isEdit ? escapeHtml(p.slug) : ''}" required class="admin-form-control" placeholder="e.g. royal-peony-floral">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Price ($)</label>
-            <input type="number" name="price" value="${isEdit ? p.price : ''}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;" placeholder="e.g. 45">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Price ($)</label>
+            <input type="number" name="price" value="${isEdit ? p.price : ''}" required class="admin-form-control" placeholder="e.g. 45">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Category</label>
-            <select name="categoryId" required style="padding: 10px; background: #111318; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Category</label>
+            <select name="categoryId" required class="admin-form-control">
               <option value="">Select Category</option>
               ${cats.map(c => `<option value="${c.id}" ${isEdit && p.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
             </select>
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Collection (Optional)</label>
-            <select name="collectionId" style="padding: 10px; background: #111318; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Collection (Optional)</label>
+            <select name="collectionId" class="admin-form-control">
               <option value="">None</option>
               ${site.collections.map(col => `<option value="${col.id}" ${isEdit && p.collectionId === col.id ? 'selected' : ''}>${escapeHtml(col.title)}</option>`).join('')}
             </select>
           </div>
 
-          <div style="grid-column: span 2; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Description</label>
-            <textarea name="description" rows="3" style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none; resize: vertical;" placeholder="An exquisite design for...">${isEdit ? escapeHtml(p.description || "") : ''}</textarea>
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Description</label>
+            <textarea name="description" rows="3" class="admin-form-control" placeholder="An exquisite design for...">${isEdit ? escapeHtml(p.description || "") : ''}</textarea>
           </div>
 
-          <div style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 8px;">
+          <div style="grid-column: span 2; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px;">
             <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--gold); margin: 0 0 14px;">Stitch Specifications & Calculation Parameters</h3>
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Back Stitch Count</label>
-            <input type="number" id="formBackStitches" name="backStitchCount" value="${isEdit ? (p.backStitchCount || 0) : 0}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Back Stitch Count</label>
+            <input type="number" id="formBackStitches" name="backStitchCount" value="${isEdit ? (p.backStitchCount || 0) : 0}" required class="admin-form-control">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Hands Stitch Count</label>
-            <input type="number" id="formHandsStitches" name="handStitchCount" value="${isEdit ? (p.handStitchCount || 0) : 0}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Hands Stitch Count</label>
+            <input type="number" id="formHandsStitches" name="handStitchCount" value="${isEdit ? (p.handStitchCount || 0) : 0}" required class="admin-form-control">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.5);">Total Stitch Count (Auto-Summed)</label>
-            <input type="number" id="formTotalStitches" name="totalStitchCount" value="${isEdit ? (p.totalStitchCount || 0) : 0}" readonly style="padding: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; color: rgba(255,255,255,0.5); outline: none;" title="Auto-calculates as Back + Hands stitches">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Total Stitch Count (Auto-Summed)</label>
+            <input type="number" id="formTotalStitches" name="totalStitchCount" value="${isEdit ? (p.totalStitchCount || 0) : 0}" readonly class="admin-form-control" style="background:var(--ivory);" title="Auto-calculates as Back + Hands stitches">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Default Running Speed (RPM)</label>
-            <input type="number" id="formRpm" name="rpm" value="${isEdit ? (p.rpm || 850) : 850}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Default Running Speed (RPM)</label>
+            <input type="number" id="formRpm" name="rpm" value="${isEdit ? (p.rpm || 850) : 850}" required class="admin-form-control">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Thread Colors Count</label>
-            <input type="number" id="formColors" name="threadColors" value="${isEdit ? (p.threadColors || 0) : 0}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Thread Colors Count</label>
+            <input type="number" id="formColors" name="threadColors" value="${isEdit ? (p.threadColors || 0) : 0}" required class="admin-form-control">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.5);">Est. Stitch Time (Mins - Auto-Calculated)</label>
-            <input type="number" id="formEstTime" name="estimatedEmbroideryTime" value="${isEdit ? (p.estimatedEmbroideryTime || 0) : 0}" style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Est. Stitch Time (Mins - Auto-Calculated)</label>
+            <input type="number" id="formEstTime" name="estimatedEmbroideryTime" value="${isEdit ? (p.estimatedEmbroideryTime || 0) : 0}" class="admin-form-control">
           </div>
 
-          <div style="grid-column: span 2; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 16px; margin-top: 8px;">
+          <div style="grid-column: span 2; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px;">
             <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--gold); margin: 0 0 14px;">Media & Additional Parameters</h3>
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Primary Image Asset Code / URL</label>
-            <input type="text" name="image" value="${isEdit ? escapeHtml(p.image) : ''}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;" placeholder="e.g. media-product-peony">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Primary Image Asset Code / URL</label>
+            <input type="text" name="image" value="${isEdit ? escapeHtml(p.image) : ''}" required class="admin-form-control" placeholder="e.g. media-product-peony">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Difficulty Level</label>
-            <select name="difficultyLevel" style="padding: 10px; background: #111318; border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Difficulty Level</label>
+            <select name="difficultyLevel" class="admin-form-control">
               <option value="Easy" ${isEdit && p.difficultyLevel === 'Easy' ? 'selected' : ''}>Easy</option>
               <option value="Intermediate" ${isEdit && p.difficultyLevel === 'Intermediate' ? 'selected' : (!isEdit ? 'selected' : '')}>Intermediate</option>
               <option value="Advanced" ${isEdit && p.difficultyLevel === 'Advanced' ? 'selected' : ''}>Advanced</option>
             </select>
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Width (mm)</label>
-            <input type="number" name="width" value="${isEdit ? (p.width || 100) : 100}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Width (mm)</label>
+            <input type="number" name="width" value="${isEdit ? (p.width || 100) : 100}" required class="admin-form-control">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Height (mm)</label>
-            <input type="number" name="height" value="${isEdit ? (p.height || 100) : 100}" required style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Height (mm)</label>
+            <input type="number" name="height" value="${isEdit ? (p.height || 100) : 100}" required class="admin-form-control">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Tags (comma separated)</label>
-            <input type="text" name="tags" value="${tagsString}" style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;" placeholder="e.g. blouse, allover, floral">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Tags (comma separated)</label>
+            <input type="text" name="tags" value="${tagsString}" class="admin-form-control" placeholder="e.g. blouse, allover, floral">
           </div>
 
-          <div style="grid-column: span 1; display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 13px; color: rgba(255, 255, 255, 0.6);">Fabrics (comma separated)</label>
-            <input type="text" name="recommendedFabrics" value="${fabricsString}" style="padding: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; outline: none;" placeholder="e.g. Silk, Organza">
+          <div class="admin-form-group">
+            <label class="admin-form-label">Fabrics (comma separated)</label>
+            <input type="text" name="recommendedFabrics" value="${fabricsString}" class="admin-form-control" placeholder="e.g. Silk, Organza">
           </div>
 
-          <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 20px; margin-top: 10px;">
-            <button type="button" class="admin-product-cancel-btn" style="padding: 10px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s;">
+          <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 10px;">
+            <button type="button" class="admin-btn admin-btn-secondary admin-product-cancel-btn">
               Cancel
             </button>
-            <button type="submit" style="padding: 10px 24px; background: var(--gold); border: none; border-radius: 6px; color: var(--navy); cursor: pointer; font-size: 14px; font-weight: 700; transition: all 0.2s;">
+            <button type="submit" class="admin-btn admin-btn-primary">
               Save Design
             </button>
           </div>
@@ -342,15 +585,12 @@ function renderProductsModule() {
     `;
   }
   
-  // Filter products list based on search and category filters
   const filteredProducts = site.products.filter(p => {
     const titleMatch = (p.title || "").toLowerCase().includes(productSearchQuery.toLowerCase());
     const codeMatch = (p.code || "").toLowerCase().includes(productSearchQuery.toLowerCase());
     const tagMatch = p.tags && p.tags.some(t => t.toLowerCase().includes(productSearchQuery.toLowerCase()));
     const searchMatch = !productSearchQuery || titleMatch || codeMatch || tagMatch;
-    
     const categoryMatch = !productFilterCategory || p.categoryId === productFilterCategory;
-    
     return searchMatch && categoryMatch;
   });
   
@@ -361,7 +601,7 @@ function renderProductsModule() {
           <h1 class="admin-module-title">Products Catalog</h1>
           <p class="admin-module-subtitle">View, add, edit, and delete designs in your digital library.</p>
         </div>
-        <button id="adminAddProductBtn" style="padding: 10px 20px; background: var(--gold); border: none; border-radius: 6px; color: var(--navy); cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: opacity 0.2s;">
+        <button id="adminAddProductBtn" class="admin-btn admin-btn-primary">
           ${icon("plus", 16)} Add Design
         </button>
       </div>
@@ -373,11 +613,13 @@ function renderProductsModule() {
           id="adminProductSearch" 
           value="${escapeHtml(productSearchQuery)}" 
           placeholder="Search by title, code, or tags..." 
-          style="flex: 1; min-width: 250px; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #fff; outline: none; border-color: rgba(255,255,255,0.12);"
+          class="admin-form-control"
+          style="flex: 1; min-width: 250px;"
         >
         <select 
           id="adminProductCategoryFilter" 
-          style="padding: 10px; background: #111318; border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: #fff; outline: none; min-width: 180px;"
+          class="admin-form-control"
+          style="min-width: 180px;"
         >
           <option value="">All Categories</option>
           ${cats.map(c => `<option value="${c.id}" ${productFilterCategory === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
@@ -385,16 +627,16 @@ function renderProductsModule() {
       </div>
 
       <!-- Products Table -->
-      <div style="overflow-x: auto; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13.5px; color: rgba(255,255,255,0.7);">
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
           <thead>
-            <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255,255,255,0.02); color: #f0ece4; font-weight: 600;">
-              <th style="padding: 16px;">Product</th>
-              <th style="padding: 16px;">Category</th>
-              <th style="padding: 16px; text-align: right;">Price</th>
-              <th style="padding: 16px;">Stitches (Back / Hands)</th>
-              <th style="padding: 16px;">Emb. Details</th>
-              <th style="padding: 16px; text-align: center;">Actions</th>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th style="text-align: right;">Price</th>
+              <th>Stitches (Back / Hands)</th>
+              <th>Emb. Details</th>
+              <th style="text-align: center;">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -403,27 +645,27 @@ function renderProductsModule() {
               const formattedStitches = `${p.totalStitchCount ? p.totalStitchCount.toLocaleString() : '0'} (${(p.backStitchCount || 0).toLocaleString()} / ${(p.handStitchCount || 0).toLocaleString()})`;
               
               return `
-                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.04); transition: background 0.15s;" onmouseover="this.style.background='rgba(255,255,255,0.01)'" onmouseout="this.style.background='transparent'">
-                  <td style="padding: 16px; display: flex; align-items: center; gap: 12px;">
-                    <img src="${attr(mediaUrl(p.image))}" alt="" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(255,255,255,0.06);" />
+                <tr>
+                  <td style="display: flex; align-items: center; gap: 12px;">
+                    <img src="${attr(mediaUrl(p.image))}" alt="" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border);" />
                     <div>
-                      <div style="font-weight: 600; color: #f0ece4; font-size: 14px;">${escapeHtml(p.title)}</div>
+                      <div style="font-weight: 600; color: var(--navy); font-size: 14px;">${escapeHtml(p.title)}</div>
                       <div style="font-size: 11px; color: var(--gold); font-weight: 500; text-transform: uppercase; margin-top: 2px;">${escapeHtml(p.code)}</div>
                     </div>
                   </td>
-                  <td style="padding: 16px;">${escapeHtml(categoryName)}</td>
-                  <td style="padding: 16px; text-align: right; font-weight: 600; color: #fff;">$${p.price}</td>
-                  <td style="padding: 16px;">${formattedStitches}</td>
-                  <td style="padding: 16px;">
+                  <td>${escapeHtml(categoryName)}</td>
+                  <td style="text-align: right; font-weight: 600; color: var(--navy);">$${p.price}</td>
+                  <td>${formattedStitches}</td>
+                  <td>
                     <div>Speed: <strong>${p.rpm} RPM</strong></div>
-                    <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">Est: ${p.estimatedEmbroideryTime} mins</div>
+                    <div style="font-size: 11px; color: rgba(17,29,66,0.5); margin-top: 2px;">Est: ${p.estimatedEmbroideryTime} mins</div>
                   </td>
-                  <td style="padding: 16px; text-align: center;">
+                  <td style="text-align: center;">
                     <div style="display: flex; gap: 8px; justify-content: center;">
-                      <button class="admin-product-edit-btn" data-id="${p.id}" style="padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; transition: all 0.15s;" onmouseover="this.style.borderColor='var(--gold)'; this.style.color='var(--gold)';" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.color='#fff';">
+                      <button class="admin-btn admin-btn-secondary admin-product-edit-btn" data-id="${p.id}">
                         ${icon("edit-2", 12)} Edit
                       </button>
-                      <button class="admin-product-delete-btn" data-id="${p.id}" style="padding: 6px 12px; background: rgba(239, 83, 80, 0.1); border: 1px solid rgba(239, 83, 80, 0.25); border-radius: 4px; color: #ef5350; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; transition: all 0.15s;" onmouseover="this.style.background='rgba(239, 83, 80, 0.2)'" onmouseout="this.style.background='rgba(239, 83, 80, 0.1)'">
+                      <button class="admin-btn admin-btn-danger admin-product-delete-btn" data-id="${p.id}">
                         ${icon("trash-2", 12)} Delete
                       </button>
                     </div>
@@ -433,7 +675,7 @@ function renderProductsModule() {
             }).join('')}
             ${filteredProducts.length === 0 ? `
               <tr>
-                <td colspan="6" style="padding: 40px; text-align: center; color: rgba(255,255,255,0.45);">
+                <td colspan="6" style="padding: 40px; text-align: center; color: rgba(17,29,66,0.5);">
                   No products found matching your filters.
                 </td>
               </tr>
@@ -445,21 +687,1078 @@ function renderProductsModule() {
   `;
 }
 
-function renderComingSoon(title, description, iconName) {
+function renderCategoriesModule() {
+  if (isAddingCategory || editingCategory) {
+    const isEdit = !!editingCategory;
+    const c = editingCategory || {};
+    return `
+      <div class="admin-module">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary admin-category-cancel-btn">
+            ${icon("arrow-left", 16)} Back to Categories
+          </button>
+        </div>
+
+        <form id="adminCategoryForm" class="admin-form">
+          <input type="hidden" name="id" value="${c.id || ''}">
+          <div>
+            <h2 class="admin-form-title">${isEdit ? 'Edit Category' : 'Add New Category'}</h2>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Category Name</label>
+            <input type="text" name="name" value="${isEdit ? escapeHtml(c.name) : ''}" required class="admin-form-control" placeholder="e.g. Designer Blouses">
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Slug</label>
+            <input type="text" name="slug" value="${isEdit ? escapeHtml(c.slug) : ''}" required class="admin-form-control" placeholder="e.g. designer-blouses">
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Description</label>
+            <textarea name="description" rows="3" class="admin-form-control" placeholder="Describe the category...">${isEdit ? escapeHtml(c.description || "") : ''}</textarea>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Image Code / URL</label>
+            <input type="text" name="image" value="${isEdit ? escapeHtml(c.image || '') : ''}" class="admin-form-control" placeholder="e.g. media-collection-blouses">
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Display Order</label>
+            <input type="number" name="displayOrder" value="${isEdit ? c.displayOrder : 1}" class="admin-form-control">
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; gap: 8px;">
+            <input type="checkbox" id="catFeatured" name="featured" ${c.featured ? 'checked' : ''} style="width: 16px; height: 16px;">
+            <label for="catFeatured" class="admin-form-label" style="margin: 0; cursor: pointer;">Featured on Homepage</label>
+          </div>
+
+          <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <button type="button" class="admin-btn admin-btn-secondary admin-category-cancel-btn">Cancel</button>
+            <button type="submit" class="admin-btn admin-btn-primary">Save Category</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
   return `
     <div class="admin-module">
-      <div class="admin-module-header">
-        <h1 class="admin-module-title">${title}</h1>
-        <p class="admin-module-subtitle">${description}</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <h1 class="admin-module-title">Categories CMS</h1>
+          <p class="admin-module-subtitle">Manage storefront catalog categories.</p>
+        </div>
+        <button id="adminAddCategoryBtn" class="admin-btn admin-btn-primary">
+          ${icon("plus", 16)} Add Category
+        </button>
       </div>
-      <div class="admin-coming-soon">
-        <div class="admin-coming-soon-icon"><i data-lucide="${iconName}"></i></div>
-        <h3>Coming in Phase 16</h3>
-        <p>This module will be fully functional in the Admin CMS phase. The route is secured and protected — only admins with <code>profiles.role = 'admin'</code> can reach this page.</p>
-        <a href="#/admin-dashboard" class="admin-back-link">
-          <i data-lucide="arrow-left"></i>
-          Back to Dashboard
-        </a>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Slug</th>
+              <th>Display Order</th>
+              <th>Featured</th>
+              <th style="text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${categoriesList.map(c => `
+              <tr>
+                <td>
+                  <img src="${attr(mediaUrl(c.image))}" alt="" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border);" />
+                </td>
+                <td><strong>${escapeHtml(c.name)}</strong></td>
+                <td><code>${escapeHtml(c.slug)}</code></td>
+                <td>${c.displayOrder}</td>
+                <td><span class="admin-pill ${c.featured ? 'admin-pill-gold' : 'admin-pill-secondary'}">${c.featured ? 'Yes' : 'No'}</span></td>
+                <td style="text-align: center;">
+                  <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button class="admin-btn admin-btn-secondary edit-category-btn" data-id="${c.id}">Edit</button>
+                    <button class="admin-btn admin-btn-danger delete-category-btn" data-id="${c.id}">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+            ${categoriesList.length === 0 ? `
+              <tr>
+                <td colspan="6" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No categories found.</td>
+              </tr>
+            ` : ""}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderCollectionsModule() {
+  if (isAddingCollection || editingCollection) {
+    const isEdit = !!editingCollection;
+    const col = editingCollection || {};
+    return `
+      <div class="admin-module">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary admin-collection-cancel-btn">
+            ${icon("arrow-left", 16)} Back to Collections
+          </button>
+        </div>
+
+        <form id="adminCollectionForm" class="admin-form">
+          <input type="hidden" name="id" value="${col.id || ''}">
+          <div>
+            <h2 class="admin-form-title">${isEdit ? 'Edit Collection' : 'Add New Collection'}</h2>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Collection Title</label>
+            <input type="text" name="title" value="${isEdit ? escapeHtml(col.title) : ''}" required class="admin-form-control" placeholder="e.g. Bridal Collection">
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Slug</label>
+            <input type="text" name="slug" value="${isEdit ? escapeHtml(col.slug) : ''}" required class="admin-form-control" placeholder="e.g. bridal">
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Description</label>
+            <textarea name="description" rows="3" class="admin-form-control" placeholder="Description...">${isEdit ? escapeHtml(col.description || "") : ''}</textarea>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Image Code / URL</label>
+            <input type="text" name="image" value="${isEdit ? escapeHtml(col.image || '') : ''}" class="admin-form-control" placeholder="e.g. media-collection-bridal">
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Display Order</label>
+            <input type="number" name="displayOrder" value="${isEdit ? col.displayOrder : 1}" class="admin-form-control">
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; gap: 8px;">
+            <input type="checkbox" id="colFeatured" name="featured" ${col.featured ? 'checked' : ''} style="width: 16px; height: 16px;">
+            <label for="colFeatured" class="admin-form-label" style="margin: 0; cursor: pointer;">Featured Collection</label>
+          </div>
+
+          <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <button type="button" class="admin-btn admin-btn-secondary admin-collection-cancel-btn">Cancel</button>
+            <button type="submit" class="admin-btn admin-btn-primary">Save Collection</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="admin-module">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <h1 class="admin-module-title">Collections CMS</h1>
+          <p class="admin-module-subtitle">Curate homepage featured collections.</p>
+        </div>
+        <button id="adminAddCollectionBtn" class="admin-btn admin-btn-primary">
+          ${icon("plus", 16)} Add Collection
+        </button>
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Title</th>
+              <th>Slug</th>
+              <th>Display Order</th>
+              <th>Featured</th>
+              <th style="text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${site.collections.map(col => `
+              <tr>
+                <td>
+                  <img src="${attr(mediaUrl(col.image))}" alt="" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover; border: 1px solid var(--border);" />
+                </td>
+                <td><strong>${escapeHtml(col.title)}</strong></td>
+                <td><code>${escapeHtml(col.slug)}</code></td>
+                <td>${col.displayOrder}</td>
+                <td><span class="admin-pill ${col.featured ? 'admin-pill-gold' : 'admin-pill-secondary'}">${col.featured ? 'Yes' : 'No'}</span></td>
+                <td style="text-align: center;">
+                  <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button class="admin-btn admin-btn-secondary edit-collection-btn" data-id="${col.id}">Edit</button>
+                    <button class="admin-btn admin-btn-danger delete-collection-btn" data-id="${col.id}">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderOrdersModule() {
+  if (selectedOrder) {
+    const o = selectedOrder;
+    const date = new Date(o.created_at).toLocaleString();
+    const items = o.order_items || [];
+    
+    return `
+      <div class="admin-module">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary close-order-details-btn">
+            ${icon("arrow-left", 16)} Back to Orders
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+          <div class="admin-form" style="padding: 24px;">
+            <h2 class="admin-form-title">Order Details</h2>
+            <div style="font-size: 13px; color:rgba(17,29,66,0.5); border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:12px;">
+              Order Ref: <strong>${escapeHtml(o.reference_number || o.id.slice(0, 8).toUpperCase())}</strong><br>
+              Placed on: ${date}
+            </div>
+
+            <div style="display: grid; gap: 16px;">
+              <div>
+                <h3 style="font-size:14px; margin: 0 0 8px; font-weight:700;">Customer Information</h3>
+                <p style="margin: 0; font-size:13.5px; line-height:1.6;">
+                  Name: <strong>${escapeHtml(o.customer_name || "Guest")}</strong><br>
+                  Email: ${escapeHtml(o.customer_email || "N/A")}<br>
+                  Phone: ${escapeHtml(o.customer_phone || "N/A")}<br>
+                  Shipping Address: ${escapeHtml(o.shipping_address || "N/A")}
+                </p>
+              </div>
+
+              <div style="border-top:1px solid var(--border); padding-top:16px;">
+                <h3 style="font-size:14px; margin: 0 0 12px; font-weight:700;">Order Items</h3>
+                <div style="display: grid; gap: 12px;">
+                  ${items.map(item => {
+                    const prod = item.products || {};
+                    return `
+                      <div style="display: flex; justify-content: space-between; align-items: center; background:var(--ivory); padding: 12px; border-radius: 6px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                          <img src="${attr(mediaUrl(prod.image))}" style="width: 44px; height: 44px; border-radius: 4px; object-fit:cover;" />
+                          <div>
+                            <div style="font-weight:600; font-size:13.5px;">${escapeHtml(prod.title || "Deleted Product")}</div>
+                            <div style="font-size:11px; color:var(--gold); font-weight:600; text-transform:uppercase;">Code: ${escapeHtml(prod.code || "N/A")}</div>
+                            <div style="font-size:11px; color:rgba(17,29,66,0.5);">Format: <strong>${escapeHtml(item.format || "DST")}</strong></div>
+                          </div>
+                        </div>
+                        <div style="font-weight:700; font-size:14px;">$${item.price}</div>
+                      </div>
+                    `;
+                  }).join("")}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Status Side Panel -->
+          <form id="orderStatusForm" class="admin-form" style="padding:24px;">
+            <input type="hidden" name="id" value="${o.id}">
+            <h3 style="font-family:var(--font-serif); font-size:18px; margin: 0 0 16px;">Fulfillment & Payment</h3>
+            
+            <div class="admin-form-group">
+              <label class="admin-form-label">Order Status</label>
+              <select name="status" class="admin-form-control">
+                <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
+                <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Completed</option>
+                <option value="cancelled" ${o.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+              </select>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Payment Status</label>
+              <select name="paymentStatus" class="admin-form-control">
+                <option value="pending" ${o.payment_status === 'pending' ? 'selected' : ''}>Pending</option>
+                <option value="paid" ${o.payment_status === 'paid' ? 'selected' : ''}>Paid</option>
+                <option value="refunded" ${o.payment_status === 'refunded' ? 'selected' : ''}>Refunded</option>
+              </select>
+            </div>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="admin-btn admin-btn-primary" style="width:100%; justify-content:center;">
+                Save Status Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
+  const filteredOrders = ordersList.filter(o => {
+    const term = orderSearchQuery.toLowerCase();
+    const refMatch = (o.reference_number || "").toLowerCase().includes(term);
+    const idMatch = o.id.toLowerCase().includes(term);
+    const nameMatch = (o.customer_name || "").toLowerCase().includes(term);
+    const emailMatch = (o.customer_email || "").toLowerCase().includes(term);
+    return !orderSearchQuery || refMatch || idMatch || nameMatch || emailMatch;
+  });
+
+  return `
+    <div class="admin-module">
+      <div style="margin-bottom: 24px;">
+        <h1 class="admin-module-title">Orders Management</h1>
+        <p class="admin-module-subtitle">Fulfill customer design purchases and update commerce transactions.</p>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <input 
+          type="text" 
+          id="adminOrderSearch" 
+          value="${escapeHtml(orderSearchQuery)}" 
+          placeholder="Search by reference, name, email, or order ID..." 
+          class="admin-form-control"
+          style="width: 100%; max-width: 480px;"
+        >
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Total</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th style="text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredOrders.map(o => `
+              <tr>
+                <td><strong>${escapeHtml(o.reference_number || o.id.slice(0, 8).toUpperCase())}</strong></td>
+                <td>
+                  <div style="font-weight:600;">${escapeHtml(o.customer_name || "Guest")}</div>
+                  <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(o.customer_email || "")}</div>
+                </td>
+                <td>${new Date(o.created_at).toLocaleDateString()}</td>
+                <td><strong>$${o.total}</strong></td>
+                <td><span class="admin-pill ${o.payment_status === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${o.payment_status}</span></td>
+                <td><span class="admin-pill admin-pill-gold">${o.status}</span></td>
+                <td style="text-align: center;">
+                  <button class="admin-btn admin-btn-secondary view-order-details-btn" data-id="${o.id}">
+                    View Details
+                  </button>
+                </td>
+              </tr>
+            `).join("")}
+            ${filteredOrders.length === 0 ? `
+              <tr>
+                <td colspan="7" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No orders found.</td>
+              </tr>
+            ` : ""}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderCustomRequestsModule() {
+  if (selectedRequest) {
+    const r = selectedRequest;
+    const date = new Date(r.createdAt).toLocaleString();
+    
+    return `
+      <div class="admin-module">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary close-request-details-btn">
+            ${icon("arrow-left", 16)} Back to Requests
+          </button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start;">
+          <div class="admin-form" style="padding: 24px;">
+            <h2 class="admin-form-title">Custom Digitizing Request</h2>
+            <div style="font-size: 13px; color:rgba(17,29,66,0.5); border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:12px;">
+              Request Ref: <strong>${escapeHtml(r.referenceNumber || r.id.slice(0, 8).toUpperCase())}</strong><br>
+              Received on: ${date}
+            </div>
+
+            <div style="display: grid; gap: 16px;">
+              <div>
+                <h3 style="font-size:14px; margin: 0 0 8px; font-weight:700;">Customer Information</h3>
+                <p style="margin: 0; font-size:13.5px; line-height:1.6;">
+                  Name: <strong>${escapeHtml(r.name)}</strong><br>
+                  Email: ${escapeHtml(r.email)}<br>
+                  Phone: ${escapeHtml(r.phone || "N/A")}
+                </p>
+              </div>
+
+              <div style="border-top:1px solid var(--border); padding-top:16px;">
+                <h3 style="font-size:14px; margin: 0 0 8px; font-weight:700;">Request Details</h3>
+                <p style="margin: 0; font-size:13.5px; line-height:1.6;">
+                  Project Type: <strong>${escapeHtml(r.projectType)}</strong><br>
+                  Customer Notes:<br>
+                  <em style="color:rgba(17,29,66,0.7); display:block; padding: 10px; background:var(--ivory); border-radius:6px; margin-top:6px;">"${escapeHtml(r.notes || 'No description provided')}"</em>
+                </p>
+              </div>
+
+              ${r.artworkAttachment ? `
+                <div style="border-top:1px solid var(--border); padding-top:16px;">
+                  <h3 style="font-size:14px; margin: 0 0 12px; font-weight:700;">Artwork Attachment</h3>
+                  <a href="${attr(mediaUrl(r.artworkAttachment))}" target="_blank" rel="noopener">
+                    <img src="${attr(mediaUrl(r.artworkAttachment))}" style="max-width: 100%; max-height: 280px; border-radius: 8px; border:1px solid var(--border); object-fit:contain;" />
+                  </a>
+                </div>
+              ` : ""}
+            </div>
+          </div>
+
+          <!-- Price Quote form -->
+          <form id="customRequestQuoteForm" class="admin-form" style="padding:24px;">
+            <input type="hidden" name="id" value="${r.id}">
+            <h3 style="font-family:var(--font-serif); font-size:18px; margin: 0 0 16px;">Quote Price & Status</h3>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Quoted Amount ($)</label>
+              <input type="number" name="quoteAmount" value="${r.quoteAmount || ''}" class="admin-form-control" placeholder="e.g. 150">
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Request Status</label>
+              <select name="status" class="admin-form-control">
+                <option value="Submitted" ${r.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
+                <option value="Quoted" ${r.status === 'Quoted' ? 'selected' : ''}>Quoted</option>
+                <option value="Paid" ${r.status === 'Paid' ? 'selected' : ''}>Paid</option>
+                <option value="In Progress" ${r.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                <option value="Completed" ${r.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                <option value="Cancelled" ${r.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+              </select>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Payment Status</label>
+              <select name="paymentStatus" class="admin-form-control">
+                <option value="unpaid" ${r.paymentStatus === 'unpaid' ? 'selected' : ''}>Unpaid</option>
+                <option value="paid" ${r.paymentStatus === 'paid' ? 'selected' : ''}>Paid</option>
+              </select>
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Digitized File URL / Code (If Completed)</label>
+              <input type="text" name="digitizedFile" value="${escapeHtml(r.digitizedFile || '')}" class="admin-form-control" placeholder="e.g. digitized-designs/1234.pes">
+            </div>
+
+            <div class="admin-form-group">
+              <label class="admin-form-label">Admin Notes</label>
+              <textarea name="adminNotes" rows="3" class="admin-form-control" placeholder="Add private notes or instructions...">${escapeHtml(r.adminNotes || '')}</textarea>
+            </div>
+
+            <div style="margin-top:16px;">
+              <button type="submit" class="admin-btn admin-btn-primary" style="width:100%; justify-content:center;">
+                Update Request / Send Quote
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    `;
+  }
+
+  const filteredRequests = requestsList.filter(r => {
+    const term = requestSearchQuery.toLowerCase();
+    const refMatch = (r.referenceNumber || "").toLowerCase().includes(term);
+    const nameMatch = (r.name || "").toLowerCase().includes(term);
+    const emailMatch = (r.email || "").toLowerCase().includes(term);
+    return !requestSearchQuery || refMatch || nameMatch || emailMatch;
+  });
+
+  return `
+    <div class="admin-module">
+      <div style="margin-bottom: 24px;">
+        <h1 class="admin-module-title">Custom Digitizing Requests</h1>
+        <p class="admin-module-subtitle">Review designs uploaded by customers, quote prices, and deliver digitized stitch files.</p>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <input 
+          type="text" 
+          id="adminRequestSearch" 
+          value="${escapeHtml(requestSearchQuery)}" 
+          placeholder="Search by reference, name, or email..." 
+          class="admin-form-control"
+          style="width: 100%; max-width: 480px;"
+        >
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Customer</th>
+              <th>Project Type</th>
+              <th>Amount Quoted</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th style="text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredRequests.map(r => `
+              <tr>
+                <td><strong>${escapeHtml(r.referenceNumber || r.id.slice(0, 8).toUpperCase())}</strong></td>
+                <td>
+                  <div style="font-weight:600;">${escapeHtml(r.name)}</div>
+                  <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(r.email)}</div>
+                </td>
+                <td>${escapeHtml(r.projectType)}</td>
+                <td><strong>${r.quoteAmount ? `$${r.quoteAmount}` : "—"}</strong></td>
+                <td><span class="admin-pill ${r.paymentStatus === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${r.paymentStatus || 'unpaid'}</span></td>
+                <td><span class="admin-pill admin-pill-gold">${r.status}</span></td>
+                <td style="text-align: center;">
+                  <button class="admin-btn admin-btn-secondary view-request-details-btn" data-id="${r.id}">
+                    Review & Quote
+                  </button>
+                </td>
+              </tr>
+            `).join("")}
+            ${filteredRequests.length === 0 ? `
+              <tr>
+                <td colspan="7" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No requests found.</td>
+              </tr>
+            ` : ""}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderCustomersModule() {
+  const filteredCustomers = customersList.filter(c => {
+    const term = customerSearchQuery.toLowerCase();
+    const nameMatch = (c.name || "").toLowerCase().includes(term);
+    const emailMatch = (c.email || "").toLowerCase().includes(term);
+    const phoneMatch = (c.phone || "").toLowerCase().includes(term);
+    return !customerSearchQuery || nameMatch || emailMatch || phoneMatch;
+  });
+
+  return `
+    <div class="admin-module">
+      <div style="margin-bottom: 24px;">
+        <h1 class="admin-module-title">Customers Directory</h1>
+        <p class="admin-module-subtitle">Browse registered customer profiles, contact numbers, and billing registries.</p>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <input 
+          type="text" 
+          id="adminCustomerSearch" 
+          value="${escapeHtml(customerSearchQuery)}" 
+          placeholder="Search by name, email, or phone..." 
+          class="admin-form-control"
+          style="width: 100%; max-width: 480px;"
+        >
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Avatar</th>
+              <th>Customer Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Default Address</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filteredCustomers.map(c => `
+              <tr>
+                <td>
+                  <div class="admin-user-avatar" style="width:36px; height:36px; font-size:13px;">
+                    ${c.name ? c.name.charAt(0).toUpperCase() : "U"}
+                  </div>
+                </td>
+                <td><strong>${escapeHtml(c.name || "Customer")}</strong></td>
+                <td>${escapeHtml(c.email)}</td>
+                <td>${escapeHtml(c.phone || "—")}</td>
+                <td>
+                  ${c.address_line_1 ? `
+                    <div style="font-size:12px; line-height:1.4;">
+                      ${escapeHtml(c.address_line_1)} ${c.address_line_2 ? escapeHtml(c.address_line_2) : ""}<br>
+                      ${escapeHtml(c.city || "")}, ${escapeHtml(c.state || "")} ${escapeHtml(c.postal_code || "")}<br>
+                      ${escapeHtml(c.country || "")}
+                    </div>
+                  ` : "—"}
+                </td>
+                <td><span class="admin-pill ${c.role === 'admin' ? 'admin-pill-gold' : 'admin-pill-secondary'}">${c.role}</span></td>
+              </tr>
+            `).join("")}
+            ${filteredCustomers.length === 0 ? `
+              <tr>
+                <td colspan="6" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No customers registered yet.</td>
+              </tr>
+            ` : ""}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderContentModule() {
+  const b = site.brand || {};
+  const c = site.brand.contact || {};
+  const h = site.hero || {};
+  const ct = site.cta || {};
+  const f = site.footer || {};
+  
+  return `
+    <div class="admin-module">
+      <div style="margin-bottom: 24px;">
+        <h1 class="admin-module-title">Customize Storefront Content</h1>
+        <p class="admin-module-subtitle">Edit brand details, contact info (phone, email, address), homepage text, and footer parameters.</p>
+      </div>
+
+      <form id="adminSiteContentForm" class="admin-form" style="grid-template-columns: 1fr 1fr;">
+        
+        <!-- Section 1: Brand & Contact Info -->
+        <div style="grid-column: span 2; border-bottom:1px solid var(--border); padding-bottom:10px; margin-bottom:10px;">
+          <h2 style="font-family:var(--font-serif); font-size:20px; color:var(--navy); margin:0;">1. Brand & Contact Information</h2>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Brand Name</label>
+          <input type="text" name="brandName" value="${escapeHtml(b.name || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Brand Tagline</label>
+          <input type="text" name="brandTagline" value="${escapeHtml(b.tagline || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">Brand Descriptor</label>
+          <textarea name="brandDescriptor" rows="2" required class="admin-form-control">${escapeHtml(b.descriptor || '')}</textarea>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Contact Email Address</label>
+          <input type="email" name="contactEmail" value="${escapeHtml(c.email || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Contact Phone Number</label>
+          <input type="text" name="contactPhone" value="${escapeHtml(c.phone || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Instagram Handle</label>
+          <input type="text" name="contactInstagram" value="${escapeHtml(c.instagram || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Trust Bar Text</label>
+          <input type="text" name="brandTrustText" value="${escapeHtml(b.trustText || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Watch Story Button Label</label>
+          <input type="text" name="brandStoryLabel" value="${escapeHtml(b.storyLabel || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Quality Badge Title</label>
+          <input type="text" name="brandQualityTitle" value="${escapeHtml(b.qualityTitle || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">Quality Badge Description</label>
+          <input type="text" name="brandQualityText" value="${escapeHtml(b.qualityText || '')}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">Physical Address</label>
+          <input type="text" name="contactAddress" value="${escapeHtml(c.address || '')}" required class="admin-form-control">
+        </div>
+
+        <!-- Section 2: Hero Section -->
+        <div style="grid-column: span 2; border-bottom:1px solid var(--border); padding-top:20px; padding-bottom:10px; margin-bottom:10px;">
+          <h2 style="font-family:var(--font-serif); font-size:20px; color:var(--navy); margin:0;">2. Hero Header Block</h2>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Hero Eyebrow</label>
+          <input type="text" name="heroEyebrow" value="${escapeHtml(h.eyebrow || '')}" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Hero Heading Title</label>
+          <input type="text" name="heroHeading" value="${escapeHtml(h.heading || '')}" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">Hero Subheading</label>
+          <input type="text" name="heroSubheading" value="${escapeHtml(h.subheading || '')}" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Primary Button Text</label>
+          <input type="text" name="heroPrimaryButton" value="${escapeHtml(h.primaryButton || '')}" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Secondary Button Text</label>
+          <input type="text" name="heroSecondaryButton" value="${escapeHtml(h.secondaryButton || '')}" class="admin-form-control">
+        </div>
+
+        <!-- Section 3: Call To Action (CTA) -->
+        <div style="grid-column: span 2; border-bottom:1px solid var(--border); padding-top:20px; padding-bottom:10px; margin-bottom:10px;">
+          <h2 style="font-family:var(--font-serif); font-size:20px; color:var(--navy); margin:0;">3. Call To Action (CTA) Section</h2>
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">CTA Headline</label>
+          <input type="text" name="ctaHeadline" value="${escapeHtml(ct.headline || '')}" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">CTA Paragraph Text</label>
+          <textarea name="ctaText" rows="2" class="admin-form-control">${escapeHtml(ct.text || '')}</textarea>
+        </div>
+
+        <!-- Section 4: Footer -->
+        <div style="grid-column: span 2; border-bottom:1px solid var(--border); padding-top:20px; padding-bottom:10px; margin-bottom:10px;">
+          <h2 style="font-family:var(--font-serif); font-size:20px; color:var(--navy); margin:0;">4. Footer Parameters</h2>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Newsletter Title</label>
+          <input type="text" name="footerNewsletterTitle" value="${escapeHtml(f.newsletterTitle || '')}" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Newsletter Subtitle</label>
+          <input type="text" name="footerNewsletterText" value="${escapeHtml(f.newsletterText || '')}" class="admin-form-control">
+        </div>
+
+        <div style="grid-column: span 2; display: flex; justify-content: flex-end; padding-top: 20px; border-top:1px solid var(--border);">
+          <button type="submit" class="admin-btn admin-btn-primary" style="padding:12px 30px;">
+            Save & Publish Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+function renderTestimonialsModule() {
+  if (isAddingTestimonial || editingTestimonial) {
+    const isEdit = !!editingTestimonial;
+    const t = editingTestimonial || {};
+    
+    return `
+      <div class="admin-module">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary admin-testimonial-cancel-btn">
+            ${icon("arrow-left", 16)} Back to Testimonials
+          </button>
+        </div>
+
+        <form id="adminTestimonialForm" class="admin-form">
+          <input type="hidden" name="id" value="${t.id || ''}">
+          <div>
+            <h2 class="admin-form-title">${isEdit ? 'Edit Testimonial' : 'Add New Testimonial'}</h2>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Author Name</label>
+            <input type="text" name="name" value="${isEdit ? escapeHtml(t.name) : ''}" required class="admin-form-control" placeholder="e.g. Neha Mehta">
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Role / Location</label>
+            <input type="text" name="role" value="${isEdit ? escapeHtml(t.role) : ''}" required class="admin-form-control" placeholder="e.g. Boutique Owner, Mumbai">
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Review Quote</label>
+            <textarea name="quote" rows="3" required class="admin-form-control" placeholder="Quote...">${isEdit ? escapeHtml(t.quote) : ''}</textarea>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Rating (1 to 5 Stars)</label>
+            <input type="number" step="0.1" max="5.0" min="1.0" name="rating" value="${isEdit ? t.rating : 5.0}" required class="admin-form-control">
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Display Order</label>
+            <input type="number" name="displayOrder" value="${isEdit ? (t.displayOrder || t.display_order || 1) : 1}" class="admin-form-control">
+          </div>
+
+          <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <button type="button" class="admin-btn admin-btn-secondary admin-testimonial-cancel-btn">Cancel</button>
+            <button type="submit" class="admin-btn admin-btn-primary">Save Testimonial</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="admin-module">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <h1 class="admin-module-title">Customer Testimonials</h1>
+          <p class="admin-module-subtitle">Manage customer reviews displayed on the home page reviews wall.</p>
+        </div>
+        <button id="adminAddTestimonialBtn" class="admin-btn admin-btn-primary">
+          ${icon("plus", 16)} Add Testimonial
+        </button>
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Author</th>
+              <th>Role</th>
+              <th>Rating</th>
+              <th style="width:40%;">Quote</th>
+              <th>Order</th>
+              <th style="text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${testimonialsList.map(t => `
+              <tr>
+                <td><strong>${escapeHtml(t.name)}</strong></td>
+                <td>${escapeHtml(t.role)}</td>
+                <td><strong style="color:var(--gold);">${t.rating} ★</strong></td>
+                <td><em style="font-size:12px; line-height:1.4; display:block;">"${escapeHtml(t.quote.slice(0, 100))}${t.quote.length > 100 ? '...' : ''}"</em></td>
+                <td>${t.display_order || t.displayOrder || 1}</td>
+                <td style="text-align: center;">
+                  <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button class="admin-btn admin-btn-secondary edit-testimonial-btn" data-id="${t.id}">Edit</button>
+                    <button class="admin-btn admin-btn-danger delete-testimonial-btn" data-id="${t.id}">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+            ${testimonialsList.length === 0 ? `
+              <tr>
+                <td colspan="6" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No testimonials found.</td>
+              </tr>
+            ` : ""}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderFAQsModule() {
+  if (isAddingFaq || editingFaq) {
+    const isEdit = !!editingFaq;
+    const f = editingFaq || {};
+    
+    return `
+      <div class="admin-module">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary admin-faq-cancel-btn">
+            ${icon("arrow-left", 16)} Back to FAQs
+          </button>
+        </div>
+
+        <form id="adminFaqForm" class="admin-form">
+          <input type="hidden" name="id" value="${f.id || ''}">
+          <div>
+            <h2 class="admin-form-title">${isEdit ? 'Edit FAQ' : 'Add New FAQ'}</h2>
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Question</label>
+            <input type="text" name="question" value="${isEdit ? escapeHtml(f.question) : ''}" required class="admin-form-control" placeholder="e.g. What formats do you support?">
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Answer</label>
+            <textarea name="answer" rows="3" required class="admin-form-control" placeholder="Provide a detailed answer...">${isEdit ? escapeHtml(f.answer) : ''}</textarea>
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Category</label>
+            <input type="text" name="category" value="${isEdit ? escapeHtml(f.category) : 'General'}" required class="admin-form-control" placeholder="e.g. Formats, Orders, Shipping">
+          </div>
+
+          <div class="admin-form-group">
+            <label class="admin-form-label">Display Order</label>
+            <input type="number" name="displayOrder" value="${isEdit ? (f.displayOrder || f.display_order || 1) : 1}" class="admin-form-control">
+          </div>
+
+          <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px;">
+            <button type="button" class="admin-btn admin-btn-secondary admin-faq-cancel-btn">Cancel</button>
+            <button type="submit" class="admin-btn admin-btn-primary">Save FAQ</button>
+          </div>
+        </form>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="admin-module">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <h1 class="admin-module-title">FAQs CMS</h1>
+          <p class="admin-module-subtitle">Manage frequently asked questions categorized by section.</p>
+        </div>
+        <button id="adminAddFaqBtn" class="admin-btn admin-btn-primary">
+          ${icon("plus", 16)} Add FAQ
+        </button>
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Question</th>
+              <th style="width:40%;">Answer</th>
+              <th>Order</th>
+              <th style="text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${faqsList.map(f => `
+              <tr>
+                <td><span class="admin-pill admin-pill-gold">${escapeHtml(f.category)}</span></td>
+                <td><strong>${escapeHtml(f.question)}</strong></td>
+                <td><span style="font-size:12px; line-height:1.4; display:block;">${escapeHtml(f.answer.slice(0, 100))}${f.answer.length > 100 ? '...' : ''}</span></td>
+                <td>${f.display_order || f.displayOrder || 1}</td>
+                <td style="text-align: center;">
+                  <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button class="admin-btn admin-btn-secondary edit-faq-btn" data-id="${f.id}">Edit</button>
+                    <button class="admin-btn admin-btn-danger delete-faq-btn" data-id="${f.id}">Delete</button>
+                  </div>
+                </td>
+              </tr>
+            `).join("")}
+            ${faqsList.length === 0 ? `
+              <tr>
+                <td colspan="5" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No FAQs found.</td>
+              </tr>
+            ` : ""}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function renderMediaModule() {
+  return `
+    <div class="admin-module">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap:wrap; gap:16px;">
+        <div>
+          <h1 class="admin-module-title">Media Library</h1>
+          <p class="admin-module-subtitle">Upload, view, and retrieve public links for catalog assets.</p>
+        </div>
+        <form id="adminMediaUploadForm" style="display:flex; gap:10px; align-items:center;">
+          <input type="file" id="mediaUploadInput" required class="admin-form-control" style="padding:6px; max-width:240px;" accept="image/*">
+          <button type="submit" class="admin-btn admin-btn-primary">
+            ${icon("upload-cloud", 16)} Upload Image
+          </button>
+        </form>
+      </div>
+
+      <!-- Media Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;">
+        ${mediaList.map(item => {
+          const publicUrl = supabase.storage.from('media-library').getPublicUrl('images/' + item.name).data.publicUrl;
+          return `
+            <div style="background:#ffffff; border:1px solid var(--border); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+              <div style="height:120px; border-radius:6px; overflow:hidden; background:var(--ivory); border:1px solid var(--border); display:grid; place-items:center;">
+                <img src="${attr(publicUrl)}" style="max-width:100%; max-height:100%; object-fit:contain;" />
+              </div>
+              <div style="font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--navy);" title="${escapeHtml(item.name)}">
+                ${escapeHtml(item.name)}
+              </div>
+              <div style="font-size:10px; color:rgba(17,29,66,0.5);">
+                ${(item.metadata?.size / 1024).toFixed(1)} KB
+              </div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button class="admin-btn admin-btn-secondary copy-media-url-btn" data-url="${attr(publicUrl)}" style="padding:6px; font-size:11px; flex:1; justify-content:center;">
+                  Copy URL
+                </button>
+                <button class="admin-btn admin-btn-danger delete-media-btn" data-name="${attr(item.name)}" style="padding:6px; font-size:11px; justify-content:center;">
+                  ${icon("trash-2", 12)}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+        ${mediaList.length === 0 ? `
+          <div style="grid-column: 1 / -1; padding: 60px; text-align: center; color: rgba(17,29,66,0.5); border: 1px dashed var(--border); border-radius:12px;">
+            No media library assets uploaded yet.
+          </div>
+        ` : ""}
+      </div>
+    </div>
+  `;
+}
+
+function renderSettingsModule() {
+  return `
+    <div class="admin-module">
+      <div style="margin-bottom: 24px;">
+        <h1 class="admin-module-title">System Settings</h1>
+        <p class="admin-module-subtitle">Manage backups, reset store data, and configure global variables.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        <!-- Backup Section -->
+        <div class="admin-form" style="padding: 24px; gap:12px;">
+          <h3 style="font-family:var(--font-serif); font-size:18px; margin:0 0 4px;">Store Backups</h3>
+          <p style="font-size:12.5px; color:rgba(17,29,66,0.6); margin:0;">Download the entire storefront configuration, text content, and products into a JSON file, or restore a previous backup.</p>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+            <button id="downloadBackupBtn" class="admin-btn admin-btn-secondary" style="justify-content:center;">
+              ${icon("download", 16)} Download Backup JSON
+            </button>
+            <div style="border-top:1px dashed var(--border); padding-top:10px; margin-top:4px;">
+              <label class="admin-form-label" style="display:block; margin-bottom:6px;">Restore Backup File</label>
+              <input type="file" id="restoreBackupInput" class="admin-form-control" style="padding:6px; width:100%;" accept=".json">
+            </div>
+          </div>
+        </div>
+
+        <!-- System Reset Section -->
+        <div class="admin-form" style="padding: 24px; gap:12px;">
+          <h3 style="font-family:var(--font-serif); font-size:18px; margin:0 0 4px; color:#ef5350;">System Recovery</h3>
+          <p style="font-size:12.5px; color:rgba(17,29,66,0.6); margin:0;">Warning: Resetting to defaults will erase all custom settings modifications and restore default storefront parameters.</p>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px; justify-content:flex-end; flex:1;">
+            <button id="systemResetBtn" class="admin-btn admin-btn-danger" style="justify-content:center; width:100%;">
+              ${icon("alert-triangle", 16)} Reset System to Defaults
+            </button>
+          </div>
+        </div>
+
+        <!-- Sync Diagnostics -->
+        <div class="admin-form" style="padding: 24px; gap:12px;">
+          <h3 style="font-family:var(--font-serif); font-size:18px; margin:0 0 4px;">Sync Diagnostics</h3>
+          <p style="font-size:12.5px; color:rgba(17,29,66,0.6); margin:0;">Perform manual database synchronization between client state cache and Cloud Supabase tables.</p>
+          <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px; justify-content:flex-end; flex:1;">
+            <button id="manualSyncBtn" class="admin-btn admin-btn-primary" style="justify-content:center; width:100%;">
+              ${icon("refresh-cw", 16)} Sync Database Now
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -469,20 +1768,21 @@ function renderModule(section) {
   const moduleMap = {
     "dashboard": () => renderDashboardOverview(),
     "products": () => renderProductsModule(),
-    "categories": () => renderComingSoon("Categories", "Organize designs into categories.", "tag"),
-    "collections": () => renderComingSoon("Collections", "Curate featured design collections.", "layers"),
-    "orders": () => renderComingSoon("Orders", "View and manage customer orders.", "shopping-bag"),
-    "custom-requests": () => renderComingSoon("Custom Requests", "Review digitizing requests from customers.", "pencil-ruler"),
-    "customers": () => renderComingSoon("Customers", "Browse and manage customer accounts.", "users"),
-    "content": () => renderComingSoon("Site Content", "Edit hero text, CTA sections, and brand copy.", "file-text"),
-    "testimonials": () => renderComingSoon("Testimonials", "Manage customer testimonials displayed on the home page.", "message-square"),
-    "faqs": () => renderComingSoon("FAQs", "Add and update frequently asked questions.", "help-circle"),
-    "media": () => renderComingSoon("Media Library", "Upload and manage images and design files.", "image"),
-    "settings": () => renderComingSoon("Settings", "Configure store-wide settings and preferences.", "settings")
+    "categories": () => renderComingSoon("Categories", "Organize designs into categories.", "tag"), // Fallback if needed, but we implemented categories!
+    "categories": () => renderCategoriesModule(),
+    "collections": () => renderCollectionsModule(),
+    "orders": () => renderOrdersModule(),
+    "custom-requests": () => renderCustomRequestsModule(),
+    "customers": () => renderCustomersModule(),
+    "content": () => renderContentModule(),
+    "testimonials": () => renderTestimonialsModule(),
+    "faqs": () => renderFAQsModule(),
+    "media": () => renderMediaModule(),
+    "settings": () => renderSettingsModule()
   };
 
   const renderer = moduleMap[section];
-  return renderer ? renderer() : renderComingSoon("Unknown Section", "This section is not recognized.", "alert-circle");
+  return renderer ? renderer() : renderDashboardOverview();
 }
 
 // ==========================================
@@ -491,6 +1791,7 @@ function renderModule(section) {
 
 export function renderAdminDashboard(params = {}) {
   const activeSection = getActiveSection(params);
+  triggerDataLoad(activeSection);
 
   return `
     <div class="admin-shell" id="adminShell">
@@ -503,7 +1804,7 @@ export function renderAdminDashboard(params = {}) {
           <div class="admin-topbar-breadcrumb">
             <span>Admin</span>
             <i data-lucide="chevron-right"></i>
-            <span>${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace("-", " ")}</span>
+            <span style="font-weight:600;">${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace("-", " ")}</span>
           </div>
           <div class="admin-topbar-actions">
             <a href="#/" class="admin-topbar-link" target="_blank" rel="noopener">
@@ -541,6 +1842,7 @@ export function initAdminDashboardDelegates() {
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async () => {
       await logout();
+      resetLoadedState();
       navigate("/");
     });
   }
@@ -553,8 +1855,37 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "adminProductSearch") {
       productSearchQuery = e.target.value;
       triggerRender();
-      // Keep focus on the search input after render
       const input = document.getElementById("adminProductSearch");
+      if (input) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }
+    
+    if (e.target.id === "adminOrderSearch") {
+      orderSearchQuery = e.target.value;
+      triggerRender();
+      const input = document.getElementById("adminOrderSearch");
+      if (input) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }
+
+    if (e.target.id === "adminRequestSearch") {
+      requestSearchQuery = e.target.value;
+      triggerRender();
+      const input = document.getElementById("adminRequestSearch");
+      if (input) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }
+
+    if (e.target.id === "adminCustomerSearch") {
+      customerSearchQuery = e.target.value;
+      triggerRender();
+      const input = document.getElementById("adminCustomerSearch");
       if (input) {
         input.focus();
         input.setSelectionRange(input.value.length, input.value.length);
@@ -585,11 +1916,38 @@ export function initAdminDashboardDelegates() {
       productFilterCategory = e.target.value;
       triggerRender();
     }
+    
+    // Settings Restore File Upload
+    if (e.target.id === "restoreBackupInput") {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const parsed = JSON.parse(event.target.result);
+            // Apply backup sections
+            const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
+            sections.forEach(sec => {
+              if (parsed[sec]) site[sec] = parsed[sec];
+            });
+            await saveSite();
+            showToast("Backup configuration restored successfully!");
+            triggerRender();
+          } catch (err) {
+            console.error("Backup restore failed:", err);
+            showToast("Failed to parse backup JSON file.");
+          }
+        };
+        reader.readAsText(file);
+      }
+    }
   });
 
   // Action Click handlers
   document.addEventListener("click", async (e) => {
-    // Add Design Clicked
+    // ------------------------------------------
+    // Products CMS Actions
+    // ------------------------------------------
     if (e.target.closest("#adminAddProductBtn")) {
       isAddingProduct = true;
       editingProduct = null;
@@ -597,7 +1955,6 @@ export function initAdminDashboardDelegates() {
       return;
     }
     
-    // Cancel Form Clicked
     if (e.target.closest(".admin-product-cancel-btn")) {
       isAddingProduct = false;
       editingProduct = null;
@@ -605,10 +1962,9 @@ export function initAdminDashboardDelegates() {
       return;
     }
     
-    // Edit Button Clicked
-    const editBtn = e.target.closest(".admin-product-edit-btn");
-    if (editBtn) {
-      const id = editBtn.dataset.id;
+    const editProdBtn = e.target.closest(".admin-product-edit-btn");
+    if (editProdBtn) {
+      const id = editProdBtn.dataset.id;
       const prod = site.products.find(p => p.id === id);
       if (prod) {
         editingProduct = prod;
@@ -618,18 +1974,15 @@ export function initAdminDashboardDelegates() {
       return;
     }
     
-    // Delete Button Clicked
-    const deleteBtn = e.target.closest(".admin-product-delete-btn");
-    if (deleteBtn) {
-      const id = deleteBtn.dataset.id;
+    const deleteProdBtn = e.target.closest(".admin-product-delete-btn");
+    if (deleteProdBtn) {
+      const id = deleteProdBtn.dataset.id;
       const prod = site.products.find(p => p.id === id);
       if (prod && confirm(`Are you sure you want to delete "${prod.title}"?`)) {
         try {
           await productService.deleteProduct(id);
           showToast("Design deleted successfully!");
-          
-          const freshProds = await productService.getProducts();
-          site.products = freshProds;
+          site.products = await productService.getProducts();
           triggerRender();
         } catch (err) {
           console.error("Error deleting product:", err);
@@ -638,13 +1991,308 @@ export function initAdminDashboardDelegates() {
       }
       return;
     }
+
+    // ------------------------------------------
+    // Categories CMS Actions
+    // ------------------------------------------
+    if (e.target.closest("#adminAddCategoryBtn")) {
+      isAddingCategory = true;
+      editingCategory = null;
+      triggerRender();
+      return;
+    }
+
+    if (e.target.closest(".admin-category-cancel-btn")) {
+      isAddingCategory = false;
+      editingCategory = null;
+      triggerRender();
+      return;
+    }
+
+    const editCatBtn = e.target.closest(".edit-category-btn");
+    if (editCatBtn) {
+      const id = editCatBtn.dataset.id;
+      const cat = categoriesList.find(c => c.id === id);
+      if (cat) {
+        editingCategory = cat;
+        isAddingCategory = false;
+        triggerRender();
+      }
+      return;
+    }
+
+    const deleteCatBtn = e.target.closest(".delete-category-btn");
+    if (deleteCatBtn) {
+      const id = deleteCatBtn.dataset.id;
+      const cat = categoriesList.find(c => c.id === id);
+      if (cat && confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
+        try {
+          await categoryService.deleteCategory(id);
+          showToast("Category deleted successfully!");
+          categoriesList = await categoryService.getCategories();
+          triggerRender();
+        } catch (err) {
+          showToast(`Failed to delete category: ${err.message}`);
+        }
+      }
+      return;
+    }
+
+    // ------------------------------------------
+    // Collections CMS Actions
+    // ------------------------------------------
+    if (e.target.closest("#adminAddCollectionBtn")) {
+      isAddingCollection = true;
+      editingCollection = null;
+      triggerRender();
+      return;
+    }
+
+    if (e.target.closest(".admin-collection-cancel-btn")) {
+      isAddingCollection = false;
+      editingCollection = null;
+      triggerRender();
+      return;
+    }
+
+    const editColBtn = e.target.closest(".edit-collection-btn");
+    if (editColBtn) {
+      const id = editColBtn.dataset.id;
+      const col = site.collections.find(c => c.id === id);
+      if (col) {
+        editingCollection = col;
+        isAddingCollection = false;
+        triggerRender();
+      }
+      return;
+    }
+
+    const deleteColBtn = e.target.closest(".delete-collection-btn");
+    if (deleteColBtn) {
+      const id = deleteColBtn.dataset.id;
+      const col = site.collections.find(c => c.id === id);
+      if (col && confirm(`Are you sure you want to delete collection "${col.title}"?`)) {
+        try {
+          await collectionService.deleteCollection(id);
+          showToast("Collection deleted successfully!");
+          site.collections = await collectionService.getCollections();
+          triggerRender();
+        } catch (err) {
+          showToast(`Failed to delete collection: ${err.message}`);
+        }
+      }
+      return;
+    }
+
+    // ------------------------------------------
+    // Order Actions
+    // ------------------------------------------
+    const viewOrderBtn = e.target.closest(".view-order-details-btn");
+    if (viewOrderBtn) {
+      const id = viewOrderBtn.dataset.id;
+      const order = ordersList.find(o => o.id === id);
+      if (order) {
+        selectedOrder = order;
+        triggerRender();
+      }
+      return;
+    }
+
+    if (e.target.closest(".close-order-details-btn")) {
+      selectedOrder = null;
+      triggerRender();
+      return;
+    }
+
+    // ------------------------------------------
+    // Custom Request Actions
+    // ------------------------------------------
+    const viewReqBtn = e.target.closest(".view-request-details-btn");
+    if (viewReqBtn) {
+      const id = viewReqBtn.dataset.id;
+      const req = requestsList.find(r => r.id === id);
+      if (req) {
+        selectedRequest = req;
+        triggerRender();
+      }
+      return;
+    }
+
+    if (e.target.closest(".close-request-details-btn")) {
+      selectedRequest = null;
+      triggerRender();
+      return;
+    }
+
+    // ------------------------------------------
+    // Testimonials CMS Actions
+    // ------------------------------------------
+    if (e.target.closest("#adminAddTestimonialBtn")) {
+      isAddingTestimonial = true;
+      editingTestimonial = null;
+      triggerRender();
+      return;
+    }
+
+    if (e.target.closest(".admin-testimonial-cancel-btn")) {
+      isAddingTestimonial = false;
+      editingTestimonial = null;
+      triggerRender();
+      return;
+    }
+
+    const editTestBtn = e.target.closest(".edit-testimonial-btn");
+    if (editTestBtn) {
+      const id = editTestBtn.dataset.id;
+      const test = testimonialsList.find(t => t.id === id);
+      if (test) {
+        editingTestimonial = test;
+        isAddingTestimonial = false;
+        triggerRender();
+      }
+      return;
+    }
+
+    const deleteTestBtn = e.target.closest(".delete-testimonial-btn");
+    if (deleteTestBtn) {
+      const id = deleteTestBtn.dataset.id;
+      if (confirm("Are you sure you want to delete this testimonial?")) {
+        try {
+          await testimonialService.deleteTestimonial(id);
+          showToast("Testimonial deleted successfully!");
+          testimonialsList = await testimonialService.getTestimonials();
+          triggerRender();
+        } catch (err) {
+          showToast(`Failed to delete: ${err.message}`);
+        }
+      }
+      return;
+    }
+
+    // ------------------------------------------
+    // FAQs CMS Actions
+    // ------------------------------------------
+    if (e.target.closest("#adminAddFaqBtn")) {
+      isAddingFaq = true;
+      editingFaq = null;
+      triggerRender();
+      return;
+    }
+
+    if (e.target.closest(".admin-faq-cancel-btn")) {
+      isAddingFaq = false;
+      editingFaq = null;
+      triggerRender();
+      return;
+    }
+
+    const editFaqBtn = e.target.closest(".edit-faq-btn");
+    if (editFaqBtn) {
+      const id = editFaqBtn.dataset.id;
+      const faq = faqsList.find(f => f.id === id);
+      if (faq) {
+        editingFaq = faq;
+        isAddingFaq = false;
+        triggerRender();
+      }
+      return;
+    }
+
+    const deleteFaqBtn = e.target.closest(".delete-faq-btn");
+    if (deleteFaqBtn) {
+      const id = deleteFaqBtn.dataset.id;
+      if (confirm("Are you sure you want to delete this FAQ?")) {
+        try {
+          await faqService.deleteFaq(id);
+          showToast("FAQ deleted successfully!");
+          faqsList = await faqService.getFaqs();
+          triggerRender();
+        } catch (err) {
+          showToast(`Failed to delete: ${err.message}`);
+        }
+      }
+      return;
+    }
+
+    // ------------------------------------------
+    // Media Library Actions
+    // ------------------------------------------
+    const copyUrlBtn = e.target.closest(".copy-media-url-btn");
+    if (copyUrlBtn) {
+      const url = copyUrlBtn.dataset.url;
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast("Public URL copied to clipboard!");
+      } catch (err) {
+        console.error("Clipboard copy failed:", err);
+        showToast(`Image URL: ${url}`);
+      }
+      return;
+    }
+
+    const deleteMediaBtn = e.target.closest(".delete-media-btn");
+    if (deleteMediaBtn) {
+      const filename = deleteMediaBtn.dataset.name;
+      if (confirm(`Are you sure you want to delete "${filename}"?`)) {
+        try {
+          await storageService.deleteMedia('media-library', `images/${filename}`);
+          showToast("Asset deleted from storage!");
+          // Reload list
+          const { data } = await supabase.storage.from('media-library').list('images');
+          mediaList = data || [];
+          triggerRender();
+        } catch (err) {
+          showToast(`Failed to delete: ${err.message}`);
+        }
+      }
+      return;
+    }
+
+    // ------------------------------------------
+    // System Settings Actions
+    // ------------------------------------------
+    if (e.target.closest("#downloadBackupBtn")) {
+      const blob = new Blob([JSON.stringify(site, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "godavari-designer-backup.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+      showToast("Backup JSON file download initiated!");
+      return;
+    }
+
+    if (e.target.closest("#manualSyncBtn")) {
+      const btn = document.getElementById("manualSyncBtn");
+      if (btn) btn.disabled = true;
+      showToast("Synchronizing storefront settings...");
+      try {
+        await saveSite();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+      return;
+    }
+
+    if (e.target.closest("#systemResetBtn")) {
+      if (confirm("DANGER: This resets all custom content settings back to the system defaults. Proceed?")) {
+        localStorage.clear();
+        showToast("System cache cleared. Reloading...");
+        setTimeout(() => window.location.reload(), 1500);
+      }
+      return;
+    }
   });
 
-  // Product Form Submission
+  // Form Submissions Delegator
   document.addEventListener("submit", async (e) => {
+    // ------------------------------------------
+    // Products CMS Form Submit
+    // ------------------------------------------
     if (e.target.id === "adminProductForm") {
       e.preventDefault();
-      
       const submitBtn = e.target.querySelector("button[type='submit']");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -713,19 +2361,273 @@ export function initAdminDashboardDelegates() {
           await productService.createProduct(prodPayload);
           showToast("Design added successfully!");
         }
-        
-        const freshProds = await productService.getProducts();
-        site.products = freshProds;
-        
+        site.products = await productService.getProducts();
         isAddingProduct = false;
         editingProduct = null;
         triggerRender();
       } catch (err) {
-        console.error("Error saving product:", err);
         showToast(`Failed to save: ${err.message}`);
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerText = "Save Design";
+        }
+      }
+    }
+
+    // ------------------------------------------
+    // Categories CMS Form Submit
+    // ------------------------------------------
+    if (e.target.id === "adminCategoryForm") {
+      e.preventDefault();
+      const form = e.target;
+      const id = form.id.value;
+      const payload = {
+        name: form.name.value,
+        slug: form.slug.value,
+        description: form.description.value,
+        image: form.image.value,
+        displayOrder: parseInt(form.displayOrder.value || 1),
+        featured: form.featured.checked
+      };
+
+      try {
+        if (id) {
+          await categoryService.updateCategory(id, payload);
+          showToast("Category updated!");
+        } else {
+          await categoryService.createCategory(payload);
+          showToast("Category added!");
+        }
+        categoriesList = await categoryService.getCategories();
+        isAddingCategory = false;
+        editingCategory = null;
+        triggerRender();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    // ------------------------------------------
+    // Collections CMS Form Submit
+    // ------------------------------------------
+    if (e.target.id === "adminCollectionForm") {
+      e.preventDefault();
+      const form = e.target;
+      const id = form.id.value;
+      const payload = {
+        title: form.title.value,
+        slug: form.slug.value,
+        description: form.description.value,
+        image: form.image.value,
+        displayOrder: parseInt(form.displayOrder.value || 1),
+        featured: form.featured.checked
+      };
+
+      try {
+        if (id) {
+          await collectionService.updateCollection(id, payload);
+          showToast("Collection updated!");
+        } else {
+          await collectionService.createCollection(payload);
+          showToast("Collection added!");
+        }
+        site.collections = await collectionService.getCollections();
+        isAddingCollection = false;
+        editingCollection = null;
+        triggerRender();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    // ------------------------------------------
+    // Order Status Update Submit
+    // ------------------------------------------
+    if (e.target.id === "orderStatusForm") {
+      e.preventDefault();
+      const form = e.target;
+      const id = form.id.value;
+      const status = form.status.value;
+      const paymentStatus = form.paymentStatus.value;
+
+      try {
+        await orderService.updateOrder(id, { status, paymentStatus });
+        showToast("Order status updated successfully!");
+        ordersList = await orderService.getOrders();
+        selectedOrder = ordersList.find(o => o.id === id);
+        triggerRender();
+      } catch (err) {
+        showToast(`Error updating order: ${err.message}`);
+      }
+    }
+
+    // ------------------------------------------
+    // Custom Request Quote Submit
+    // ------------------------------------------
+    if (e.target.id === "customRequestQuoteForm") {
+      e.preventDefault();
+      const form = e.target;
+      const id = form.id.value;
+      
+      const payload = {
+        quoteAmount: Number(form.quoteAmount.value || 0),
+        status: form.status.value,
+        paymentStatus: form.paymentStatus.value,
+        digitizedFile: form.digitizedFile.value || null,
+        adminNotes: form.adminNotes.value || null,
+        name: selectedRequest.name,
+        email: selectedRequest.email,
+        notes: selectedRequest.notes
+      };
+
+      try {
+        await customRequestService.updateRequest(id, payload);
+        showToast("Request updated successfully!");
+        requestsList = await customRequestService.getRequests();
+        selectedRequest = requestsList.find(r => r.id === id);
+        triggerRender();
+      } catch (err) {
+        showToast(`Error updating request: ${err.message}`);
+      }
+    }
+
+    // ------------------------------------------
+    // Site Content Form Submit
+    // ------------------------------------------
+    if (e.target.id === "adminSiteContentForm") {
+      e.preventDefault();
+      const f = e.target;
+      
+      // Update site state directly
+      site.brand.name = f.brandName.value;
+      site.brand.tagline = f.brandTagline.value;
+      site.brand.descriptor = f.brandDescriptor.value;
+      site.brand.contact.email = f.contactEmail.value;
+      site.brand.contact.phone = f.contactPhone.value;
+      site.brand.contact.address = f.contactAddress.value;
+      site.brand.contact.instagram = f.contactInstagram.value;
+
+      site.brand.trustText = f.brandTrustText.value;
+      site.brand.storyLabel = f.brandStoryLabel.value;
+      site.brand.qualityTitle = f.brandQualityTitle.value;
+      site.brand.qualityText = f.brandQualityText.value;
+
+      site.hero.eyebrow = f.heroEyebrow.value;
+      site.hero.heading = f.heroHeading.value;
+      site.hero.subheading = f.heroSubheading.value;
+      site.hero.primaryButton = f.heroPrimaryButton.value;
+      site.hero.secondaryButton = f.heroSecondaryButton.value;
+
+      site.cta.headline = f.ctaHeadline.value;
+      site.cta.text = f.ctaText.value;
+
+      site.footer.newsletterTitle = f.footerNewsletterTitle.value;
+      site.footer.newsletterText = f.footerNewsletterText.value;
+
+      try {
+        const submitBtn = f.querySelector("button[type='submit']");
+        if (submitBtn) submitBtn.disabled = true;
+        await saveSite();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        const submitBtn = f.querySelector("button[type='submit']");
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    }
+
+    // ------------------------------------------
+    // Testimonials Form Submit
+    // ------------------------------------------
+    if (e.target.id === "adminTestimonialForm") {
+      e.preventDefault();
+      const form = e.target;
+      const id = form.id.value;
+      const payload = {
+        name: form.name.value,
+        role: form.role.value,
+        quote: form.quote.value,
+        rating: Number(form.rating.value || 5.0),
+        displayOrder: parseInt(form.displayOrder.value || 1)
+      };
+
+      try {
+        if (id) {
+          await testimonialService.updateTestimonial(id, payload);
+          showToast("Testimonial updated!");
+        } else {
+          await testimonialService.createTestimonial(payload);
+          showToast("Testimonial added!");
+        }
+        testimonialsList = await testimonialService.getTestimonials();
+        isAddingTestimonial = false;
+        editingTestimonial = null;
+        triggerRender();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    // ------------------------------------------
+    // FAQs Form Submit
+    // ------------------------------------------
+    if (e.target.id === "adminFaqForm") {
+      e.preventDefault();
+      const form = e.target;
+      const id = form.id.value;
+      const payload = {
+        question: form.question.value,
+        answer: form.answer.value,
+        category: form.category.value,
+        displayOrder: parseInt(form.displayOrder.value || 1)
+      };
+
+      try {
+        if (id) {
+          await faqService.updateFaq(id, payload);
+          showToast("FAQ updated!");
+        } else {
+          await faqService.createFaq(payload);
+          showToast("FAQ added!");
+        }
+        faqsList = await faqService.getFaqs();
+        isAddingFaq = false;
+        editingFaq = null;
+        triggerRender();
+      } catch (err) {
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    // ------------------------------------------
+    // Media Library Upload Form Submit
+    // ------------------------------------------
+    if (e.target.id === "adminMediaUploadForm") {
+      e.preventDefault();
+      const fileInput = document.getElementById("mediaUploadInput");
+      const file = fileInput ? fileInput.files[0] : null;
+      if (!file) return;
+
+      const submitBtn = e.target.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Uploading...";
+      }
+
+      try {
+        const cleanName = file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_');
+        await storageService.uploadImage(file, cleanName);
+        showToast("Asset uploaded successfully!");
+        const { data } = await supabase.storage.from('media-library').list('images');
+        mediaList = data || [];
+        fileInput.value = "";
+        triggerRender();
+      } catch (err) {
+        showToast(`Upload failed: ${err.message}`);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Upload Image";
         }
       }
     }

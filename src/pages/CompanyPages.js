@@ -234,7 +234,7 @@ export function renderCareers() {
                   <span style="color: var(--ink-soft); font-size: 12px; font-weight: 600;">${escapeHtml(job.type)}</span>
                   <p style="margin: 8px 0 0 0; color: var(--ink-soft); font-size: 14px; line-height: 1.6;">${escapeHtml(job.desc)}</p>
                 </div>
-                <button type="button" onclick="showToast('Application portal is currently offline. Please email your CV to careers@godavaridesigner.com')" class="button button-secondary" style="min-height: 40px; padding: 0 20px; font-size: 12px; font-weight: 700; border-radius: 4px; cursor: pointer; text-decoration: none;">
+                <button type="button" onclick="showToast('Application portal is currently offline. Please email your CV to ${escapeHtml(site.brand?.contact?.email || 'careers@godavaridesigner.com')}')" class="button button-secondary" style="min-height: 40px; padding: 0 20px; font-size: 12px; font-weight: 700; border-radius: 4px; cursor: pointer; text-decoration: none;">
                   Apply Position
                 </button>
               </div>

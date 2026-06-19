@@ -117,7 +117,7 @@ export function renderReturnsRefunds() {
     <div style="display: grid; gap: 12px;">
       <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; margin: 0; color: var(--navy);">3. Contact Support</h3>
       <p style="margin: 0; color: var(--ink-soft); line-height: 1.7;">
-        If you experience technical issues downloading your files or importing them into your machine software, please contact our digitizers at **support@godavaridesigner.com** for immediate support.
+        If you experience technical issues downloading your files or importing them into your machine software, please contact our digitizers at **${escapeHtml(site.brand?.contact?.email || 'support@godavaridesigner.com')}** for immediate support.
       </p>
     </div>
   `;
