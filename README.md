@@ -9,6 +9,7 @@ The current work is a fully customizable static homepage prototype with a light 
 - `index.html` - Static website entry point.
 - `styles.css` - Complete luxury UI system, responsive layout, motion, glassmorphism, hover states, and editorial spacing.
 - `app.js` - Homepage content model, rendering logic, admin customization drawer, search, cart, wishlist, quote form, newsletter form, and local persistence.
+- `desktop-home.png` and `mobile-home.png` - Preview screenshots captured during the first visual QA pass.
 
 ## Customization
 
