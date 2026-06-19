@@ -112,7 +112,7 @@ export function renderProductDetail() {
         <div class="product-detail-layout">
           
           <!-- Left Column: Gallery Container -->
-          <div style="position: relative;">
+          <div class="product-gallery-column">
             <div class="detail-gallery-container">
               <!-- Thumbnails -->
               <div class="detail-gallery-thumbs">

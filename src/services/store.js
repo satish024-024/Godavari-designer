@@ -169,6 +169,16 @@ export async function initAuth() {
         currentUser = user;
         DB.setActiveUser(user);
         await processPendingCartItem();
+        // On OAuth sign-in, route to appropriate dashboard
+        if (event === 'SIGNED_IN') {
+          const currentHash = window.location.hash;
+          const isOnAuthPage = currentHash.includes('/auth') || currentHash === '#/' || currentHash === '';
+          if (isOnAuthPage && user) {
+            setTimeout(() => {
+              window.location.hash = user.role === 'admin' ? '#/admin-dashboard' : '#/account';
+            }, 100);
+          }
+        }
       } catch (e) {
         currentUser = null;
         DB.setActiveUser(null);
@@ -403,6 +413,12 @@ export async function login(email, password) {
     showToast(`Welcome back, ${user.name}`);
     await processPendingCartItem();
     triggerRender();
+    // Role-based redirect
+    if (user.role === 'admin') {
+      window.location.hash = '#/admin-dashboard';
+    } else {
+      window.location.hash = '#/account';
+    }
     return true;
   } catch (error) {
     showToast(error.message || "Invalid email or password");
@@ -418,6 +434,12 @@ export async function register(email, password, name, phone, addressFields = {})
     showToast(`Account created! Welcome, ${user.name}`);
     await processPendingCartItem();
     triggerRender();
+    // Role-based redirect
+    if (user.role === 'admin') {
+      window.location.hash = '#/admin-dashboard';
+    } else {
+      window.location.hash = '#/account';
+    }
     return true;
   } catch (error) {
     showToast(error.message || "Failed to create account");

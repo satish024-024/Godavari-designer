@@ -323,11 +323,21 @@ export const authService = {
       if (upsertErr) throw upsertErr;
     }
 
+    // Re-fetch the profile to get the actual DB-assigned role
+    // (the trigger may have set 'admin' for approved emails)
+    const { data: finalProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single();
+
+    const assignedRole = finalProfile?.role || 'customer';
+
     return {
       id: data.user.id,
       email: data.user.email,
       name,
-      role: 'customer',
+      role: assignedRole,
       phone,
       addressLine1: addressFields.addressLine1 || "",
       addressLine2: addressFields.addressLine2 || "",
@@ -336,6 +346,7 @@ export const authService = {
       country: addressFields.country || "",
       postalCode: addressFields.postalCode || ""
     };
+
   },
 
   async updateProfile(name, phone, addressFields = {}) {

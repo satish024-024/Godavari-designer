@@ -70,7 +70,7 @@ import { renderCart } from "./pages/Cart.js";
 import { renderWishlist } from "./pages/Wishlist.js";
 import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js";
 import { renderAuth, initAuthDelegates } from "./pages/Auth.js";
-import { renderAdminDashboard } from "./pages/AdminDashboard.js";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js";
 import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js";
 import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js";
 import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js";
@@ -125,7 +125,7 @@ function render() {
       pageContent = renderAuth();
       break;
     case "admin-dashboard":
-      pageContent = renderAdminDashboard();
+      pageContent = renderAdminDashboard(ui.pageParams);
       break;
     case "404":
       pageContent = renderNotFound();
@@ -134,7 +134,19 @@ function render() {
       pageContent = renderHome();
   }
 
-  // Shell Layout
+  // Admin dashboard gets its own full-screen shell — no site header/footer
+  if (ui.page === "admin-dashboard") {
+    app.innerHTML = `
+      <div class="admin-page-wrapper">
+        ${pageContent}
+        ${renderToast()}
+      </div>
+    `;
+    afterRender();
+    return;
+  }
+
+  // Shell Layout (all non-admin pages)
   app.innerHTML = `
     <div class="site-shell">
       ${renderHeader()}
@@ -155,6 +167,7 @@ function render() {
 
   afterRender();
 }
+
 
 function afterRender() {
   // Bind Lucide icons
@@ -198,6 +211,11 @@ function afterRender() {
     initAuthDelegates();
   }
 
+  // Initialize Admin Dashboard events if active page
+  if (ui.page === "admin-dashboard") {
+    initAdminDashboardDelegates();
+  }
+
   // Initialize NotFound events if active page
   if (ui.page === "404") {
     if (!notFoundAnalyticsEmitted) {
@@ -208,14 +226,14 @@ function afterRender() {
     notFoundAnalyticsEmitted = false;
   }
 
-  // Focus search input
+  // Focus search input ONLY if it just opened and nothing else has focus
   const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
+  if (searchInput && document.activeElement === document.body) {
     searchInput.focus();
     searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
   }
 
-  // Focus catalog search input if it was active
+  // Restore catalog search focus only when it was previously active
   const catSearchInput = document.getElementById("catalogSearchInput");
   if (catSearchInput && document.activeElement && document.activeElement.id === "catalogSearchInput") {
     catSearchInput.focus();
@@ -379,6 +397,25 @@ document.addEventListener("click", (event) => {
   if (action === "copy-email") {
     navigator.clipboard?.writeText(site.brand.contact.email);
     showToast("Email copied to clipboard");
+  }
+
+  // --- Search Submit (overlay) ---
+  if (action === "search-submit") {
+    const q = ui.searchQuery.trim();
+    if (q) {
+      window.location.hash = `#/catalog?search=${encodeURIComponent(q)}`;
+    }
+    closePanels();
+    triggerRender();
+  }
+
+  if (action === "search-clear") {
+    ui.searchQuery = "";
+    triggerRender();
+    // Refocus the input after clear
+    setTimeout(() => {
+      document.getElementById("searchInput")?.focus();
+    }, 50);
   }
 
   // --- Catalog Filters ---
