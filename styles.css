@@ -842,6 +842,31 @@ select:focus-visible {
   right: 0;
 }
 
+/* Static controls and layout wrappers for flex-aligned carousels */
+.heading-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.carousel-controls-desktop {
+  display: flex;
+  gap: 12px;
+}
+
+.round-control.static-control {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+@media (max-width: 680px) {
+  .carousel-controls-desktop {
+    display: none !important;
+  }
+}
+
 .timeline {
   position: relative;
   display: grid;

@@ -93,11 +93,27 @@ function renderHero() {
 function renderCollections() {
   return `
     <section class="content-section collections-section" id="collections">
-      ${renderSectionHeading("Featured Collections", "Luxury Machine-Ready Worlds", "View All", "#/catalog")}
+      <div class="section-heading reveal">
+        <div>
+          <p class="section-kicker">Featured Collections</p>
+          <h2>Luxury Machine-Ready Worlds</h2>
+        </div>
+        <div class="heading-actions-wrap">
+          <a href="#/catalog" class="text-action" style="text-decoration:none;">
+            View All
+            ${icon("arrow-right", 18)}
+          </a>
+          <div class="carousel-controls-desktop">
+            <button type="button" class="round-control static-control" data-action="scroll-carousel" data-target="collectionTrack" data-direction="-1" aria-label="Previous collections">
+              ${icon("arrow-left", 18)}
+            </button>
+            <button type="button" class="round-control static-control" data-action="scroll-carousel" data-target="collectionTrack" data-direction="1" aria-label="Next collections">
+              ${icon("arrow-right", 18)}
+            </button>
+          </div>
+        </div>
+      </div>
       <div class="carousel-shell">
-        <button type="button" class="round-control left" data-action="scroll-carousel" data-target="collectionTrack" data-direction="-1" aria-label="Previous collections">
-          ${icon("arrow-left", 18)}
-        </button>
         <div class="collection-track" id="collectionTrack">
           ${site.collections
             .map(
@@ -118,9 +134,6 @@ function renderCollections() {
             )
             .join("")}
         </div>
-        <button type="button" class="round-control right" data-action="scroll-carousel" data-target="collectionTrack" data-direction="1" aria-label="Next collections">
-          ${icon("arrow-right", 18)}
-        </button>
       </div>
     </section>
   `;
