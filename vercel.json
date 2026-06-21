@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/styles.css",
+      "destination": "/styles.css"
+    },
+    {
+      "source": "/src/(.*)",
+      "destination": "/src/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

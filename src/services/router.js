@@ -1,4 +1,4 @@
-import { setPage, currentUser, showToast, authInitialized, dataSynced } from "./store.js";
+import { setPage, currentUser, showToast, authInitialized, dataSynced, site } from "./store.js";
 import { DB } from "./db.js";
 
 // ==========================================
@@ -85,24 +85,51 @@ export function initRouter() {
 // ==========================================
 
 export function handleRouting() {
-  const hash = window.location.hash || "#/";
+  const hash = window.location.hash;
 
-  // Parse parameters from hash (which can be formatted like query params, e.g. #access_token=... or #error_description=...)
+  // Parse OAuth parameters from hash if present
   const hashParams = {};
-  const hashString = hash.replace("#", "");
-  if (hashString) {
+  if (hash) {
+    const hashString = hash.replace("#", "");
     const paramString = hashString.includes("?") ? hashString.split("?")[1] : hashString;
-    paramString.split("&").forEach((pair) => {
-      const [key, value] = pair.split("=");
-      if (key) {
-        hashParams[decodeURIComponent(key)] = decodeURIComponent(value || "");
-      }
-    });
+    if (paramString && paramString.includes("=")) {
+      paramString.split("&").forEach((pair) => {
+        const [key, value] = pair.split("=");
+        if (key) {
+          hashParams[decodeURIComponent(key)] = decodeURIComponent(value || "");
+        }
+      });
+    }
   }
 
-  // Split hash into path and query parameters
-  const [hashPath, queryString] = hash.replace("#", "").split("?");
-  const path = hashPath || "/";
+  // Determine active route path and query string (supporting both pathnames and hashbangs/hashes)
+  let path = "/";
+  let queryString = "";
+
+  if (hash && hash !== "#" && hash !== "#/") {
+    let cleanHash = hash.replace("#", "");
+    if (cleanHash.startsWith("!")) {
+      cleanHash = cleanHash.substring(1);
+    }
+    const [hashPath, qString] = cleanHash.split("?");
+    path = hashPath || "/";
+    queryString = qString || "";
+  } else if (window.location.pathname && window.location.pathname !== "/" && window.location.pathname !== "/index.html") {
+    const [pathPart, qString] = window.location.pathname.split("?");
+    path = pathPart;
+    queryString = qString || "";
+    if (window.location.search) {
+      queryString = window.location.search.substring(1);
+    }
+  }
+
+  // Normalize path (ensure leading slash, strip trailing slash if not root)
+  if (!path.startsWith("/")) {
+    path = "/" + path;
+  }
+  if (path.length > 1 && path.endsWith("/")) {
+    path = path.slice(0, -1);
+  }
 
   // Handle OAuth authentication errors
   if (hashParams.error_description || hashParams.error) {
@@ -250,7 +277,134 @@ export function handleRouting() {
   // ------------------------------------------
   // NAVIGATION — pass sub-route to page component
   // ------------------------------------------
-  document.title = matchedRoute.title;
+  
+  // Dynamic SEO Metadata and JSON-LD Schema
+  let pageTitle = matchedRoute.title;
+  let pageDescription = "Godavari Designers is a premium luxury embroidery digitizing studio and design library. Download machine-ready embroidery files (DST, PES, EXP).";
+  let schemaData = null;
+
+  if (matchedRoute.page === "product-detail" && matchedParams.slug) {
+    const products = DB.getProducts();
+    const product = products.find((p) => p.slug === matchedParams.slug);
+    if (product) {
+      pageTitle = `${product.title} Embroidery Design | DST / PES / EXP | Godavari Designers`;
+      pageDescription = `Download high-quality ${product.title} embroidery design. Hoop size: ${product.hoopSize || "standard"}, stitch count: ${product.stitchCount || "optimized"}, compatible with all major embroidery machines.`;
+      
+      // Inject Product Schema
+      schemaData = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": product.title,
+        "image": product.image ? (product.image.startsWith("http") ? product.image : `https://godavaridesigners.com/${product.image}`) : "",
+        "description": product.description || pageDescription,
+        "sku": product.id || product.slug,
+        "brand": {
+          "@type": "Brand",
+          "name": "Godavari Designers"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": `https://godavaridesigners.com/product/${product.slug}`,
+          "priceCurrency": "INR",
+          "price": product.price || "0",
+          "itemCondition": "https://schema.org/NewCondition",
+          "availability": "https://schema.org/InStock"
+        }
+      };
+    }
+  } else if (matchedRoute.page === "catalog") {
+    if (queryParams.collection) {
+      const collectionNames = {
+        bridal: "Bridal Collection",
+        blouses: "Designer Blouses",
+        saree: "Saree Borders",
+        kids: "Kids Wear",
+        floral: "Luxury Floral"
+      };
+      const colName = collectionNames[queryParams.collection] || queryParams.collection;
+      pageTitle = `${colName} Embroidery Designs | Godavari Designers`;
+      pageDescription = `Explore our curated list of ${colName} machine embroidery files. Premium luxury designs available for instant download.`;
+    }
+  } else if (matchedRoute.page === "home") {
+    pageTitle = "Godavari Designers | Premium Custom Embroidery Digitizing & Design Studio";
+    pageDescription = "Professional custom embroidery digitizing services and premium machine-ready design files for boutiques, fashion houses, and designer labels.";
+    
+    // Inject Local Business Schema
+    schemaData = {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Godavari Designers",
+      "image": "https://godavaridesigners.com/desktop-home.png",
+      "url": "https://godavaridesigners.com",
+      "telephone": site.brand?.contact?.phone || "+918886364024",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Rajahmundry",
+        "addressRegion": "Andhra Pradesh",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "17.0005",
+        "longitude": "81.8040"
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday"
+        ],
+        "opens": "09:00",
+        "closes": "21:00"
+      },
+      "sameAs": [
+        "https://www.facebook.com/godavaridesigners",
+        "https://www.instagram.com/godavaridesigners"
+      ]
+    };
+  }
+
+  // Apply Title
+  document.title = pageTitle;
+
+  // Apply Meta Description
+  let metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+    metaDesc = document.createElement("meta");
+    metaDesc.setAttribute("name", "description");
+    document.head.appendChild(metaDesc);
+  }
+  metaDesc.setAttribute("content", pageDescription);
+
+  // Apply Canonical Link
+  let canonicalLink = document.querySelector('link[rel="canonical"]');
+  if (!canonicalLink) {
+    canonicalLink = document.createElement("link");
+    canonicalLink.setAttribute("rel", "canonical");
+    document.head.appendChild(canonicalLink);
+  }
+  let canonicalPath = path;
+  if (path === "/catalog" && queryParams.collection) {
+    canonicalPath = `/catalog?collection=${queryParams.collection}`;
+  }
+  canonicalLink.setAttribute("href", `https://godavaridesigners.com${canonicalPath}`);
+
+  // Apply JSON-LD Schema
+  let schemaScript = document.getElementById("seo-schema-jsonld");
+  if (schemaScript) {
+    schemaScript.remove();
+  }
+  if (schemaData) {
+    schemaScript = document.createElement("script");
+    schemaScript.id = "seo-schema-jsonld";
+    schemaScript.type = "application/ld+json";
+    schemaScript.text = JSON.stringify(schemaData);
+    document.head.appendChild(schemaScript);
+  }
 
   // Derive admin section from path (e.g. /admin/products → 'products')
   let adminSection = null;
