@@ -9,6 +9,10 @@
       "destination": "/sitemap.xml"
     },
     {
+      "source": "/sitemap.xsl",
+      "destination": "/sitemap.xsl"
+    },
+    {
       "source": "/styles.css",
       "destination": "/styles.css"
     },
