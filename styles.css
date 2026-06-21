@@ -973,6 +973,53 @@ select:focus-visible {
   }
 }
 
+/* Mobile Timeline Glow Animations & Styling */
+.timeline-vertical-step {
+  animation: timelineStepGlowMobile 7.5s infinite;
+  animation-delay: calc(var(--step) * 1.5s);
+  transition: transform 0.4s ease;
+}
+
+.timeline-vertical-num {
+  display: inline-block;
+  animation: numberGlow 7.5s infinite;
+  animation-delay: calc(var(--step) * 1.5s);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.timeline-vertical-hoop {
+  animation: iconGlowMobile 7.5s infinite;
+  animation-delay: calc(var(--step) * 1.5s);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+@keyframes timelineStepGlowMobile {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  4%, 16% {
+    transform: translateX(8px);
+  }
+  20% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes iconGlowMobile {
+  0%, 100% {
+    border-color: var(--gold);
+    box-shadow: none;
+  }
+  4%, 16% {
+    border-color: var(--navy);
+    box-shadow: 0 0 16px rgba(200, 161, 90, 0.42);
+  }
+  20% {
+    border-color: var(--gold);
+    box-shadow: none;
+  }
+}
+
 .timeline-step h3 {
   margin-top: 8px;
   font-size: 25px;

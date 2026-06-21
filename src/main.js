@@ -284,6 +284,8 @@ function initCollectionAutoscroll() {
 
   let currentScroll = loopThreshold;
   let isPaused = false;
+  let isHovered = false;
+  let resumeTimeout = null;
 
   // Disable smooth scroll behavior on the element to prevent jitter during animation
   track.style.scrollBehavior = "auto";
@@ -300,7 +302,29 @@ function initCollectionAutoscroll() {
     autoscrollFrameId = requestAnimationFrame(step);
   }
 
-  // Handle wrap-around on scroll events (including user drag/swipe/mousewheel)
+  // Helper to pause autoscrolling
+  const pause = () => {
+    isPaused = true;
+    if (resumeTimeout) {
+      clearTimeout(resumeTimeout);
+      resumeTimeout = null;
+    }
+  };
+
+  // Helper to schedule resumption after scrolling/touch stops
+  const scheduleResume = () => {
+    if (resumeTimeout) {
+      clearTimeout(resumeTimeout);
+    }
+    resumeTimeout = setTimeout(() => {
+      // Only resume if the user is not actively hovering the carousel on desktop
+      if (!isHovered) {
+        isPaused = false;
+      }
+    }, 200); // 200ms debounce ensures momentum scrolling has fully stopped
+  };
+
+  // Handle wrap-around on scroll events (including user drag/swipe/mousewheel/momentum)
   const handleScroll = () => {
     const sl = track.scrollLeft;
     if (sl >= loopThreshold * 2) {
@@ -312,23 +336,33 @@ function initCollectionAutoscroll() {
     } else if (isPaused) {
       currentScroll = sl;
     }
+
+    // If scrolling while paused (i.e. manual interaction or momentum), keep resetting resume timer
+    if (isPaused) {
+      scheduleResume();
+    }
   };
 
   track.addEventListener("scroll", handleScroll, { passive: true });
 
   // Pausing interactions
   const container = track.closest(".carousel-shell") || track;
-  const pause = () => { isPaused = true; };
-  const resume = () => { isPaused = false; };
 
-  container.addEventListener("mouseenter", pause);
-  container.addEventListener("mouseleave", resume);
+  container.addEventListener("mouseenter", () => {
+    isHovered = true;
+    pause();
+  });
+  
+  container.addEventListener("mouseleave", () => {
+    isHovered = false;
+    scheduleResume();
+  });
   
   track.addEventListener("touchstart", pause, { passive: true });
-  track.addEventListener("touchend", resume);
-  track.addEventListener("touchcancel", resume);
+  track.addEventListener("touchend", scheduleResume);
+  track.addEventListener("touchcancel", scheduleResume);
   track.addEventListener("pointerdown", pause);
-  track.addEventListener("pointerup", resume);
+  track.addEventListener("pointerup", scheduleResume);
 
   autoscrollFrameId = requestAnimationFrame(step);
 }

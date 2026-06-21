@@ -152,7 +152,7 @@ function renderProcess() {
           ${site.steps
             .map(
               (step, index) => `
-                <article class="timeline-vertical-step reveal" style="--delay:${index * 60}ms">
+                <article class="timeline-vertical-step reveal" style="--step:${index}; --delay:${index * 60}ms">
                   <div class="timeline-vertical-hoop">
                     <div class="timeline-vertical-hoop-inner">
                       ${icon(step.icon, 18)}
