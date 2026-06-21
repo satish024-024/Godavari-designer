@@ -10,6 +10,8 @@ import { DB } from "./db.js";
 const routes = {
   "/": { page: "home", title: "Godavari Designer | Luxury Embroidery" },
   "/catalog": { page: "catalog", title: "Design Library | Godavari Designer" },
+  "/collection/:collection": { page: "catalog", title: "Collection | Godavari Designer" },
+  "/category/:category": { page: "catalog", title: "Category | Godavari Designer" },
   "/product/:slug": { page: "product-detail", title: "Product Detail | Godavari" },
   "/custom-order": { page: "custom-order", title: "Custom Digitizing Request | Godavari" },
   "/cart": { page: "cart", title: "Your Cart | Godavari Designer", noindex: true },
@@ -287,8 +289,8 @@ export function handleRouting() {
     const products = DB.getProducts();
     const product = products.find((p) => p.slug === matchedParams.slug);
     if (product) {
-      pageTitle = `${product.title} Embroidery Design | DST / PES / EXP | Godavari Designers`;
-      pageDescription = `Download high-quality ${product.title} embroidery design. Hoop size: ${product.hoopSize || "standard"}, stitch count: ${product.stitchCount || "optimized"}, compatible with all major embroidery machines.`;
+      pageTitle = product.seoTitle || `${product.title} Embroidery Design | DST / PES / EXP | Godavari Designers`;
+      pageDescription = product.seoDescription || `Download high-quality ${product.title} embroidery design. Hoop size: ${product.hoopSize || "standard"}, stitch count: ${product.stitchCount || "optimized"}, compatible with all major embroidery machines.`;
       
       // Inject Product Schema
       schemaData = {
@@ -313,17 +315,33 @@ export function handleRouting() {
       };
     }
   } else if (matchedRoute.page === "catalog") {
-    if (queryParams.collection) {
-      const collectionNames = {
-        bridal: "Bridal Collection",
-        blouses: "Designer Blouses",
-        saree: "Saree Borders",
-        kids: "Kids Wear",
-        floral: "Luxury Floral"
-      };
-      const colName = collectionNames[queryParams.collection] || queryParams.collection;
-      pageTitle = `${colName} Embroidery Designs | Godavari Designers`;
-      pageDescription = `Explore our curated list of ${colName} machine embroidery files. Premium luxury designs available for instant download.`;
+    const activeCol = matchedParams.collection || queryParams.collection;
+    const activeCat = matchedParams.category || queryParams.category;
+
+    if (activeCol) {
+      const col = site.collections?.find((c) => c.slug === activeCol);
+      if (col) {
+        pageTitle = col.seoTitle || `${col.title} | Godavari Designers`;
+        pageDescription = col.seoDescription || col.description || `Explore our ${col.title} machine embroidery designs.`;
+      } else {
+        const collectionNames = {
+          bridal: "Bridal Collection",
+          blouses: "Designer Blouses",
+          saree: "Saree Borders",
+          kids: "Kids Wear",
+          floral: "Luxury Floral"
+        };
+        const colName = collectionNames[activeCol] || activeCol;
+        pageTitle = `${colName} Embroidery Designs | Godavari Designers`;
+        pageDescription = `Explore our curated list of ${colName} machine embroidery files. Premium luxury designs available for instant download.`;
+      }
+    } else if (activeCat) {
+      const cats = DB.getCategories();
+      const cat = cats.find((c) => c.slug === activeCat);
+      if (cat) {
+        pageTitle = cat.seoTitle || `${cat.name} Embroidery Designs | Godavari Designers`;
+        pageDescription = cat.seoDescription || cat.description || `Browse our collection of ${cat.name} machine embroidery designs. Available for instant download.`;
+      }
     }
   } else if (matchedRoute.page === "home") {
     pageTitle = "Godavari Designers | Premium Custom Embroidery Digitizing & Design Studio";
@@ -409,8 +427,12 @@ export function handleRouting() {
       document.head.appendChild(canonicalLink);
     }
     let canonicalPath = path;
-    if (path === "/catalog" && queryParams.collection) {
-      canonicalPath = `/catalog?collection=${queryParams.collection}`;
+    if (path === "/catalog") {
+      if (queryParams.collection) {
+        canonicalPath = `/collection/${queryParams.collection}`;
+      } else if (queryParams.category) {
+        canonicalPath = `/category/${queryParams.category}`;
+      }
     }
     canonicalLink.setAttribute("href", `https://godavaridesigners.com${canonicalPath}`);
 

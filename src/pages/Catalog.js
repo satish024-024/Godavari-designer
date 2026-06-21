@@ -1,4 +1,4 @@
-import { site, wishlist, getCategories } from "../services/store.js";
+import { site, wishlist, getCategories, ui } from "../services/store.js";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 // Page level reactive state
@@ -34,9 +34,9 @@ export function renderCatalog() {
   // --- Router Parameters Synchronizer ---
   // If the router set category/collection/search parameters in store, apply it
   const routeParams = window.location.hash.split("?")[1] || "";
-  const categoryParam = new URLSearchParams(routeParams).get("category") || null;
-  const collectionParam = new URLSearchParams(routeParams).get("collection") || null;
-  const searchParam = new URLSearchParams(routeParams).get("search") || null;
+  const categoryParam = ui.pageParams.category || new URLSearchParams(routeParams).get("category") || null;
+  const collectionParam = ui.pageParams.collection || new URLSearchParams(routeParams).get("collection") || null;
+  const searchParam = ui.pageParams.search || new URLSearchParams(routeParams).get("search") || null;
 
   if (searchParam !== lastSearchParam) {
     lastSearchParam = searchParam;

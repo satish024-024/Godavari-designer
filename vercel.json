@@ -9,8 +9,16 @@
       "destination": "/sitemap.xml"
     },
     {
+      "source": "/sitemap-(.*).xml",
+      "destination": "/sitemap-$1.xml"
+    },
+    {
       "source": "/sitemap.xsl",
       "destination": "/sitemap.xsl"
+    },
+    {
+      "source": "/sitemap-index.xsl",
+      "destination": "/sitemap-index.xsl"
     },
     {
       "source": "/styles.css",

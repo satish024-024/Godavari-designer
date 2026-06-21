@@ -658,7 +658,7 @@ INSERT INTO public.products (
   'royal-peony-floral',
   'GD-1028',
   'Royal Peony Floral',
-  'An exquisite royal peony motif designed for luxury blouses and centerpieces.',
+  'A majestic royal peony embroidery motif meticulously digitized for high-end boutique blouses, designer kurtas, and decorative centerpieces. Features smooth stitch runs, optimized jump stitches, and premium shading depth to capture realistic floral elegance on silk, velvet, or organza.',
   45,
   'a2b1660d-2bc6-46b5-827c-65ff52b9fb1a',
   'a2b1660d-2bc6-46b5-827c-65ff52b92005',
@@ -677,8 +677,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"200mm x 200mm","price":45},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"200mm x 200mm","price":45},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"200mm x 200mm","price":45},{"format":"JEF","machineBrand":"Janome","machineModel":"MC550E","hoopSize":"200mm x 200mm","price":45},{"format":"XXX","machineBrand":"Singer","machineModel":"EM9305","hoopSize":"200mm x 200mm","price":45}]'::jsonb,
   true,
   true,
-  'Royal Peony Floral Design Motif | Godavari',
-  'Exquisite royal peony motif design for high-end boutique stitching.'
+  'Royal Peony Floral Design Motif (GD-1028) | Godavari',
+  'Download the Royal Peony machine embroidery design motif. Optimized for silk, velvet, and organza fabrics. Available in DST, PES, EXP, and JEF.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
@@ -714,7 +714,7 @@ INSERT INTO public.products (
   'bridal-gold-bloom',
   'GD-2041',
   'Bridal Gold Bloom',
-  'Heirloom gold flower motif with dimensional details, perfect for lehengas and wedding veils.',
+  'An heirloom-grade gold floral bloom embroidery pattern designed for bridal lehengas, heavy dupattas, and luxury wedding veils. Digitized for multi-directional metallic thread stability, minimizing thread breaks while maintaining a dense, rich 3D gold finish.',
   65,
   'd3b07384-d113-4ec5-a5d6-d05b5832a821',
   'd3b07384-d113-4ec5-a5d6-d05b5832a001',
@@ -733,8 +733,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"200mm x 300mm","price":65},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"200mm x 300mm","price":65},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"200mm x 300mm","price":65},{"format":"JEF","machineBrand":"Janome","machineModel":"MC550E","hoopSize":"200mm x 300mm","price":65}]'::jsonb,
   true,
   true,
-  'Bridal Gold Bloom Machine Embroidery Pattern | Godavari',
-  'Exquisite bridal gold bloom machine embroidery design with 58,000 stitches.'
+  'Bridal Gold Bloom Lehenga Embroidery Design (GD-2041) | Godavari',
+  'Premium bridal gold bloom machine embroidery design with 58,000 stitches. Perfect for wedding lehengas, veils, and heavy boutique wear.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
@@ -770,7 +770,7 @@ INSERT INTO public.products (
   'designer-vine-border',
   'GD-1877',
   'Designer Vine Border',
-  'Clean vine border trailing design, highly optimized for sarees and ethnic neck borders.',
+  'A sleek, repeating vine border trailing embroidery design. Masterfully engineered for running borders on designer sarees, dupatta edges, and ethnic kurtis. The continuous seamless loop ensures zero overlaps and flawless stitching sequences.',
   35,
   '11c4c1a7-de34-4b5a-93ef-92e1fc16d3f2',
   'f47ac10b-58cc-4372-a567-0e02b2c3d003',
@@ -789,8 +789,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"130mm x 300mm","price":35},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"130mm x 300mm","price":35},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"130mm x 300mm","price":35}]'::jsonb,
   false,
   true,
-  'Designer Vine Border Saree Design | Godavari',
-  'Buy designer vine border embroidery design for boutique saree border stitching.'
+  'Designer Vine Border Saree Embroidery Design (GD-1877) | Godavari',
+  'Buy repeating vine border machine embroidery pattern for boutique saree border stitching. Seamless continuous looping, optimized for running stitch borders.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
@@ -826,7 +826,7 @@ INSERT INTO public.products (
   'regal-paisley-motif',
   'GD-3102',
   'Regal Paisley Motif',
-  'Ornate traditional paisley patch with rich zari embroidery, perfect for ethnic wedding lehengas.',
+  'A regal, traditional paisley (buta) patch design featuring dense gold zari fill and delicate outline runs. Perfect for matching side panels on bridal lehengas, sherwani collars, and premium wedding ethnic wear.',
   42,
   'c18f3a38-f9b0-4dbf-8647-7bc9c8c9a3d4',
   'd3b07384-d113-4ec5-a5d6-d05b5832a001',
@@ -845,8 +845,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"200mm x 200mm","price":42},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"200mm x 200mm","price":42},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"200mm x 200mm","price":42},{"format":"JEF","machineBrand":"Janome","machineModel":"MC550E","hoopSize":"200mm x 200mm","price":42}]'::jsonb,
   true,
   false,
-  'Regal Paisley Motif Traditional Design | Godavari',
-  'Traditional regal paisley patch design with 41,000 stitches.'
+  'Regal Paisley Motif Lehenga Embroidery Pattern (GD-3102) | Godavari',
+  'Intricate traditional regal paisley patch design. Dense zari gold embroidery file with 41,000 stitches, ideal for bridal and wedding couture.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
@@ -882,7 +882,7 @@ INSERT INTO public.products (
   'kids-floral-garden',
   'GD-4058',
   'Kids Floral Garden',
-  'Soft mini floral motifs designed for children occasionwear, lehengas, and tiny borders.',
+  'A playful, delicate floral garden motif designed specifically for children''s festive wear, frocks, lehengas, and tiny borders. Engineered with a low stitch density and soft fills to prevent fabric stiffening on lightweight kid-friendly fabrics.',
   36,
   'e43a52bd-2d88-4fb7-87db-2b5b5c92c48f',
   'e74288b2-b108-4c28-98e3-99b350bc2004',
@@ -901,8 +901,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"100mm x 150mm","price":36},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"100mm x 150mm","price":36},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"100mm x 150mm","price":36},{"format":"JEF","machineBrand":"Janome","machineModel":"MC550E","hoopSize":"100mm x 150mm","price":36},{"format":"XXX","machineBrand":"Singer","machineModel":"EM9305","hoopSize":"100mm x 150mm","price":36}]'::jsonb,
   false,
   true,
-  'Kids Floral Garden Embroidery Design | Godavari',
-  'Soft mini floral garden embroidery design for kids festive dresses.'
+  'Kids Floral Garden Dress Embroidery Design (GD-4058) | Godavari',
+  'Soft mini floral garden machine embroidery pattern for kids festive wear. Low density stitch structure for comfortable, soft drape on child fabrics.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
@@ -938,7 +938,7 @@ INSERT INTO public.products (
   'zari-leaf-trail',
   'GD-2766',
   'Zari Leaf Trail',
-  'Traditional zari leaf trail border motif, highly optimized for designer wedding saree borders.',
+  'A classic zari leaf trail continuous border design. Beautifully digitized for borders of designer sarees, lehenga hems, and sherwani cuffs. Standardized for high-speed embroidery machines with minimal color changes and trim commands.',
   39,
   '1f2a3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d',
   'f47ac10b-58cc-4372-a567-0e02b2c3d003',
@@ -957,8 +957,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"100mm x 250mm","price":39},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"100mm x 250mm","price":39},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"100mm x 250mm","price":39}]'::jsonb,
   false,
   false,
-  'Zari Leaf Trail Embroidery Border | Godavari',
-  'Buy zari leaf border machine embroidery design with 25,500 stitches.'
+  'Zari Leaf Trail Saree Border Embroidery Design (GD-2766) | Godavari',
+  'Get the zari leaf border machine embroidery design with 25,500 stitches. Optimized for high-speed boutique production on wedding sarees.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
@@ -994,7 +994,7 @@ INSERT INTO public.products (
   'cutwork-elegance',
   'GD-3345',
   'Cutwork Elegance',
-  'Heavy cutwork blouse back-neck design pattern with intricate lace borders.',
+  'A heavy cutwork back-neck design pattern for bridal blouses. Digitized with specialized satin stitch outlines and secure cut-out borders to guide precise fabric trimming, giving a flawless hollow lace effect on silk and georgette.',
   55,
   '5c3452bd-2d88-4fb7-87db-2b5b5c92c48e',
   'c8397a6e-4b2a-4a2b-8a7e-40742ff82002',
@@ -1013,8 +1013,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"200mm x 250mm","price":55},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"200mm x 250mm","price":55},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"200mm x 250mm","price":55}]'::jsonb,
   true,
   true,
-  'Cutwork Elegance Blouse Back Design | Godavari',
-  'Exquisite cutwork pattern back-neck blouse design.'
+  'Cutwork Elegance Blouse Back-Neck Embroidery (GD-3345) | Godavari',
+  'Exquisite cutwork back-neck designer blouse machine embroidery file. Clean satin stitch edges for perfect cutout guides. Compatible with DST, PES, EXP.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
@@ -1050,7 +1050,7 @@ INSERT INTO public.products (
   'neckline-royal-design',
   'GD-5120',
   'Neckline Royal Design',
-  'Regal front-neck and collar embroidery placements with delicate beadwork outlines.',
+  'A magnificent regal front-neck and collar embroidery placement. Features traditional Indian neckline curvatures and royal leaf motifs, with outlines structured to accept manual stone-fixing or beadwork overlays for a hybrid luxury finish.',
   48,
   'f47ac10b-58cc-4372-a567-0e02b2c3d470',
   'c8397a6e-4b2a-4a2b-8a7e-40742ff82002',
@@ -1069,8 +1069,8 @@ INSERT INTO public.products (
   '[{"format":"DST","machineBrand":"Tajima","machineModel":"TMEZ-SC","hoopSize":"200mm x 200mm","price":48},{"format":"PES","machineBrand":"Brother","machineModel":"PR1055X","hoopSize":"200mm x 200mm","price":48},{"format":"EXP","machineBrand":"Bernina","machineModel":"E16","hoopSize":"200mm x 200mm","price":48},{"format":"JEF","machineBrand":"Janome","machineModel":"MC550E","hoopSize":"200mm x 200mm","price":48}]'::jsonb,
   false,
   false,
-  'Neckline Royal Collar Embroidery Pattern | Godavari',
-  'Regal neckline collar embroidery design with 22,000 stitches.'
+  'Royal Neckline Collar Machine Embroidery Pattern (GD-5120) | Godavari',
+  'Regal front-neck collar embroidery design with 22,000 stitches. Indian boutique style placement template for kurtas and wedding blouses.'
 ) ON CONFLICT (id) DO UPDATE SET
   slug = EXCLUDED.slug,
   code = EXCLUDED.code,
