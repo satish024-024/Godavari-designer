@@ -245,10 +245,105 @@ function render() {
 }
 
 
+// --- Carousel Autoscroll Animations ---
+let autoscrollFrameId = null;
+
+function stopCollectionAutoscroll() {
+  if (autoscrollFrameId) {
+    cancelAnimationFrame(autoscrollFrameId);
+    autoscrollFrameId = null;
+  }
+}
+
+function initCollectionAutoscroll() {
+  stopCollectionAutoscroll();
+
+  const track = document.getElementById("collectionTrack");
+  if (!track) return;
+
+  const items = Array.from(track.children);
+  if (items.length === 0) return;
+
+  const originalScrollWidth = track.scrollWidth;
+  const gap = parseFloat(window.getComputedStyle(track).gap) || 0;
+  const loopThreshold = originalScrollWidth + gap;
+
+  // If layout is not ready yet (e.g. elements not fully rendered), retry in 100ms
+  if (originalScrollWidth === 0) {
+    setTimeout(initCollectionAutoscroll, 100);
+    return;
+  }
+
+  // Clone elements to create at least 3 identical sets for seamless bidirectional scrolling
+  const cloneCount = Math.max(2, Math.ceil(track.clientWidth / originalScrollWidth) + 1);
+  for (let i = 0; i < cloneCount; i++) {
+    items.forEach(item => {
+      track.appendChild(item.cloneNode(true));
+    });
+  }
+
+  let currentScroll = loopThreshold;
+  let isPaused = false;
+
+  // Disable smooth scroll behavior on the element to prevent jitter during animation
+  track.style.scrollBehavior = "auto";
+  track.scrollLeft = loopThreshold;
+
+  function step() {
+    if (!isPaused) {
+      currentScroll += 0.8; // continuous scrolling speed (pixels per frame)
+      if (currentScroll >= loopThreshold * 2) {
+        currentScroll -= loopThreshold;
+      }
+      track.scrollLeft = currentScroll;
+    }
+    autoscrollFrameId = requestAnimationFrame(step);
+  }
+
+  // Handle wrap-around on scroll events (including user drag/swipe/mousewheel)
+  const handleScroll = () => {
+    const sl = track.scrollLeft;
+    if (sl >= loopThreshold * 2) {
+      track.scrollLeft = sl - loopThreshold;
+      currentScroll = track.scrollLeft;
+    } else if (sl < loopThreshold) {
+      track.scrollLeft = sl + loopThreshold;
+      currentScroll = track.scrollLeft;
+    } else if (isPaused) {
+      currentScroll = sl;
+    }
+  };
+
+  track.addEventListener("scroll", handleScroll, { passive: true });
+
+  // Pausing interactions
+  const container = track.closest(".carousel-shell") || track;
+  const pause = () => { isPaused = true; };
+  const resume = () => { isPaused = false; };
+
+  container.addEventListener("mouseenter", pause);
+  container.addEventListener("mouseleave", resume);
+  
+  track.addEventListener("touchstart", pause, { passive: true });
+  track.addEventListener("touchend", resume);
+  track.addEventListener("touchcancel", resume);
+  track.addEventListener("pointerdown", pause);
+  track.addEventListener("pointerup", resume);
+
+  autoscrollFrameId = requestAnimationFrame(step);
+}
+
 function afterRender() {
   // Bind Lucide icons
   if (window.lucide) {
     window.lucide.createIcons();
+  }
+
+  // Initialize Home page events and autoscrolling
+  if (ui.page === "home" || !ui.page) {
+    initCollectionAutoscroll();
+  } else {
+    stopCollectionAutoscroll();
   }
 
   // Initialize Product Detail events if active page

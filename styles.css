@@ -675,7 +675,6 @@ select:focus-visible {
   grid-auto-columns: minmax(250px, 1fr);
   gap: clamp(18px, 2vw, 30px);
   overflow-x: auto;
-  scroll-snap-type: x mandatory;
   padding: 6px 2px 24px;
   scrollbar-width: none;
 }
