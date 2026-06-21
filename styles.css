@@ -880,7 +880,8 @@ select:focus-visible {
   right: 8%;
   top: 76px;
   height: 0;
-  border-top: 2px dashed rgba(200, 161, 90, 0.44);
+  border-top: 2px dashed var(--gold);
+  opacity: 0.65;
   z-index: 1;
 }
 
@@ -890,6 +891,9 @@ select:focus-visible {
   justify-items: center;
   gap: 10px;
   text-align: center;
+  animation: timelineStepGlow 7.5s infinite;
+  animation-delay: calc(var(--step) * 1.5s);
+  transition: transform 0.4s ease;
 }
 
 .step-number {
@@ -900,6 +904,9 @@ select:focus-visible {
   font-family: var(--font-serif);
   font-size: clamp(42px, 4vw, 64px);
   line-height: 1;
+  animation: numberGlow 7.5s infinite;
+  animation-delay: calc(var(--step) * 1.5s);
+  transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 .step-icon {
@@ -914,6 +921,56 @@ select:focus-visible {
   background: #ffffff;
   color: var(--navy);
   box-shadow: var(--shadow);
+  animation: iconGlow 7.5s infinite;
+  animation-delay: calc(var(--step) * 1.5s);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, color 0.4s ease;
+}
+
+/* Timeline Glow Animations (1-by-1 step highlighting) */
+@keyframes timelineStepGlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  4%, 16% {
+    transform: translateY(-8px);
+  }
+  20% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes iconGlow {
+  0%, 100% {
+    border-color: rgba(230, 222, 209, 0.94);
+    box-shadow: var(--shadow);
+    color: var(--navy);
+  }
+  4%, 16% {
+    border-color: var(--gold);
+    box-shadow: 0 0 24px rgba(200, 161, 90, 0.48), var(--shadow-deep);
+    color: var(--gold);
+  }
+  20% {
+    border-color: rgba(230, 222, 209, 0.94);
+    box-shadow: var(--shadow);
+    color: var(--navy);
+  }
+}
+
+@keyframes numberGlow {
+  0%, 100% {
+    opacity: 0.52;
+    transform: scale(1);
+  }
+  4%, 16% {
+    opacity: 1;
+    transform: scale(1.12);
+    text-shadow: 0 0 12px rgba(200, 161, 90, 0.3);
+  }
+  20% {
+    opacity: 0.52;
+    transform: scale(1);
+  }
 }
 
 .timeline-step h3 {
@@ -1972,8 +2029,11 @@ select:focus-visible {
     bottom: 24px;
     left: 46px;
     right: auto;
-    width: 2px;
+    width: 0;
     height: auto;
+    border-top: none;
+    border-left: 2px dashed var(--gold);
+    opacity: 0.6;
   }
 
   .timeline-thread::after {
@@ -3027,7 +3087,7 @@ select:focus-visible {
   margin: 36px 0;
 }
 
-.timeline-step {
+.timeline-container .timeline-step {
   position: relative;
   text-align: center;
 }
@@ -3045,7 +3105,7 @@ select:focus-visible {
   font-weight: 700;
 }
 
-.timeline-step::after {
+.timeline-container .timeline-step::after {
   content: "";
   position: absolute;
   top: 20px;
@@ -3056,7 +3116,7 @@ select:focus-visible {
   z-index: -1;
 }
 
-.timeline-step:last-child::after {
+.timeline-container .timeline-step:last-child::after {
   display: none;
 }
 
@@ -3123,11 +3183,11 @@ select:focus-visible {
     gap: 24px;
   }
   
-  .timeline-step::after {
+  .timeline-container .timeline-step::after {
     display: none;
   }
   
-  .timeline-step {
+  .timeline-container .timeline-step {
     text-align: left;
     display: flex;
     gap: 16px;
