@@ -1,5 +1,6 @@
 import { setPage, currentUser, showToast, authInitialized, dataSynced, site } from "./store.js";
 import { DB } from "./db.js";
+import { SERVICES_DATA, LOCATIONS_DATA } from "../data/seoLandingPages.js";
 
 // ==========================================
 // ROUTE CONFIGURATION
@@ -14,6 +15,8 @@ const routes = {
   "/category/:category": { page: "catalog", title: "Category | Godavari Designer" },
   "/product/:slug": { page: "product-detail", title: "Product Detail | Godavari" },
   "/custom-order": { page: "custom-order", title: "Custom Digitizing Request | Godavari" },
+  "/services/:service": { page: "service-detail", title: "Embroidery Services | Godavari Designers" },
+  "/locations/:location": { page: "location-detail", title: "Embroidery Digitizing | Godavari Designers" },
   "/cart": { page: "cart", title: "Your Cart | Godavari Designer", noindex: true },
   "/wishlist": { page: "wishlist", title: "Saved Designs | Godavari Designer", noindex: true },
   "/checkout": { page: "checkout", title: "Checkout | Godavari Designer", noindex: true },
@@ -222,6 +225,22 @@ export function handleRouting() {
     }
   }
 
+  // 1b. Validate service slug
+  if (matchedRoute.page === "service-detail" && matchedParams.service) {
+    if (!SERVICES_DATA[matchedParams.service]) {
+      window.location.hash = "#/404";
+      return;
+    }
+  }
+
+  // 1c. Validate location slug
+  if (matchedRoute.page === "location-detail" && matchedParams.location) {
+    if (!LOCATIONS_DATA[matchedParams.location]) {
+      window.location.hash = "#/404";
+      return;
+    }
+  }
+
   // 2. Validate catalog query params
   if (matchedRoute.page === "catalog") {
     if (queryParams.category) {
@@ -354,7 +373,7 @@ export function handleRouting() {
       "name": "Godavari Designers",
       "image": "https://godavaridesigners.com/desktop-home.png",
       "url": "https://godavaridesigners.com",
-      "telephone": site.brand?.contact?.phone || "+918886364024",
+      "telephone": site.brand?.contact?.phone || "+91 83098 97055",
       "address": {
         "@type": "PostalAddress",
         "addressLocality": "Rajahmundry",
@@ -384,6 +403,123 @@ export function handleRouting() {
         "https://www.instagram.com/godavaridesigners"
       ]
     };
+  } else if (matchedRoute.page === "service-detail" && matchedParams.service) {
+    const service = SERVICES_DATA[matchedParams.service];
+    if (service) {
+      pageTitle = service.metaTitle;
+      pageDescription = service.metaDescription;
+      
+      // Inject Service Schema + BreadcrumbList Schema
+      schemaData = {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Service",
+            "name": service.h1,
+            "description": service.metaDescription,
+            "provider": {
+              "@type": "LocalBusiness",
+              "name": "Godavari Designers",
+              "image": "https://godavaridesigners.com/desktop-home.png",
+              "telephone": "+91 83098 97055",
+              "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Rajahmundry",
+                "addressRegion": "Andhra Pradesh",
+                "addressCountry": "IN"
+              }
+            },
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "INR"
+            }
+          },
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://godavaridesigners.com"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Services",
+                "item": `https://godavaridesigners.com/services/${service.slug}`
+              }
+            ]
+          }
+        ]
+      };
+    }
+  } else if (matchedRoute.page === "location-detail" && matchedParams.location) {
+    const location = LOCATIONS_DATA[matchedParams.location];
+    if (location) {
+      pageTitle = location.metaTitle;
+      pageDescription = location.metaDescription;
+
+      const graph = [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://godavaridesigners.com"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Locations",
+              "item": `https://godavaridesigners.com/locations/${location.slug}`
+            }
+          ]
+        }
+      ];
+
+      // If Rajahmundry, also inject LocalBusiness schema
+      if (location.slug === "rajahmundry-embroidery-digitizing") {
+        graph.push({
+          "@type": "LocalBusiness",
+          "name": "Godavari Designers",
+          "image": "https://godavaridesigners.com/desktop-home.png",
+          "url": "https://godavaridesigners.com",
+          "telephone": "+91 83098 97055",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Rajahmundry",
+            "addressRegion": "Andhra Pradesh",
+            "addressCountry": "IN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "17.0005",
+            "longitude": "81.8040"
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "09:00",
+            "closes": "21:00"
+          }
+        });
+      }
+
+      schemaData = {
+        "@context": "https://schema.org",
+        "@graph": graph
+      };
+    }
   }
 
   // Apply Title

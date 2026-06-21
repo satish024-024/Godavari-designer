@@ -97,6 +97,8 @@ import {
   renderTermsService,
   renderPrivacyPolicy
 } from "./pages/SupportPages.js";
+import { renderServicePage } from "./pages/ServicePages.js";
+import { renderLocationPage } from "./pages/LocationPages.js";
 
 const app = document.getElementById("app");
 let lastLoadedPage = "";
@@ -199,6 +201,12 @@ function render() {
       break;
     case "privacy-policy":
       pageContent = renderPrivacyPolicy();
+      break;
+    case "service-detail":
+      pageContent = renderServicePage(ui.pageParams.service);
+      break;
+    case "location-detail":
+      pageContent = renderLocationPage(ui.pageParams.location);
       break;
     case "404":
       pageContent = renderNotFound();

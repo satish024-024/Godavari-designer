@@ -16,13 +16,21 @@ const FOOTER_LINKS_MAP = {
   "Privacy Policy": "#/privacy-policy",
   // Shop
   "Design Library": "#/catalog",
-  "Custom Digitizing": "#/custom-order"
+  "Custom Digitizing": "#/custom-order",
+  "Bridal Blouse Embroidery": "#/services/bridal-blouse-embroidery-designs",
+  "Saree Border Embroidery": "#/services/saree-border-embroidery-designs",
+  "Logo Digitizing": "#/services/logo-embroidery-digitizing",
+  "Rajahmundry Embroidery Services": "#/locations/rajahmundry-embroidery-digitizing",
+  "Andhra Pradesh Embroidery Services": "#/locations/andhra-pradesh-embroidery-design-services",
+  "Contact / WhatsApp": "https://wa.me/918309897055",
+  "Track Order": "#/track-order"
 };
 
 function renderFooterLink(link) {
   const hash = FOOTER_LINKS_MAP[link];
   if (hash) {
-    return `<a href="${hash}">${escapeHtml(link)}</a>`;
+    const isExt = hash.startsWith("http");
+    return `<a href="${hash}"${isExt ? ' target="_blank" rel="noopener noreferrer"' : ''}>${escapeHtml(link)}</a>`;
   }
   if (link === "All Collections") {
     return `<button type="button" data-action="scroll-to" data-target="collections">${escapeHtml(link)}</button>`;

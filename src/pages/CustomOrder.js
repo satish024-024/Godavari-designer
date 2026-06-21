@@ -215,6 +215,30 @@ export function renderCustomOrder() {
               <div>💻 <strong>Available Formats:</strong> DST • PES • JEF • EXP • XXX</div>
               <div>🧵 <strong>Optimized speed:</strong> 850–1200 RPM matching tension</div>
             </div>
+
+            <hr style="border:0; border-top: 1px solid var(--border); margin: 24px 0;" />
+
+            <div style="display: grid; gap: 12px; background: #ffffff; border: 1px solid var(--border); border-radius: 6px; padding: 16px;">
+              <h3 style="font-family: var(--font-serif); font-size: 14px; font-weight: 700; color: var(--navy); margin: 0;">Related Services</h3>
+              <div style="display: grid; gap: 8px;">
+                <a href="#/services/custom-embroidery-digitizing" style="font-size: 13px; font-weight: 600; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <span>Custom Embroidery Digitizing</span>
+                  ${icon("arrow-right", 12)}
+                </a>
+                <a href="#/services/bridal-blouse-embroidery-designs" style="font-size: 13px; font-weight: 600; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <span>Bridal Blouse Designs</span>
+                  ${icon("arrow-right", 12)}
+                </a>
+                <a href="#/services/saree-border-embroidery-designs" style="font-size: 13px; font-weight: 600; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <span>Saree Border Digitizing</span>
+                  ${icon("arrow-right", 12)}
+                </a>
+                <a href="#/services/logo-embroidery-digitizing" style="font-size: 13px; font-weight: 600; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <span>Logo & Branding Digitizing</span>
+                  ${icon("arrow-right", 12)}
+                </a>
+              </div>
+            </div>
           </div>
 
           <!-- Right Column: Interactive Form steps -->
