@@ -174,7 +174,7 @@ export function renderProductDetail() {
                 .map(
                   (thumbId) => `
                     <button type="button" class="detail-thumb-btn ${activeImageSrc === thumbId ? "active" : ""}" data-action="select-thumb" data-src="${attr(thumbId)}" style="width: 60px; height: 60px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; padding: 0;">
-                      <img src="${attr(mediaUrl(thumbId))}" alt="Thumbnail" style="width:100%; height:100%; object-fit:cover;" />
+                      <img src="${attr(mediaUrl(thumbId))}" alt="${attr(product.title)} design view" style="width:100%; height:100%; object-fit:cover;" />
                     </button>
                   `
                 )
@@ -572,7 +572,7 @@ export function renderProductDetail() {
                   .map(
                     (thumbId) => `
                       <button type="button" class="detail-thumb-btn ${activeImageSrc === thumbId ? "active" : ""}" data-action="select-thumb" data-src="${attr(thumbId)}">
-                        <img src="${attr(mediaUrl(thumbId))}" alt="Thumbnail" />
+                        <img src="${attr(mediaUrl(thumbId))}" alt="${attr(product.title)} design view" />
                       </button>
                     `
                   )

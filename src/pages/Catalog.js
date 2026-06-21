@@ -395,7 +395,7 @@ export function renderCatalog() {
                     Intricate floral embroidery designed for couture bridal fashion.
                   </p>
                   <a href="#/catalog?collection=bridal" class="button button-primary" style="display:inline-flex; text-decoration:none; padding: 12px 28px; min-height:48px;">
-                    <span>Explore Collection</span>
+                    <span>Explore Bridal Embroidery Collection</span>
                     ${icon("arrow-right", 16)}
                   </a>
                 </div>

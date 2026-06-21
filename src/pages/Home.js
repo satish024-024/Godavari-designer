@@ -100,7 +100,7 @@ function renderCollections() {
         </div>
         <div class="heading-actions-wrap">
           <a href="#/catalog" class="text-action" style="text-decoration:none;">
-            View All
+            View All Collections
             ${icon("arrow-right", 18)}
           </a>
           <div class="carousel-controls-desktop">
@@ -125,7 +125,7 @@ function renderCollections() {
                   </div>
                   <div class="collection-content">
                     <h3>${escapeHtml(collection.title)}</h3>
-                    <a href="#/catalog?collection=${collection.slug || collection.id}" class="gold-circle" aria-label="Open ${attr(collection.title)}">
+                    <a href="#/catalog?collection=${collection.slug || collection.id}" class="gold-circle" aria-label="Browse ${attr(collection.title)} embroidery collection">
                       ${icon("arrow-right", 18)}
                     </a>
                   </div>

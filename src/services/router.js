@@ -12,12 +12,12 @@ const routes = {
   "/catalog": { page: "catalog", title: "Design Library | Godavari Designer" },
   "/product/:slug": { page: "product-detail", title: "Product Detail | Godavari" },
   "/custom-order": { page: "custom-order", title: "Custom Digitizing Request | Godavari" },
-  "/cart": { page: "cart", title: "Your Cart | Godavari Designer" },
-  "/wishlist": { page: "wishlist", title: "Saved Designs | Godavari Designer" },
-  "/checkout": { page: "checkout", title: "Checkout | Godavari Designer" },
-  "/track-order": { page: "track-order", title: "Track Your Order | Godavari" },
-  "/account": { page: "account", title: "Customer Dashboard | Godavari", requiresAuth: true },
-  "/auth": { page: "auth", title: "Sign In / Register | Godavari" },
+  "/cart": { page: "cart", title: "Your Cart | Godavari Designer", noindex: true },
+  "/wishlist": { page: "wishlist", title: "Saved Designs | Godavari Designer", noindex: true },
+  "/checkout": { page: "checkout", title: "Checkout | Godavari Designer", noindex: true },
+  "/track-order": { page: "track-order", title: "Track Your Order | Godavari", noindex: true },
+  "/account": { page: "account", title: "Customer Dashboard | Godavari", requiresAuth: true, noindex: true },
+  "/auth": { page: "auth", title: "Sign In / Register | Godavari", noindex: true },
   
   // Company pages
   "/about-us": { page: "about-us", title: "About Us | Godavari Designer" },
@@ -34,7 +34,7 @@ const routes = {
   "/privacy-policy": { page: "privacy-policy", title: "Privacy Policy | Godavari" },
 
   // Admin login alias – redirects authenticated admins, no bare auth access
-  "/admin/login": { page: "auth", title: "Admin Login | Godavari" },
+  "/admin/login": { page: "auth", title: "Admin Login | Godavari", noindex: true },
   // Admin portal root
   "/admin": { page: "admin-dashboard", title: "Admin Portal | Godavari", requiresAdmin: true },
   "/admin-dashboard": { page: "admin-dashboard", title: "Admin Portal | Godavari", requiresAdmin: true },
@@ -50,7 +50,7 @@ const routes = {
   "/admin/faqs": { page: "admin-dashboard", title: "FAQs | Admin Portal", requiresAdmin: true },
   "/admin/settings": { page: "admin-dashboard", title: "Settings | Admin Portal", requiresAdmin: true },
   "/admin/media": { page: "admin-dashboard", title: "Media Library | Admin Portal", requiresAdmin: true },
-  "/404": { page: "404", title: "Page Not Found | Godavari" }
+  "/404": { page: "404", title: "Page Not Found | Godavari", noindex: true }
 };
 
 // ==========================================
@@ -380,30 +380,52 @@ export function handleRouting() {
   }
   metaDesc.setAttribute("content", pageDescription);
 
-  // Apply Canonical Link
-  let canonicalLink = document.querySelector('link[rel="canonical"]');
-  if (!canonicalLink) {
-    canonicalLink = document.createElement("link");
-    canonicalLink.setAttribute("rel", "canonical");
-    document.head.appendChild(canonicalLink);
+  // Apply Meta Robots (noindex for private/transactional/admin pages)
+  const isNoIndex = !!(matchedRoute.noindex || matchedRoute.requiresAdmin);
+  let metaRobots = document.querySelector('meta[name="robots"]');
+  if (isNoIndex) {
+    if (!metaRobots) {
+      metaRobots = document.createElement("meta");
+      metaRobots.setAttribute("name", "robots");
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.setAttribute("content", "noindex, nofollow");
+  } else if (metaRobots) {
+    metaRobots.remove();
   }
-  let canonicalPath = path;
-  if (path === "/catalog" && queryParams.collection) {
-    canonicalPath = `/catalog?collection=${queryParams.collection}`;
-  }
-  canonicalLink.setAttribute("href", `https://godavaridesigners.com${canonicalPath}`);
 
-  // Apply JSON-LD Schema
-  let schemaScript = document.getElementById("seo-schema-jsonld");
-  if (schemaScript) {
-    schemaScript.remove();
-  }
-  if (schemaData) {
-    schemaScript = document.createElement("script");
-    schemaScript.id = "seo-schema-jsonld";
-    schemaScript.type = "application/ld+json";
-    schemaScript.text = JSON.stringify(schemaData);
-    document.head.appendChild(schemaScript);
+  // For noindex pages: suppress canonical and JSON-LD, clean up any stale tags
+  if (isNoIndex) {
+    const staleCanonical = document.querySelector('link[rel="canonical"]');
+    if (staleCanonical) staleCanonical.remove();
+    const staleSchema = document.getElementById("seo-schema-jsonld");
+    if (staleSchema) staleSchema.remove();
+  } else {
+    // Apply Canonical Link
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement("link");
+      canonicalLink.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalLink);
+    }
+    let canonicalPath = path;
+    if (path === "/catalog" && queryParams.collection) {
+      canonicalPath = `/catalog?collection=${queryParams.collection}`;
+    }
+    canonicalLink.setAttribute("href", `https://godavaridesigners.com${canonicalPath}`);
+
+    // Apply JSON-LD Schema
+    let schemaScript = document.getElementById("seo-schema-jsonld");
+    if (schemaScript) {
+      schemaScript.remove();
+    }
+    if (schemaData) {
+      schemaScript = document.createElement("script");
+      schemaScript.id = "seo-schema-jsonld";
+      schemaScript.type = "application/ld+json";
+      schemaScript.text = JSON.stringify(schemaData);
+      document.head.appendChild(schemaScript);
+    }
   }
 
   // Derive admin section from path (e.g. /admin/products → 'products')
