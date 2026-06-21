@@ -173,6 +173,8 @@ function mapCustomRequestFromDB(r) {
     digitizedFile: r.digitized_file,
     referenceNumber: r.reference_number,
     statusNote: r.status_note,
+    requestSource: r.request_source || 'custom_order',
+    cartItems: r.cart_items || null,
     createdAt: r.created_at,
     updatedAt: r.updated_at
   };
@@ -184,16 +186,18 @@ function mapCustomRequestToDB(r) {
     name: r.name,
     email: r.email,
     phone: r.phone || null,
-    project_type: r.projectType || r.project_type || "",
+    project_type: r.projectType || r.project_type || null,
     notes: r.notes,
-    artwork_attachment: r.artworkAttachment || r.artwork_attachment || "",
+    artwork_attachment: r.artworkAttachment || r.artwork_attachment || null,
     status: r.status || "Submitted",
     quote_amount: r.quoteAmount || null,
     payment_status: r.paymentStatus || "unpaid",
     admin_notes: r.adminNotes || null,
     digitized_file: r.digitizedFile || null,
     reference_number: r.referenceNumber || null,
-    status_note: r.statusNote || null
+    status_note: r.statusNote || null,
+    request_source: r.requestSource || r.request_source || 'custom_order',
+    cart_items: r.cartItems || r.cart_items || null
   };
 }
 
@@ -600,6 +604,16 @@ export const settingsService = {
 // CUSTOM REQUEST SERVICE
 // ==========================================
 
+function generateCartQuoteReference() {
+  const year = new Date().getFullYear();
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let randStr = '';
+  for (let i = 0; i < 6; i++) {
+    randStr += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `GD-CQ-${year}-${randStr}`;
+}
+
 export const customRequestService = {
   async getRequests() {
     const { data, error } = await supabase
@@ -608,6 +622,48 @@ export const customRequestService = {
       .order('created_at', { ascending: false });
     if (error) throw error;
     return data.map(mapCustomRequestFromDB);
+  },
+
+  async createCartQuoteRequest(payload) {
+    if (!payload.name) throw new Error("Name is required");
+    if (!payload.email) throw new Error("Email is required");
+    if (!payload.phone) throw new Error("Phone number is required");
+    if (!payload.cartItems || !Array.isArray(payload.cartItems) || payload.cartItems.length === 0) {
+      throw new Error("Cart is empty");
+    }
+
+    const refNum = generateCartQuoteReference();
+
+    const req = {
+      userId: payload.userId || null,
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+      projectType: "Cart Quote",
+      notes: payload.notes || "",
+      artworkAttachment: null,
+      status: "Submitted",
+      referenceNumber: refNum,
+      requestSource: "cart_quote",
+      cartItems: payload.cartItems
+    };
+
+    const dbReq = mapCustomRequestToDB(req);
+    dbReq.status_history = [
+      {
+        status: dbReq.status || 'Submitted',
+        timestamp: new Date().toISOString()
+      }
+    ];
+
+    const { data, error } = await supabase
+      .from('custom_requests')
+      .insert(dbReq)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return mapCustomRequestFromDB(data);
   },
 
   async createRequest(req) {

@@ -1,4 +1,4 @@
-import { setPage, currentUser, showToast, authInitialized } from "./store.js";
+import { setPage, currentUser, showToast, authInitialized, dataSynced } from "./store.js";
 import { DB } from "./db.js";
 
 // ==========================================
@@ -184,20 +184,24 @@ export function handleRouting() {
 
   // 1. Validate product slug
   if (matchedRoute.page === "product-detail") {
-    const products = DB.getProducts();
-    if (!products.some((p) => p.slug === matchedParams.slug)) {
-      window.location.hash = "#/404";
-      return;
+    if (dataSynced) {
+      const products = DB.getProducts();
+      if (!products.some((p) => p.slug === matchedParams.slug)) {
+        window.location.hash = "#/404";
+        return;
+      }
     }
   }
 
   // 2. Validate catalog query params
   if (matchedRoute.page === "catalog") {
     if (queryParams.category) {
-      const cats = DB.getCategories();
-      if (!cats.some((c) => c.slug === queryParams.category)) {
-        window.location.hash = "#/404";
-        return;
+      if (dataSynced) {
+        const cats = DB.getCategories();
+        if (!cats.some((c) => c.slug === queryParams.category)) {
+          window.location.hash = "#/404";
+          return;
+        }
       }
     }
     if (queryParams.collection) {

@@ -1,6 +1,6 @@
 import { DB } from "./db.js";
 import { defaultSite } from "../data/defaultSite.js";
-import { mergeDefaults, clone } from "../utils/helpers.js";
+import { mergeDefaults, clone, money } from "../utils/helpers.js";
 import {
   initSupabase,
   supabase,
@@ -28,6 +28,9 @@ export let currentProfile = null;
 export let authInitialized = false;
 export let authLoading = false;
 export let faqs = [];
+export let dataSynced = false;
+export let cartQuoteSubmitting = false;
+export let lastCartQuoteResult = null;
 
 export const ui = {
   page: "home",
@@ -110,7 +113,12 @@ export async function syncFromSupabase() {
     // 6. Fetch FAQs
     faqs = await faqService.getFaqs();
 
-    triggerRender();
+    dataSynced = true;
+    import("./router.js").then(({ handleRouting }) => {
+      handleRouting();
+    }).catch((e) => {
+      triggerRender();
+    });
   } catch (err) {
     console.error("Failed to sync state from Supabase:", err);
     showToast("Running in offline mode");
@@ -119,7 +127,13 @@ export async function syncFromSupabase() {
     const cachedCats = DB.getCategories();
     const cachedProds = DB.getProducts();
     if (cachedProds.length > 0) site.products = cachedProds;
-    triggerRender();
+    
+    dataSynced = true;
+    import("./router.js").then(({ handleRouting }) => {
+      handleRouting();
+    }).catch((e) => {
+      triggerRender();
+    });
   }
 }
 
@@ -619,5 +633,264 @@ export async function deleteCategory(id) {
     await categoryService.deleteCategory(id);
   } catch (error) {
     showToast(`Error: ${error.message}`);
+  }
+}
+
+export function clearCartQuoteResult() {
+  lastCartQuoteResult = null;
+  triggerRender();
+}
+
+export async function submitCartQuote(formData) {
+  if (!cart || cart.length === 0) {
+    showToast("Your cart is empty");
+    return null;
+  }
+
+  // 1. Map/transform cart items to structured cart_items format
+  const cartItems = cart.map((item) => {
+    const product = site.products.find((p) => p.id === item.id);
+    if (!product) return null;
+    const formatObj = product.formats ? product.formats.find(f => f.format === item.format) : null;
+    const unitPrice = formatObj ? formatObj.price : product.price;
+    const categoryName = product.category || "";
+    const collectionName = product.collection || "";
+
+    return {
+      product_id: product.id,
+      product_slug: product.slug,
+      product_name: product.title,
+      quantity: item.qty,
+      selected_format: item.format,
+      unit_price: Number(unitPrice),
+      line_total: Number(unitPrice * item.qty),
+      image: product.image,
+      category_name: categoryName,
+      collection_name: collectionName
+    };
+  }).filter(Boolean);
+
+  if (cartItems.length === 0) {
+    showToast("Invalid items in cart");
+    return null;
+  }
+
+  cartQuoteSubmitting = true;
+  triggerRender();
+
+  try {
+    const payload = {
+      userId: currentUser ? currentUser.id : null,
+      name: formData.name || formData.get?.("name") || "",
+      email: formData.email || formData.get?.("email") || "",
+      phone: formData.phone || formData.get?.("phone") || "",
+      notes: formData.notes || formData.get?.("notes") || "",
+      cartItems
+    };
+
+    let result;
+    try {
+      result = await customRequestService.createCartQuoteRequest(payload);
+    } catch (dbErr) {
+      console.warn("Database insert failed, falling back to local reference for WhatsApp:", dbErr);
+      
+      const year = new Date().getFullYear();
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let randStr = '';
+      for (let i = 0; i < 6; i++) {
+        randStr += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      const refNum = `GD-CQ-TEMP-${year}-${randStr}`;
+
+      result = {
+        id: "temp-" + Date.now(),
+        referenceNumber: refNum,
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        notes: payload.notes,
+        cartItems: payload.cartItems,
+        createdAt: new Date().toISOString(),
+        isLocalFallback: true
+      };
+    }
+
+    // Build the WhatsApp message
+    const itemsText = cartItems.map(item => `- ${item.product_name} (${item.selected_format}) x${item.quantity}`).join('\n');
+    const totalEst = cartItems.reduce((sum, item) => sum + item.line_total, 0);
+    const whatsappMsg = `Hello Godavari Designer, I would like to request a quote for the following designs:
+
+Reference: ${result.referenceNumber}
+Customer: ${result.name}
+Email: ${result.email}
+Phone: ${result.phone}
+Notes: ${result.notes || "None"}
+
+Designs:
+${itemsText}
+
+Total Estimate: ${money(totalEst)}
+
+Please confirm the pricing and availability. Thank you!`;
+
+    const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMsg)}`;
+
+    try {
+      window.open(whatsappUrl, "_blank");
+    } catch (popErr) {
+      console.warn("Popup blocked, fallback will be handled by success page button", popErr);
+    }
+
+    // Clear cart upon successful submission/preparation
+    cart = [];
+    saveCommerce();
+
+    result.whatsappUrl = whatsappUrl;
+    lastCartQuoteResult = result;
+
+    if (!result.isLocalFallback) {
+      showToast("Quote inquiry submitted successfully!");
+    } else {
+      showToast("Inquiry prepared. Please send via WhatsApp.");
+    }
+
+    return result;
+  } catch (err) {
+    console.error("Failed to submit cart quote:", err);
+    showToast(err.message || "Failed to submit quote inquiry");
+    throw err;
+  } finally {
+    cartQuoteSubmitting = false;
+    triggerRender();
+  }
+}
+
+export async function submitQuoteModal(formData) {
+  const cartItems = cart.map((item) => {
+    const product = site.products.find((p) => p.id === item.id);
+    if (!product) return null;
+    const formatObj = product.formats ? product.formats.find(f => f.format === item.format) : null;
+    const unitPrice = formatObj ? formatObj.price : product.price;
+    const categoryName = product.category || "";
+    const collectionName = product.collection || "";
+
+    return {
+      product_id: product.id,
+      product_slug: product.slug,
+      product_name: product.title,
+      quantity: item.qty,
+      selected_format: item.format,
+      unit_price: Number(unitPrice),
+      line_total: Number(unitPrice * item.qty),
+      image: product.image,
+      category_name: categoryName,
+      collection_name: collectionName
+    };
+  }).filter(Boolean);
+
+  const nameVal = formData.name || formData.get?.("name") || "";
+  const emailVal = formData.email || formData.get?.("email") || "";
+  const phoneVal = formData.phone || formData.get?.("phone") || "";
+  const projectVal = formData.project || formData.get?.("project") || "Custom Quote";
+  const notesVal = formData.notes || formData.get?.("notes") || "";
+
+  const year = new Date().getFullYear();
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let randStr = '';
+  for (let i = 0; i < 6; i++) {
+    randStr += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  
+  const prefix = cartItems.length > 0 ? "GD-CQ" : "GD-CO";
+  const refNum = `${prefix}-${year}-${randStr}`;
+  const statusVal = currentUser ? "Submitted" : "Guest Lead";
+
+  const requestData = {
+    userId: currentUser ? currentUser.id : null,
+    name: nameVal,
+    email: emailVal,
+    phone: phoneVal,
+    projectType: projectVal,
+    notes: notesVal,
+    artworkAttachment: null,
+    status: statusVal,
+    referenceNumber: refNum,
+    requestSource: cartItems.length > 0 ? "cart_quote" : "custom_order",
+    cartItems: cartItems.length > 0 ? cartItems : null
+  };
+
+  try {
+    let result;
+    let isLocalFallback = false;
+    try {
+      result = await customRequestService.createRequest(requestData);
+    } catch (dbErr) {
+      console.warn("Database insert failed for quote modal, falling back to WhatsApp:", dbErr);
+      isLocalFallback = true;
+      result = {
+        id: "temp-" + Date.now(),
+        referenceNumber: refNum,
+        name: requestData.name,
+        email: requestData.email,
+        phone: requestData.phone,
+        projectType: requestData.projectType,
+        notes: requestData.notes,
+        status: statusVal,
+        createdAt: new Date().toISOString(),
+        requestSource: requestData.requestSource,
+        cartItems: requestData.cartItems,
+        isLocalFallback: true
+      };
+    }
+
+    const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+    let whatsappMsg = `Hello Godavari Designer, I would like to request a quote.
+
+Reference: ${result.referenceNumber}
+Customer: ${result.name}
+Email: ${result.email}
+Phone: ${result.phone}
+Project Type: ${result.projectType}
+Notes: ${result.notes || "None"}
+`;
+
+    if (cartItems.length > 0) {
+      const itemsText = cartItems.map(item => `- ${item.product_name} (${item.selected_format}) x${item.quantity}`).join('\n');
+      const totalEst = cartItems.reduce((sum, item) => sum + item.line_total, 0);
+      whatsappMsg += `
+Selected Designs:
+${itemsText}
+
+Total Estimate: ${money(totalEst)}
+`;
+    }
+
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMsg)}`;
+
+    try {
+      window.open(whatsappUrl, "_blank");
+    } catch (popErr) {
+      console.warn("Popup blocked, fallback will be handled by success page button", popErr);
+    }
+
+    if (cartItems.length > 0) {
+      cart = [];
+      saveCommerce();
+    }
+
+    result.whatsappUrl = whatsappUrl;
+    
+    if (!result.isLocalFallback) {
+      showToast("Quote request submitted successfully!");
+    } else {
+      showToast("Quote request prepared. Opening WhatsApp...");
+    }
+
+    return result;
+  } catch (err) {
+    console.error("Failed to submit quote modal:", err);
+    showToast(err.message || "Failed to submit quote request");
+    throw err;
   }
 }

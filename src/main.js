@@ -34,7 +34,10 @@ import {
   initRealtimeSubscriptions,
   login,
   logout,
-  onAuthChange
+  onAuthChange,
+  submitCartQuote,
+  clearCartQuoteResult,
+  submitQuoteModal
 } from "./services/store.js";
 import { storageService } from "./services/supabase.js";
 import { clone, escapeHtml, attr, icon, money, isMobileViewport } from "./utils/helpers.js";
@@ -452,6 +455,11 @@ document.addEventListener("click", (event) => {
     removeFromCart(trigger.dataset.id, trigger.dataset.format);
   }
 
+  if (action === "clear-quote-success") {
+    clearCartQuoteResult();
+    setPage("catalog");
+  }
+
   if (action === "cart-minus") {
     updateCartQty(trigger.dataset.id, -1, trigger.dataset.format);
   }
@@ -867,13 +875,34 @@ document.addEventListener("submit", (event) => {
 
   if (event.target.id === "quoteForm") {
     event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.target).entries());
-    localStorage.setItem(
-      "godavari-designer-last-quote",
-      JSON.stringify({ ...data, cart, submittedAt: new Date().toISOString() })
-    );
-    closePanels();
-    showToast("Quote request submitted successfully");
+    const formData = new FormData(event.target);
+    const data = Object.fromEntries(formData.entries());
+    
+    const submitBtn = event.target.querySelector("button[type='submit']");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = `<span>Submitting Request...</span>`;
+    }
+
+    submitQuoteModal(data).then(() => {
+      closePanels();
+      triggerRender();
+    }).catch((err) => {
+      // errors handled inside submitQuoteModal
+    }).finally(() => {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = `<span>Send Quote Request</span>`;
+      }
+    });
+  }
+
+  if (event.target.id === "cartQuoteForm") {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    submitCartQuote(formData).catch((err) => {
+      // Toast/logging handled in store
+    });
   }
 
   if (event.target.id === "newsletterForm") {

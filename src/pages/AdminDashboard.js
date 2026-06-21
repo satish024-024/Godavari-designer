@@ -146,6 +146,7 @@ function triggerDataLoad(section) {
       stats.products = prods.length;
       stats.customers = custs.length;
       ordersList = ords || [];
+      requestsList = reqs || [];
       dataLoaded.stats = true;
       loadingStats = false;
       triggerRender();
@@ -334,6 +335,7 @@ function renderSidebar(activeSection) {
 
 function renderDashboardOverview() {
   const recentOrders = ordersList.slice(0, 5);
+  const recentRequests = requestsList.slice(0, 5);
 
   return `
     <div class="admin-module">
@@ -411,6 +413,64 @@ function renderDashboardOverview() {
               ${recentOrders.length === 0 ? `
                 <tr>
                   <td colspan="7" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No orders placed recently.</td>
+                </tr>
+              ` : ""}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Recent Custom Requests & Inquiries Section -->
+      <div style="margin-top: 40px;">
+        <h2 style="font-family: var(--font-serif); font-size: 20px; color: var(--navy); margin: 0 0 16px;">Recent Custom Requests & Inquiries</h2>
+        <div class="admin-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Customer</th>
+                <th>Source</th>
+                <th>Date</th>
+                <th>Details / Type</th>
+                <th>Status</th>
+                <th style="text-align: center;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${recentRequests.map(r => {
+                const isCart = r.requestSource === 'cart_quote';
+                const sourceLabel = isCart ? 'Cart Quote' : 'Custom Order';
+                const sourceStyle = isCart 
+                  ? 'background: rgba(56, 125, 255, 0.1); color: #387dff; border: 1px solid rgba(56, 125, 255, 0.2);' 
+                  : 'background: rgba(200, 161, 90, 0.12); color: var(--gold); border: 1px solid rgba(200, 161, 90, 0.2);';
+                const detailVal = isCart 
+                  ? `<strong>${(r.cartItems || []).length} items</strong>` 
+                  : escapeHtml(r.projectType || 'Custom');
+                const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—';
+                return `
+                  <tr>
+                    <td><strong>${escapeHtml(r.referenceNumber || r.id.slice(0, 8).toUpperCase())}</strong></td>
+                    <td>
+                      <div style="font-weight:600;">${escapeHtml(r.name)}</div>
+                      <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(r.email)}</div>
+                    </td>
+                    <td>
+                      <span class="admin-pill" style="${sourceStyle}">${sourceLabel}</span>
+                    </td>
+                    <td>${dateStr}</td>
+                    <td>${detailVal}</td>
+                    <td><span class="admin-pill admin-pill-gold">${r.status}</span></td>
+                    <td style="text-align: center;">
+                      <a href="#/admin/custom-requests" class="admin-btn admin-btn-secondary view-request-details-btn" data-id="${r.id}">
+                        Review & Quote
+                      </a>
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+              ${recentRequests.length === 0 ? `
+                <tr>
+                  <td colspan="7" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No requests received recently.</td>
                 </tr>
               ` : ""}
             </tbody>
@@ -1082,7 +1142,7 @@ function renderCustomRequestsModule() {
 
         <div class="admin-grid-2-1">
           <div class="admin-form" style="padding: 24px;">
-            <h2 class="admin-form-title">Custom Digitizing Request</h2>
+            <h2 class="admin-form-title">${r.requestSource === 'cart_quote' ? 'Cart Quote Inquiry' : 'Custom Digitizing Request'}</h2>
             <div style="font-size: 13px; color:rgba(17,29,66,0.5); border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:12px;">
               Request Ref: <strong>${escapeHtml(r.referenceNumber || r.id.slice(0, 8).toUpperCase())}</strong><br>
               Received on: ${date}
@@ -1099,22 +1159,65 @@ function renderCustomRequestsModule() {
               </div>
 
               <div style="border-top:1px solid var(--border); padding-top:16px;">
-                <h3 style="font-size:14px; margin: 0 0 8px; font-weight:700;">Request Details</h3>
+                <h3 style="font-size:14px; margin: 0 0 8px; font-weight:700;">Customer Message / Notes</h3>
                 <p style="margin: 0; font-size:13.5px; line-height:1.6;">
-                  Project Type: <strong>${escapeHtml(r.projectType)}</strong><br>
-                  Customer Notes:<br>
                   <em style="color:rgba(17,29,66,0.7); display:block; padding: 10px; background:var(--ivory); border-radius:6px; margin-top:6px;">"${escapeHtml(r.notes || 'No description provided')}"</em>
                 </p>
               </div>
 
-              ${r.artworkAttachment ? `
+              ${r.requestSource === 'cart_quote' ? `
                 <div style="border-top:1px solid var(--border); padding-top:16px;">
-                  <h3 style="font-size:14px; margin: 0 0 12px; font-weight:700;">Artwork Attachment</h3>
-                  <a href="${attr(mediaUrl(r.artworkAttachment))}" target="_blank" rel="noopener">
-                    <img src="${attr(mediaUrl(r.artworkAttachment))}" style="max-width: 100%; max-height: 280px; border-radius: 8px; border:1px solid var(--border); object-fit:contain;" />
-                  </a>
+                  <h3 style="font-size:14px; margin: 0 0 12px; font-weight:700;">Requested Cart Items</h3>
+                  <div class="admin-table-wrapper" style="margin-top: 8px;">
+                    <table class="admin-table" style="font-size: 12.5px;">
+                      <thead>
+                        <tr>
+                          <th>Product</th>
+                          <th>Format</th>
+                          <th>Qty</th>
+                          <th>Est. Unit Price</th>
+                          <th>Est. Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${(r.cartItems || []).map(item => `
+                          <tr>
+                            <td>
+                              <div style="display: flex; align-items: center; gap: 8px;">
+                                <img src="${attr(mediaUrl(item.image))}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border);" />
+                                <div>
+                                  <div style="font-weight: 600;">${escapeHtml(item.product_name)}</div>
+                                  <div style="font-size: 10px; color: rgba(17,29,66,0.5);">Slug: ${escapeHtml(item.product_slug)}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td><span class="admin-pill admin-pill-gold" style="font-size: 10px;">${escapeHtml(item.selected_format)}</span></td>
+                            <td><strong>${item.quantity}</strong></td>
+                            <td>${money(item.unit_price)}</td>
+                            <td><strong>${money(item.line_total)}</strong></td>
+                          </tr>
+                        `).join("")}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              ` : ""}
+              ` : `
+                <div style="border-top:1px solid var(--border); padding-top:16px;">
+                  <h3 style="font-size:14px; margin: 0 0 8px; font-weight:700;">Request Details</h3>
+                  <p style="margin: 0; font-size:13.5px; line-height:1.6;">
+                    Project Type: <strong>${escapeHtml(r.projectType || 'Custom')}</strong>
+                  </p>
+                </div>
+
+                ${r.artworkAttachment ? `
+                  <div style="border-top:1px solid var(--border); padding-top:16px;">
+                    <h3 style="font-size:14px; margin: 0 0 12px; font-weight:700;">Artwork Attachment</h3>
+                    <a href="${attr(mediaUrl(r.artworkAttachment))}" target="_blank" rel="noopener">
+                      <img src="${attr(mediaUrl(r.artworkAttachment))}" style="max-width: 100%; max-height: 280px; border-radius: 8px; border:1px solid var(--border); object-fit:contain;" />
+                    </a>
+                  </div>
+                ` : ""}
+              `}
             </div>
           </div>
 
@@ -1132,10 +1235,13 @@ function renderCustomRequestsModule() {
               <label class="admin-form-label">Request Status</label>
               <select name="status" class="admin-form-control">
                 <option value="Submitted" ${r.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
-                <option value="Quoted" ${r.status === 'Quoted' ? 'selected' : ''}>Quoted</option>
-                <option value="Paid" ${r.status === 'Paid' ? 'selected' : ''}>Paid</option>
-                <option value="In Progress" ${r.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-                <option value="Completed" ${r.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                <option value="Quote Sent" ${r.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
+                <option value="Approved" ${r.status === 'Approved' ? 'selected' : ''}>Approved</option>
+                <option value="Digitizing" ${r.status === 'Digitizing' ? 'selected' : ''}>Digitizing</option>
+                <option value="Production" ${r.status === 'Production' ? 'selected' : ''}>Production</option>
+                <option value="Delivered" ${r.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                <option value="Guest Lead" ${r.status === 'Guest Lead' ? 'selected' : ''}>Guest Lead</option>
+                <option value="Rejected" ${r.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
                 <option value="Cancelled" ${r.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
               </select>
             </div>
@@ -1180,8 +1286,8 @@ function renderCustomRequestsModule() {
   return `
     <div class="admin-module">
       <div style="margin-bottom: 24px;">
-        <h1 class="admin-module-title">Custom Digitizing Requests</h1>
-        <p class="admin-module-subtitle">Review designs uploaded by customers, quote prices, and deliver digitized stitch files.</p>
+        <h1 class="admin-module-title">Custom Digitizing & Cart Requests</h1>
+        <p class="admin-module-subtitle">Review designs uploaded by customers or cart inquiries, quote prices, and manage order pipeline flow.</p>
       </div>
 
       <div style="margin-bottom: 24px;">
@@ -1201,7 +1307,9 @@ function renderCustomRequestsModule() {
             <tr>
               <th>Reference</th>
               <th>Customer</th>
-              <th>Project Type</th>
+              <th>Source</th>
+              <th>Created At</th>
+              <th>Details / Type</th>
               <th>Amount Quoted</th>
               <th>Payment</th>
               <th>Status</th>
@@ -1209,27 +1317,42 @@ function renderCustomRequestsModule() {
             </tr>
           </thead>
           <tbody>
-            ${filteredRequests.map(r => `
-              <tr>
-                <td><strong>${escapeHtml(r.referenceNumber || r.id.slice(0, 8).toUpperCase())}</strong></td>
-                <td>
-                  <div style="font-weight:600;">${escapeHtml(r.name)}</div>
-                  <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(r.email)}</div>
-                </td>
-                <td>${escapeHtml(r.projectType)}</td>
-                <td><strong>${r.quoteAmount ? `$${r.quoteAmount}` : "—"}</strong></td>
-                <td><span class="admin-pill ${r.paymentStatus === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${r.paymentStatus || 'unpaid'}</span></td>
-                <td><span class="admin-pill admin-pill-gold">${r.status}</span></td>
-                <td style="text-align: center;">
-                  <button class="admin-btn admin-btn-secondary view-request-details-btn" data-id="${r.id}">
-                    Review & Quote
-                  </button>
-                </td>
-              </tr>
-            `).join("")}
+            ${filteredRequests.map(r => {
+              const isCart = r.requestSource === 'cart_quote';
+              const sourceLabel = isCart ? 'Cart Quote' : 'Custom Order';
+              const sourceStyle = isCart 
+                ? 'background: rgba(56, 125, 255, 0.1); color: #387dff; border: 1px solid rgba(56, 125, 255, 0.2);' 
+                : 'background: rgba(200, 161, 90, 0.12); color: var(--gold); border: 1px solid rgba(200, 161, 90, 0.2);';
+              const detailVal = isCart 
+                ? `<strong>${(r.cartItems || []).length} items</strong>` 
+                : escapeHtml(r.projectType || 'Custom');
+              const dateStr = r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '—';
+              return `
+                <tr>
+                  <td><strong>${escapeHtml(r.referenceNumber || r.id.slice(0, 8).toUpperCase())}</strong></td>
+                  <td>
+                    <div style="font-weight:600;">${escapeHtml(r.name)}</div>
+                    <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(r.email)}</div>
+                  </td>
+                  <td>
+                    <span class="admin-pill" style="${sourceStyle}">${sourceLabel}</span>
+                  </td>
+                  <td>${dateStr}</td>
+                  <td>${detailVal}</td>
+                  <td><strong>${r.quoteAmount ? `$${r.quoteAmount}` : "—"}</strong></td>
+                  <td><span class="admin-pill ${r.paymentStatus === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${r.paymentStatus || 'unpaid'}</span></td>
+                  <td><span class="admin-pill admin-pill-gold">${r.status}</span></td>
+                  <td style="text-align: center;">
+                    <button class="admin-btn admin-btn-secondary view-request-details-btn" data-id="${r.id}">
+                      Review & Quote
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
             ${filteredRequests.length === 0 ? `
               <tr>
-                <td colspan="7" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No requests found.</td>
+                <td colspan="9" style="padding: 30px; text-align: center; color: rgba(17,29,66,0.5);">No requests found.</td>
               </tr>
             ` : ""}
           </tbody>
@@ -2493,7 +2616,9 @@ export function initAdminDashboardDelegates() {
         adminNotes: form.adminNotes.value || null,
         name: selectedRequest.name,
         email: selectedRequest.email,
-        notes: selectedRequest.notes
+        notes: selectedRequest.notes,
+        requestSource: selectedRequest.requestSource,
+        cartItems: selectedRequest.cartItems
       };
 
       try {

@@ -109,7 +109,7 @@ function renderCollections() {
                   </div>
                   <div class="collection-content">
                     <h3>${escapeHtml(collection.title)}</h3>
-                    <a href="#/catalog?collection=${collection.id}" class="gold-circle" aria-label="Open ${attr(collection.title)}">
+                    <a href="#/catalog?collection=${collection.slug || collection.id}" class="gold-circle" aria-label="Open ${attr(collection.title)}">
                       ${icon("arrow-right", 18)}
                     </a>
                   </div>

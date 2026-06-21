@@ -136,9 +136,24 @@ export function renderCustomOrder() {
             </div>
           </div>
 
-          <div class="tracking-actions-row" style="max-width: 440px; margin: 24px auto 0;">
-            <button type="button" class="button button-secondary" data-action="reset-custom-order" style="min-height: 48px; font-weight: 700; border-radius: 4px;">Request Another Quote</button>
-            <a href="#/" class="button button-primary" style="min-height: 48px; font-weight: 700; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none;">Back to Home</a>
+          ${submissionResult.isLocalFallback ? `
+            <div style="font-size: 12px; color: #d93838; background: #fff2f0; border: 1px solid #ffccc7; padding: 10px 12px; border-radius: 4px; line-height: 1.5; margin: 0 auto 20px; max-width: 440px; text-align: left;">
+              ⚠️ Note: Could not save to database (login required / offline). Please click the green button below to send your request details directly on WhatsApp so we can process your custom order.
+            </div>
+          ` : ''}
+
+          <div class="tracking-actions-row" style="max-width: 440px; margin: 24px auto 0; display: flex; flex-direction: column; gap: 12px;">
+            ${submissionResult.whatsappUrl ? `
+              <a href="${submissionResult.whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="background: #25d366; color: #fff; text-decoration: none; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-weight: 700; border-radius: 4px; width: 100%;">
+                ${icon("message-square", 18)}
+                <span>Send details via WhatsApp</span>
+              </a>
+            ` : ''}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%;">
+              <button type="button" class="button button-secondary" data-action="reset-custom-order" style="min-height: 48px; font-weight: 700; border-radius: 4px; width: 100%;">Request Another</button>
+              <a href="#/" class="button button-primary" style="min-height: 48px; font-weight: 700; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; width: 100%;">Back to Home</a>
+            </div>
           </div>
         </div>
       </section>
@@ -148,6 +163,7 @@ export function renderCustomOrder() {
   // Render Quote Request Form
   const defaultName = currentUser ? currentUser.name : "";
   const defaultEmail = currentUser ? currentUser.email : "";
+  const defaultPhone = currentUser ? (currentUser.phone || "") : "";
 
   return `
     <section class="content-section custom-order-section" style="padding-top: var(--header-height); background: var(--ivory);">
@@ -238,7 +254,7 @@ export function renderCustomOrder() {
                   </label>
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Phone Number *</span>
-                    <input type="tel" name="customerPhone" required placeholder="+91 98765 43210" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                    <input type="tel" name="customerPhone" required value="${attr(defaultPhone)}" placeholder="+91 98765 43210" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
                 </div>
               </div>
@@ -640,20 +656,60 @@ export function initCustomOrderEvents() {
           referenceNumber: refNum
         };
 
-        const result = await customRequestService.createRequest(requestData);
+        let result;
+        let isLocalFallback = false;
+        try {
+          result = await customRequestService.createRequest(requestData);
+        } catch (dbErr) {
+          console.warn("Database insert failed for custom order, falling back to WhatsApp:", dbErr);
+          isLocalFallback = true;
+          result = {
+            referenceNumber: refNum,
+            name: requestData.name,
+            email: requestData.email,
+            phone: requestData.phone,
+            projectType: requestData.projectType,
+            notes: requestData.notes,
+            status: "Guest Lead",
+            createdAt: new Date().toISOString(),
+            isLocalFallback: true
+          };
+        }
+
+        // Open WhatsApp
+        const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+        const whatsappMsg = `Hello Godavari Designer, I would like to request a Custom Digitizing Quote.
+
+Reference: ${result.referenceNumber}
+Customer: ${result.name}
+Email: ${result.email}
+Phone: ${result.phone}
+Project Type: ${result.projectType}
+Urgency: ${selectedUrgency}
+Machine Format: ${selectedFormat}
+Fabric: ${selectedFabric}
+Description: ${formData.get("projectDescription")}
+Attachments: ${commaSeparatedUrls || "None"}`;
+
+        const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMsg)}`;
+
+        try {
+          window.open(whatsappUrl, "_blank");
+        } catch (popErr) {
+          console.warn("Popup blocked, fallback will be handled by success page button", popErr);
+        }
 
         submissionResult = {
-          referenceNumber: refNum,
-          name: requestData.name,
-          email: requestData.email,
-          phone: requestData.phone,
-          projectType: requestData.projectType,
-          notes: requestData.notes,
-          status: statusVal,
-          createdAt: new Date().toISOString()
+          ...result,
+          whatsappUrl,
+          isLocalFallback
         };
 
-        showToast("Quote request submitted successfully!");
+        if (!isLocalFallback) {
+          showToast("Quote request submitted successfully!");
+        } else {
+          showToast("Request prepared. Please send via WhatsApp.");
+        }
         triggerRender();
       } catch (err) {
         console.error("Error submitting quote request:", err);

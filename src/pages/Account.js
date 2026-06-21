@@ -430,7 +430,20 @@ function renderCustomTab() {
               month: "long",
               year: "numeric"
             });
+            const isCart = req.requestSource === 'cart_quote';
             const artworkUrls = req.artworkAttachment ? req.artworkAttachment.split(", ").filter(Boolean) : [];
+            
+            const thumbnailsHtml = isCart 
+              ? (req.cartItems || []).map(item => `
+                  <div style="width: 54px; height: 54px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.02);" title="${escapeHtml(item.product_name)}">
+                    <img src="${escapeHtml(item.image)}" style="width:100%; height:100%; object-fit:cover;" />
+                  </div>
+                `).join("")
+              : artworkUrls.map(url => `
+                  <div style="width: 54px; height: 54px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.02);">
+                    <img src="${escapeHtml(url)}" style="width:100%; height:100%; object-fit:cover;" />
+                  </div>
+                `).join("");
 
             return `
               <div class="custom-request-card">
@@ -449,8 +462,8 @@ function renderCustomTab() {
 
                 <div class="custom-request-meta-grid">
                   <div class="custom-request-meta-item">
-                    <span>Application</span>
-                    <strong>${escapeHtml(req.projectType)}</strong>
+                    <span>${isCart ? "Inquiry Type" : "Application"}</span>
+                    <strong>${isCart ? "Cart Quote" : escapeHtml(req.projectType || "Custom")}</strong>
                   </div>
                   <div class="custom-request-meta-item">
                     <span>Payment State</span>
@@ -462,18 +475,14 @@ function renderCustomTab() {
                   </div>
                 </div>
 
-                <!-- Reference thumbnails -->
-                ${artworkUrls.length > 0 ? `
-                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    ${artworkUrls.map(url => `
-                      <div style="width: 54px; height: 54px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.02);">
-                        <img src="${escapeHtml(url)}" style="width:100%; height:100%; object-fit:cover;" />
-                      </div>
-                    `).join("")}
+                <!-- Reference thumbnails / Cart items -->
+                ${(isCart ? (req.cartItems || []).length > 0 : artworkUrls.length > 0) ? `
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px;">
+                    ${thumbnailsHtml}
                   </div>
                 ` : ""}
 
-                <div style="display: flex; justify-content: flex-end; border-top: 1px dashed var(--border); padding-top: 16px;">
+                <div style="display: flex; justify-content: flex-end; border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 16px;">
                   <a href="#/track-order?ref=${req.referenceNumber}" class="button button-secondary" style="min-height: 38px; font-size: 12px; font-weight: 700; padding: 0 16px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 4px;">
                     ${icon("compass", 13)} Track Progress
                   </a>

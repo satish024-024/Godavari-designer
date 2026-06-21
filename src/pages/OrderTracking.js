@@ -277,101 +277,180 @@ export function renderOrderTracking() {
         </div>
       `;
     } else {
-      // Custom digitizing details
-      let notesData = {};
-      try {
-        notesData = JSON.parse(data.notes);
-      } catch (e) {
-        notesData = {
-          project_description: data.notes,
-          fabric_type: "N/A",
-          urgency: "Standard",
-          machine_format: "DST",
-          quantity: 1
-        };
-      }
+      // Custom request tracking
+      const isCartQuote = data.request_source === 'cart_quote';
 
-      // Multiple reference image rendering
-      const artworkUrls = data.artwork_attachment ? data.artwork_attachment.split(", ").filter(Boolean) : [];
-      let referencesHtml = "";
-      if (artworkUrls.length > 0) {
-        referencesHtml = `
-          <div style="margin-top: 16px;">
-            <div style="font-weight: 700; font-size: 12px; color: var(--navy); text-transform: uppercase; margin-bottom: 8px;">Uploaded Artwork Reference Files</div>
-            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-              ${artworkUrls.map((url, idx) => `
-                <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" style="border: 1px solid var(--border); border-radius: 4px; overflow: hidden; display: block; width: 80px; height: 80px; background: var(--surface);">
-                  <img src="${escapeHtml(url)}" alt="Artwork #${idx + 1}" style="width: 100%; height: 100%; object-fit: cover;" />
-                </a>
-              `).join("")}
-            </div>
-          </div>
-        `;
-      }
-
-      // Download digitized result if delivered/completed
-      let downloadFileHtml = "";
-      if (data.digitized_file) {
-        downloadFileHtml = `
-          <div style="background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px;">
-            <div>
-              <strong style="color: #389e0d; font-size: 14px; display: block; margin-bottom: 2px;">Digitizing Completed!</strong>
-              <span style="font-size: 12px; color: var(--ink-soft);">Your high-quality embroidery files are ready for download.</span>
-            </div>
-            <a href="${escapeHtml(data.digitized_file)}" target="_blank" class="button" style="background: #52c41a; color: #fff; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; font-weight: 700; border-radius: 4px; font-size: 13px;">
-              ${icon("arrow-down", 14)} Download Design
-            </a>
-          </div>
-        `;
-      }
-
-      itemsSummaryHtml = `
-        <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: grid; gap: 16px;">
-          <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Digitizing Specifications</h3>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
-            <div>
-              <span style="color: var(--ink-soft); display: block;">Project Type / Application</span>
-              <strong style="color: var(--navy);">${escapeHtml(data.project_type || "N/A")}</strong>
-            </div>
-            <div>
-              <span style="color: var(--ink-soft); display: block;">Fabric Base</span>
-              <strong style="color: var(--navy);">${escapeHtml(notesData.fabric_type || "N/A")}</strong>
-            </div>
-            <div>
-              <span style="color: var(--ink-soft); display: block;">Format Selected</span>
-              <strong style="color: var(--navy);">${escapeHtml(notesData.machine_format || "DST")}</strong>
-            </div>
-            <div>
-              <span style="color: var(--ink-soft); display: block;">Urgency Priority</span>
-              <strong style="color: var(--navy);">${escapeHtml(notesData.urgency || "Standard")}</strong>
-            </div>
-          </div>
-
-          <div style="border-top: 1px solid var(--border); padding-top: 16px; font-size: 13px;">
-            <span style="color: var(--ink-soft); display: block; margin-bottom: 4px;">Custom Request Details</span>
-            <p style="color: var(--navy); margin: 0; line-height: 1.6; background: var(--surface); padding: 12px; border-radius: 4px;">
-              ${escapeHtml(notesData.project_description || "No description provided.")}
-            </p>
-          </div>
-
-          ${referencesHtml}
-
-          ${data.quote_amount ? `
-            <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+      if (isCartQuote) {
+        const cartItems = data.cart_items || [];
+        
+        // Download digitized result if delivered/completed
+        let downloadFileHtml = "";
+        if (data.digitized_file) {
+          downloadFileHtml = `
+            <div style="background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px;">
               <div>
-                <span style="color: var(--ink-soft); font-size: 13px;">Quote Amount:</span>
-                <span style="font-size: 11px; margin-left: 8px; background: ${data.payment_status === 'paid' ? '#f6ffed' : '#fff7e6'}; color: ${data.payment_status === 'paid' ? '#389e0d' : '#d46b08'}; font-weight:700; padding:2px 8px; border-radius:99px; text-transform:uppercase;">
-                  ${escapeHtml(data.payment_status)}
-                </span>
+                <strong style="color: #389e0d; font-size: 14px; display: block; margin-bottom: 2px;">Designs Ready!</strong>
+                <span style="font-size: 12px; color: var(--ink-soft);">Your high-quality embroidery files are ready for download.</span>
               </div>
-              <strong style="font-size: 18px; color: var(--navy);">${money(data.quote_amount)}</strong>
+              <a href="${escapeHtml(data.digitized_file)}" target="_blank" class="button" style="background: #52c41a; color: #fff; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; font-weight: 700; border-radius: 4px; font-size: 13px;">
+                ${icon("arrow-down", 14)} Download Designs
+              </a>
             </div>
-          ` : ""}
+          `;
+        }
 
-          ${downloadFileHtml}
-        </div>
-      `;
+        itemsSummaryHtml = `
+          <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: grid; gap: 16px;">
+            <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Inquiry Design Items</h3>
+            
+            <div class="admin-table-wrapper" style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border); color: var(--navy); font-weight: 700;">
+                    <th style="padding: 10px 8px;">Design</th>
+                    <th style="padding: 10px 8px;">Format</th>
+                    <th style="padding: 10px 8px;">Qty</th>
+                    <th style="padding: 10px 8px; text-align: right;">Est. Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${cartItems.map(item => `
+                    <tr style="border-bottom: 1px solid var(--border);">
+                      <td style="padding: 12px 8px; display: flex; align-items: center; gap: 12px;">
+                        <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.product_name)}" style="width: 48px; height: 48px; object-fit: cover; border: 1px solid var(--border); border-radius: 4px;" />
+                        <div>
+                          <strong style="color: var(--navy); display: block;">${escapeHtml(item.product_name)}</strong>
+                          <span style="font-size: 10px; color: var(--ink-soft);">Code: ${escapeHtml(item.product_slug)}</span>
+                        </div>
+                      </td>
+                      <td style="padding: 12px 8px;">${escapeHtml(item.selected_format)}</td>
+                      <td style="padding: 12px 8px;"><strong>${item.quantity}</strong></td>
+                      <td style="padding: 12px 8px; text-align: right; font-weight: 600;">${money(item.line_total)}</td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+
+            <div style="font-size: 13px; margin-top: 10px;">
+              <span style="color: var(--ink-soft); display: block; margin-bottom: 4px;">Customer Inquiry Notes</span>
+              <p style="color: var(--navy); margin: 0; line-height: 1.6; background: var(--surface); padding: 12px; border-radius: 4px; font-style: italic;">
+                "${escapeHtml(data.notes || "No notes provided.")}"
+              </p>
+            </div>
+
+            ${data.quote_amount ? `
+              <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <span style="color: var(--ink-soft); font-size: 13px;">Quote Amount:</span>
+                  <span style="font-size: 11px; margin-left: 8px; background: ${data.payment_status === 'paid' ? '#f6ffed' : '#fff7e6'}; color: ${data.payment_status === 'paid' ? '#389e0d' : '#d46b08'}; font-weight:700; padding:2px 8px; border-radius:99px; text-transform:uppercase;">
+                    ${escapeHtml(data.payment_status)}
+                  </span>
+                </div>
+                <strong style="font-size: 18px; color: var(--navy);">${money(data.quote_amount)}</strong>
+              </div>
+            ` : ""}
+
+            ${downloadFileHtml}
+          </div>
+        `;
+      } else {
+        // Custom digitizing details
+        let notesData = {};
+        try {
+          notesData = JSON.parse(data.notes);
+        } catch (e) {
+          notesData = {
+            project_description: data.notes,
+            fabric_type: "N/A",
+            machine_format: "DST",
+            urgency: "Standard",
+            quantity: 1
+          };
+        }
+
+        // Multiple reference image rendering
+        const artworkUrls = data.artwork_attachment ? data.artwork_attachment.split(", ").filter(Boolean) : [];
+        let referencesHtml = "";
+        if (artworkUrls.length > 0) {
+          referencesHtml = `
+            <div style="margin-top: 16px;">
+              <div style="font-weight: 700; font-size: 12px; color: var(--navy); text-transform: uppercase; margin-bottom: 8px;">Uploaded Artwork Reference Files</div>
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                ${artworkUrls.map((url, idx) => `
+                  <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" style="border: 1px solid var(--border); border-radius: 4px; overflow: hidden; display: block; width: 80px; height: 80px; background: var(--surface);">
+                    <img src="${escapeHtml(url)}" alt="Artwork #${idx + 1}" style="width: 100%; height: 100%; object-fit: cover;" />
+                  </a>
+                `).join("")}
+              </div>
+            </div>
+          `;
+        }
+
+        // Download digitized result if delivered/completed
+        let downloadFileHtml = "";
+        if (data.digitized_file) {
+          downloadFileHtml = `
+            <div style="background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 6px; padding: 20px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px;">
+              <div>
+                <strong style="color: #389e0d; font-size: 14px; display: block; margin-bottom: 2px;">Digitizing Completed!</strong>
+                <span style="font-size: 12px; color: var(--ink-soft);">Your high-quality embroidery files are ready for download.</span>
+              </div>
+              <a href="${escapeHtml(data.digitized_file)}" target="_blank" class="button" style="background: #52c41a; color: #fff; border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; font-weight: 700; border-radius: 4px; font-size: 13px;">
+                ${icon("arrow-down", 14)} Download Design
+              </a>
+            </div>
+          `;
+        }
+
+        itemsSummaryHtml = `
+          <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; display: grid; gap: 16px;">
+            <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--navy); margin: 0; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Digitizing Specifications</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
+              <div>
+                <span style="color: var(--ink-soft); display: block;">Project Type / Application</span>
+                <strong style="color: var(--navy);">${escapeHtml(data.project_type || "N/A")}</strong>
+              </div>
+              <div>
+                <span style="color: var(--ink-soft); display: block;">Fabric Base</span>
+                <strong style="color: var(--navy);">${escapeHtml(notesData.fabric_type || "N/A")}</strong>
+              </div>
+              <div>
+                <span style="color: var(--ink-soft); display: block;">Format Selected</span>
+                <strong style="color: var(--navy);">${escapeHtml(notesData.machine_format || "DST")}</strong>
+              </div>
+              <div>
+                <span style="color: var(--ink-soft); display: block;">Urgency Priority</span>
+                <strong style="color: var(--navy);">${escapeHtml(notesData.urgency || "Standard")}</strong>
+              </div>
+            </div>
+
+            <div style="border-top: 1px solid var(--border); padding-top: 16px; font-size: 13px;">
+              <span style="color: var(--ink-soft); display: block; margin-bottom: 4px;">Custom Request Details</span>
+              <p style="color: var(--navy); margin: 0; line-height: 1.6; background: var(--surface); padding: 12px; border-radius: 4px;">
+                ${escapeHtml(notesData.project_description || "No description provided.")}
+              </p>
+            </div>
+
+            ${referencesHtml}
+
+            ${data.quote_amount ? `
+              <div style="border-top: 1px solid var(--border); padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <span style="color: var(--ink-soft); font-size: 13px;">Quote Amount:</span>
+                  <span style="font-size: 11px; margin-left: 8px; background: ${data.payment_status === 'paid' ? '#f6ffed' : '#fff7e6'}; color: ${data.payment_status === 'paid' ? '#389e0d' : '#d46b08'}; font-weight:700; padding:2px 8px; border-radius:99px; text-transform:uppercase;">
+                    ${escapeHtml(data.payment_status)}
+                  </span>
+                </div>
+                <strong style="font-size: 18px; color: var(--navy);">${money(data.quote_amount)}</strong>
+              </div>
+            ` : ""}
+
+            ${downloadFileHtml}
+          </div>
+        `;
+      }
     }
 
     // CMS notes updates card

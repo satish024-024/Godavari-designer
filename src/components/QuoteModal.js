@@ -1,6 +1,11 @@
-import { icon } from "../utils/helpers.js";
+import { currentUser } from "../services/store.js";
+import { icon, attr } from "../utils/helpers.js";
 
 export function renderQuoteModal() {
+  const defaultName = currentUser ? (currentUser.name || "") : "";
+  const defaultEmail = currentUser ? (currentUser.email || "") : "";
+  const defaultPhone = currentUser ? (currentUser.phone || "") : "";
+
   return `
     <div class="overlay-panel" role="dialog" aria-modal="true" aria-label="Request custom quote">
       <div class="overlay-scrim" data-action="close-panels"></div>
@@ -15,15 +20,15 @@ export function renderQuoteModal() {
         <form id="quoteForm" class="quote-form">
           <label>
             <span>Name</span>
-            <input name="name" required placeholder="Your name" />
+            <input name="name" required value="${attr(defaultName)}" placeholder="Your name" />
           </label>
           <label>
             <span>Email</span>
-            <input name="email" type="email" required placeholder="you@example.com" />
+            <input name="email" type="email" required value="${attr(defaultEmail)}" placeholder="you@example.com" />
           </label>
           <label>
             <span>Phone</span>
-            <input name="phone" placeholder="+91" />
+            <input name="phone" value="${attr(defaultPhone)}" placeholder="+91" />
           </label>
           <label>
             <span>Project Type</span>
