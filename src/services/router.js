@@ -377,13 +377,13 @@ export function handleRouting() {
           "url": "https://godavaridesigners.com",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://godavaridesigners.com/logo-512.png",
+            "url": "https://godavaridesigners.com/logo.jpeg",
             "width": "512",
             "height": "512"
           },
           "image": {
             "@type": "ImageObject",
-            "url": "https://godavaridesigners.com/og-image.png",
+            "url": "https://godavaridesigners.com/banner.jpeg",
             "width": "1200",
             "height": "630"
           },
@@ -399,11 +399,11 @@ export function handleRouting() {
           "@type": "LocalBusiness",
           "@id": "https://godavaridesigners.com/#localbusiness",
           "name": "Godavari Designers",
-          "image": "https://godavaridesigners.com/og-image.png",
+          "image": "https://godavaridesigners.com/banner.jpeg",
           "url": "https://godavaridesigners.com",
           "telephone": "+91 83098 97055",
           "email": "godavaridesigner@gmail.com",
-          "logo": "https://godavaridesigners.com/logo-512.png",
+          "logo": "https://godavaridesigners.com/logo.jpeg",
           "priceRange": "$$",
           "address": {
             "@type": "PostalAddress",
@@ -609,7 +609,7 @@ export function handleRouting() {
     ogImage.setAttribute("property", "og:image");
     document.head.appendChild(ogImage);
   }
-  ogImage.setAttribute("content", "https://godavaridesigners.com/og-image.png");
+  ogImage.setAttribute("content", "https://godavaridesigners.com/banner.jpeg");
 
   let twitterTitle = document.querySelector('meta[name="twitter:title"]');
   if (!twitterTitle) {
@@ -633,7 +633,7 @@ export function handleRouting() {
     twitterImage.setAttribute("name", "twitter:image");
     document.head.appendChild(twitterImage);
   }
-  twitterImage.setAttribute("content", "https://godavaridesigners.com/og-image.png");
+  twitterImage.setAttribute("content", "https://godavaridesigners.com/banner.jpeg");
 
   // Apply Meta Robots (noindex for private/transactional/admin pages)
   const isNoIndex = !!(matchedRoute.noindex || matchedRoute.requiresAdmin);
