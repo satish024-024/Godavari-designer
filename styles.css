@@ -795,7 +795,7 @@ select:focus-visible {
 
 .gold-circle,
 .bag-mini,
-.heart-button,
+.product-media .heart-button,
 .round-control,
 .qty-row button {
   display: inline-grid;
@@ -820,7 +820,7 @@ select:focus-visible {
 
 .gold-circle:hover,
 .bag-mini:hover,
-.heart-button:hover,
+.product-media .heart-button:hover,
 .round-control:hover,
 .qty-row button:hover {
   transform: translateY(-3px) scale(1.04);
@@ -1087,7 +1087,7 @@ select:focus-visible {
   font-weight: 800;
 }
 
-.heart-button {
+.product-media .heart-button {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -1096,8 +1096,9 @@ select:focus-visible {
 }
 
 .heart-button.active {
-  background: var(--navy);
-  color: #fff;
+  background: var(--navy) !important;
+  color: #fff !important;
+  border-color: var(--navy) !important;
 }
 
 .product-info {
