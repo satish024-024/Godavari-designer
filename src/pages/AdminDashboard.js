@@ -2482,6 +2482,8 @@ export function initAdminDashboardDelegates() {
         rpm: parseInt(formData.get("rpm") || 850),
         estimatedEmbroideryTime: parseInt(formData.get("estimatedEmbroideryTime") || 0),
         threadColors: parseInt(formData.get("threadColors") || 0),
+        width: parseInt(formData.get("width") || 100),
+        height: parseInt(formData.get("height") || 100),
         image: formData.get("image"),
         gallery: [formData.get("image")],
         difficultyLevel: formData.get("difficultyLevel") || "Intermediate",

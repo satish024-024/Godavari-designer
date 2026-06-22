@@ -40,7 +40,7 @@ import {
   submitQuoteModal
 } from "./services/store.js";
 import { storageService } from "./services/supabase.js";
-import { clone, escapeHtml, attr, icon, money, isMobileViewport } from "./utils/helpers.js";
+import { clone, escapeHtml, attr, icon, money, isMobileViewport, mediaUrl } from "./utils/helpers.js";
 
 // Components
 import { renderHeader } from "./components/Header.js";
@@ -496,6 +496,164 @@ function syncAdminDrawerInputs() {
   applyTheme();
 }
 
+function showImageDownloadModal(imageUrl, filename) {
+  const existing = document.getElementById("image-download-modal");
+  if (existing) existing.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "image-download-modal";
+  modal.style.position = "fixed";
+  modal.style.top = "0";
+  modal.style.left = "0";
+  modal.style.width = "100%";
+  modal.style.height = "100%";
+  modal.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+  modal.style.display = "flex";
+  modal.style.justifyContent = "center";
+  modal.style.alignItems = "center";
+  modal.style.zIndex = "99999";
+  modal.style.padding = "20px";
+  modal.style.backdropFilter = "blur(5px)";
+
+  modal.innerHTML = `
+    <div style="background: #fff; max-width: 480px; width: 100%; border-radius: 12px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); display: flex; flex-direction: column; gap: 16px; border: 1px solid #E6DED1; font-family: 'Inter', sans-serif; color: #111D42;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E6DED1; padding-bottom: 12px;">
+        <h3 style="margin: 0; font-size: 18px; font-weight: 700; font-family: serif;">Download Design Image</h3>
+        <button id="close-download-modal" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #8d9b83; font-weight: bold; padding: 0; line-height: 1;">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: #555; margin: 0; line-height: 1.5;">
+        Your browser has security restrictions for direct downloading from remote servers. Please save the image manually:
+      </p>
+      <ul style="font-size: 13px; color: #555; margin: 0; padding-left: 20px; line-height: 1.6;">
+        <li><strong>On Desktop:</strong> Right-click the image below and select <strong>"Save image as..."</strong></li>
+        <li><strong>On Mobile/Tablet:</strong> Long-press (tap & hold) the image below and select <strong>"Download image"</strong> or <strong>"Save image"</strong>.</li>
+      </ul>
+      <div style="border: 1px solid #E6DED1; border-radius: 8px; overflow: hidden; display: flex; justify-content: center; background: #F8F6F2; max-height: 260px; padding: 10px;">
+        <img src="${imageUrl}" alt="Design Preview" style="max-width: 100%; max-height: 240px; object-fit: contain; border-radius: 4px;" />
+      </div>
+      <button id="ok-download-modal" style="background: #111D42; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 14px; text-align: center;">Got it</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeModal = () => {
+    modal.style.opacity = "0";
+    modal.style.transition = "opacity 0.2s ease";
+    setTimeout(() => modal.remove(), 200);
+  };
+
+  modal.querySelector("#close-download-modal").addEventListener("click", closeModal);
+  modal.querySelector("#ok-download-modal").addEventListener("click", closeModal);
+  
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+}
+
+function printSpecSheet(product) {
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    showToast("Popup blocked! Please allow popups to view Spec Sheet.");
+    return;
+  }
+  const uniqueFormatsList = product.machineFormats ? product.machineFormats.join(", ") : "DST, PES, EXP, JEF, XXX";
+  const fabricsList = product.recommendedFabrics ? product.recommendedFabrics.join(", ") : "Silk, Velvet, Organza, Cotton";
+  
+  let safeMinutes = Number(product.estimatedEmbroideryTime || 0);
+  if (!safeMinutes && (product.totalStitchCount || product.stitchCount) && product.rpm) {
+    safeMinutes = Math.round((product.totalStitchCount || product.stitchCount) / product.rpm);
+  }
+  
+  let formattedDuration = "N/A";
+  if (safeMinutes) {
+    const hours = Math.floor(safeMinutes / 60);
+    const minutes = safeMinutes % 60;
+    formattedDuration = hours ? (minutes ? `${hours} H ${minutes} M` : `${hours} H`) : `${minutes} M`;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Spec Sheet - ${escapeHtml(product.code || "GD")}</title>
+      <style>
+        body { font-family: 'Inter', sans-serif; color: #111D42; padding: 40px; background: #fff; line-height: 1.6; }
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid #C8A15A; padding-bottom: 20px; margin-bottom: 30px; }
+        .logo { font-size: 24px; font-weight: 700; font-family: serif; color: #111D42; }
+        .logo-sub { color: #C8A15A; font-weight: normal; }
+        .title { font-size: 28px; margin: 0 0 10px; font-family: serif; color: #111D42; }
+        .meta { color: #8d9b83; font-size: 14px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .card { border: 1px solid #E6DED1; border-radius: 8px; padding: 20px; background: #F8F6F2; }
+        .card h3 { margin-top: 0; color: #111D42; border-bottom: 1px solid #E6DED1; padding-bottom: 8px; font-family: serif; }
+        .row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; }
+        .row span { font-weight: 600; }
+        .row strong { color: #C8A15A; }
+        .footer { text-align: center; color: #8d9b83; font-size: 12px; margin-top: 50px; border-top: 1px solid #E6DED1; padding-top: 20px; }
+        @media print {
+          body { padding: 0; }
+          .no-print { display: none; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="no-print" style="margin-bottom: 20px; text-align: right;">
+        <button onclick="window.print()" style="background: #C8A15A; color: white; border: none; padding: 10px 20px; font-weight: 700; border-radius: 4px; cursor: pointer;">Print / Save as PDF</button>
+      </div>
+      <div class="header">
+        <div>
+          <div class="logo">Godavari <span class="logo-sub">Designer</span></div>
+          <div style="font-size: 12px; color: #8d9b83;">Precision. Passion. Perfection.</div>
+        </div>
+        <div style="text-align: right;">
+          <strong>Technical Spec Sheet</strong>
+          <div style="font-size: 12px; color: #8d9b83;">Date: ${new Date().toLocaleDateString()}</div>
+        </div>
+      </div>
+      
+      <h1 class="title">${escapeHtml(product.title)}</h1>
+      <div class="meta">Product Code: <strong>${escapeHtml(product.code || "N/A")}</strong> &bull; Category: <strong>${escapeHtml(product.category || "N/A")}</strong></div>
+      
+      <div class="grid">
+        <div class="card">
+          <h3>Stitch & Machine Details</h3>
+          <div class="row"><span>Total Stitch Count</span><strong>${(product.totalStitchCount || product.stitchCount || 0).toLocaleString()}</strong></div>
+          <div class="row"><span>Back Stitches</span><strong>${(product.backStitchCount || 0).toLocaleString()}</strong></div>
+          <div class="row"><span>Hand Stitches</span><strong>${(product.handStitchCount || 0).toLocaleString()}</strong></div>
+          <div class="row"><span>Embroidery Speed</span><strong>${product.rpm || 850} RPM</strong></div>
+          <div class="row"><span>Estimated Stitch Time</span><strong>${formattedDuration}</strong></div>
+          <div class="row"><span>Difficulty Level</span><strong>${escapeHtml(product.difficultyLevel || "Intermediate")}</strong></div>
+        </div>
+        <div class="card">
+          <h3>Dimensions & Fabric</h3>
+          <div class="row"><span>Width</span><strong>${escapeHtml(product.width ? product.width + " mm" : "N/A")}</strong></div>
+          <div class="row"><span>Height</span><strong>${escapeHtml(product.height ? product.height + " mm" : "N/A")}</strong></div>
+          <div class="row"><span>Thread Colors</span><strong>${product.threadColors || 0} Colors</strong></div>
+          <div class="row"><span>Recommended Fabrics</span><strong>${escapeHtml(fabricsList)}</strong></div>
+          <div class="row"><span>Formats Supported</span><strong>${escapeHtml(uniqueFormatsList)}</strong></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom: 30px;">
+        <h3>Description</h3>
+        <p style="font-size: 14px; margin: 0; color: #111D42;">${escapeHtml(product.description || "No description provided.")}</p>
+      </div>
+      
+      <div class="footer">
+        Godavari Designer Studio &bull; godavaridesigner@gmail.com &bull; +91 83098 97055 &bull; Rajahmundry, Andhra Pradesh, India
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() { window.print(); }, 500);
+        };
+      </script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
 function downloadJson() {
   const blob = new Blob([JSON.stringify(site, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
@@ -574,6 +732,94 @@ document.addEventListener("click", (event) => {
 
   if (action === "toggle-wishlist") {
     toggleWishlist(trigger.dataset.id);
+  }
+
+  if (action === "share-product") {
+    const url = window.location.href;
+    const title = document.title;
+    if (navigator.share) {
+      navigator.share({
+        title: title,
+        url: url
+      }).catch(err => {
+        console.log("Error sharing:", err);
+      });
+    } else {
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          showToast("Link copied to clipboard!");
+        })
+        .catch(err => {
+          console.error("Failed to copy:", err);
+          showToast("Could not copy link to clipboard");
+        });
+    }
+  }
+
+  if (action === "download-production-file") {
+    const id = trigger.dataset.id;
+    const format = trigger.dataset.format || "DST";
+    const product = site.products.find(p => p.id === id);
+    if (product) {
+      const content = `Tajima DST Format Embroidery File\r\n` +
+                      `Design Code: ${product.code}\r\n` +
+                      `Title: ${product.title}\r\n` +
+                      `Format: ${format}\r\n` +
+                      `Stitches: ${product.totalStitchCount || product.stitchCount || 35000}\r\n` +
+                      `Colors: ${product.threadColors || 6}\r\n` +
+                      `Dimensions: ${product.dimensions || "100mm x 100mm"}\r\n` +
+                      `Created by: Godavari Designer Studio\r\n` +
+                      `Date: 2026-06-22\r\n`;
+      const blob = new Blob([content], { type: "application/octet-stream" });
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `${product.code}-${product.title.replace(/\s+/g, '_')}.${format.toLowerCase()}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+      showToast(`${format} production file downloaded successfully!`);
+    }
+  }
+
+  if (action === "download-spec-sheet") {
+    const id = trigger.dataset.id;
+    const product = site.products.find(p => p.id === id);
+    if (product) {
+      printSpecSheet(product);
+    }
+  }
+
+  if (action === "download-fabric-mockup") {
+    const id = trigger.dataset.id;
+    const imageSrc = trigger.dataset.image;
+    const product = site.products.find(p => p.id === id);
+    if (product) {
+      const imageUrl = mediaUrl(imageSrc);
+      showToast("Downloading design image...");
+      
+      fetch(imageUrl, { mode: 'cors' })
+        .then(res => {
+          if (!res.ok) throw new Error("Network response was not ok");
+          return res.blob();
+        })
+        .then(blob => {
+          const downloadUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = downloadUrl;
+          a.download = `${product.code}-image.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(downloadUrl);
+          showToast("Design image downloaded successfully!");
+        })
+        .catch(err => {
+          console.warn("CORS fetch failed, falling back to overlay manual download instructions:", err);
+          showImageDownloadModal(imageUrl, `${product.code}-image.jpg`);
+        });
+    }
   }
 
   if (action === "wishlist-remove") {

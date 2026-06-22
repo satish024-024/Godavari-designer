@@ -360,19 +360,16 @@ export function renderProductDetail() {
           <!-- Design Download Center Preview -->
           <div class="download-section" style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; margin-bottom: 24px;">
             <h3 style="font-family: var(--font-serif); font-size: 16px; margin-bottom: 6px; color: var(--navy);">Design Download Center</h3>
-            <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 12px;">Attach preview vectors, fabric mockups, and digitizing specifications sheets.</p>
+            <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 12px;">Download production embroidery files, spec sheet PDFs, and design preview images.</p>
             <div style="display: grid; gap: 8px;">
-              ${product.designFile ? `
-                <a href="${attr(mediaUrl(product.designFile))}" class="button button-secondary" download style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0;">
-                  ${icon("download", 14)} Production File
-                </a>
-              ` : `
-                <button type="button" class="button button-secondary" disabled style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; opacity: 0.6; cursor: not-allowed; height: 38px; padding: 0;">
-                  ${icon("lock", 14)} Production File
-                </button>
-              `}
-              <button type="button" class="button button-secondary" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0;" onclick="alert('Spec Sheet PDF will download here.')">
+              <button type="button" class="button button-secondary" data-action="download-production-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0; width: 100%;">
+                ${icon("download", 14)} Production File
+              </button>
+              <button type="button" class="button button-secondary" data-action="download-spec-sheet" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0; width: 100%;">
                 ${icon("file-text", 14)} Spec Sheet (PDF)
+              </button>
+              <button type="button" class="button button-secondary" data-action="download-fabric-mockup" data-id="${attr(product.id)}" data-image="${attr(activeImageSrc)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0; width: 100%;">
+                ${icon("image", 14)} Download Image
               </button>
             </div>
           </div>
@@ -597,26 +594,19 @@ export function renderProductDetail() {
                 ${icon("maximize-2", 14)} Full Screen
               </button>
             </div>
-            
             <!-- Future-Proof Download Center Preview -->
             <div class="download-section" style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; background: #fff; margin-top: 24px;">
               <h3 style="font-family: var(--font-serif); font-size: 18px; margin-bottom: 8px; color: var(--navy);">Design Download Center</h3>
-              <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">Attach preview vectors, fabric mockups, and digitizing specifications sheets.</p>
+              <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">Download production embroidery files, spec sheet PDFs, and design preview images.</p>
               <div style="display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
-                ${product.designFile ? `
-                  <a href="${attr(mediaUrl(product.designFile))}" class="button button-secondary" download style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
-                    ${icon("download", 14)} Production File
-                  </a>
-                ` : `
-                  <button type="button" class="button button-secondary" disabled style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; opacity: 0.6; cursor: not-allowed; padding: 10px;">
-                    ${icon("lock", 14)} Production File
-                  </button>
-                `}
-                <button type="button" class="button button-secondary" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;" onclick="alert('Spec Sheet PDF will download here.')">
+                <button type="button" class="button button-secondary" data-action="download-production-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
+                  ${icon("download", 14)} Production File
+                </button>
+                <button type="button" class="button button-secondary" data-action="download-spec-sheet" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
                   ${icon("file-text", 14)} Spec Sheet (PDF)
                 </button>
-                <button type="button" class="button button-secondary" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;" onclick="alert('Fabric mockup placement will render here.')">
-                  ${icon("image", 14)} Fabric Mockup
+                <button type="button" class="button button-secondary" data-action="download-fabric-mockup" data-id="${attr(product.id)}" data-image="${attr(activeImageSrc)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
+                  ${icon("image", 14)} Download Image
                 </button>
               </div>
             </div>
