@@ -363,44 +363,88 @@ export function handleRouting() {
       }
     }
   } else if (matchedRoute.page === "home") {
-    pageTitle = "Godavari Designers | Premium Custom Embroidery Digitizing & Design Studio";
-    pageDescription = "Professional custom embroidery digitizing services and premium machine-ready design files for boutiques, fashion houses, and designer labels.";
+    pageTitle = "Godavari Designers | Custom Embroidery Digitizing in Rajahmundry";
+    pageDescription = "Godavari Designers provides custom embroidery digitizing, bridal blouse embroidery designs, saree border embroidery, and logo digitizing services in Rajahmundry, Andhra Pradesh.";
     
-    // Inject Local Business Schema
+    // Inject Local Business + Organization Schema Graph
     schemaData = {
       "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Godavari Designers",
-      "image": "https://godavaridesigners.com/desktop-home.png",
-      "url": "https://godavaridesigners.com",
-      "telephone": site.brand?.contact?.phone || "+91 83098 97055",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Rajahmundry",
-        "addressRegion": "Andhra Pradesh",
-        "addressCountry": "IN"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "17.0005",
-        "longitude": "81.8040"
-      },
-      "openingHoursSpecification": {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": [
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday"
-        ],
-        "opens": "09:00",
-        "closes": "21:00"
-      },
-      "sameAs": [
-        "https://www.facebook.com/godavaridesigners",
-        "https://www.instagram.com/godavaridesigners"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://godavaridesigners.com/#organization",
+          "name": "Godavari Designers",
+          "url": "https://godavaridesigners.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://godavaridesigners.com/logo-512.png",
+            "width": "512",
+            "height": "512"
+          },
+          "image": {
+            "@type": "ImageObject",
+            "url": "https://godavaridesigners.com/og-image.png",
+            "width": "1200",
+            "height": "630"
+          },
+          "email": "godavaridesigner@gmail.com",
+          "telephone": "+91 83098 97055",
+          "sameAs": [
+            "https://www.facebook.com/godavaridesigners",
+            "https://www.instagram.com/godavaridesigners",
+            "https://wa.me/918309897055"
+          ]
+        },
+        {
+          "@type": "LocalBusiness",
+          "@id": "https://godavaridesigners.com/#localbusiness",
+          "name": "Godavari Designers",
+          "image": "https://godavaridesigners.com/og-image.png",
+          "url": "https://godavaridesigners.com",
+          "telephone": "+91 83098 97055",
+          "email": "godavaridesigner@gmail.com",
+          "logo": "https://godavaridesigners.com/logo-512.png",
+          "priceRange": "$$",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Rajahmundry",
+            "addressRegion": "Andhra Pradesh",
+            "addressCountry": "IN"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": "17.0005",
+            "longitude": "81.8040"
+          },
+          "openingHoursSpecification": {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": [
+              "Monday",
+              "Tuesday",
+              "Wednesday",
+              "Thursday",
+              "Friday",
+              "Saturday"
+            ],
+            "opens": "09:00",
+            "closes": "21:00"
+          },
+          "areaServed": [
+            {
+              "@type": "AdministrativeArea",
+              "name": "Rajahmundry"
+            },
+            {
+              "@type": "AdministrativeArea",
+              "name": "Andhra Pradesh"
+            },
+            {
+              "@type": "AdministrativeArea",
+              "name": "India"
+            }
+          ],
+          "description": "Godavari Designers provides custom embroidery digitizing, bridal blouse embroidery designs, saree border embroidery, and logo digitizing services in Rajahmundry, Andhra Pradesh."
+        }
       ]
     };
   } else if (matchedRoute.page === "service-detail" && matchedParams.service) {
@@ -533,6 +577,63 @@ export function handleRouting() {
     document.head.appendChild(metaDesc);
   }
   metaDesc.setAttribute("content", pageDescription);
+
+  // Apply Open Graph / Twitter Meta Tags
+  let ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement("meta");
+    ogTitle.setAttribute("property", "og:title");
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.setAttribute("content", pageTitle);
+
+  let ogDesc = document.querySelector('meta[property="og:description"]');
+  if (!ogDesc) {
+    ogDesc = document.createElement("meta");
+    ogDesc.setAttribute("property", "og:description");
+    document.head.appendChild(ogDesc);
+  }
+  ogDesc.setAttribute("content", pageDescription);
+
+  let ogUrl = document.querySelector('meta[property="og:url"]');
+  if (!ogUrl) {
+    ogUrl = document.createElement("meta");
+    ogUrl.setAttribute("property", "og:url");
+    document.head.appendChild(ogUrl);
+  }
+  ogUrl.setAttribute("content", `https://godavaridesigners.com${path}`);
+
+  let ogImage = document.querySelector('meta[property="og:image"]');
+  if (!ogImage) {
+    ogImage = document.createElement("meta");
+    ogImage.setAttribute("property", "og:image");
+    document.head.appendChild(ogImage);
+  }
+  ogImage.setAttribute("content", "https://godavaridesigners.com/og-image.png");
+
+  let twitterTitle = document.querySelector('meta[name="twitter:title"]');
+  if (!twitterTitle) {
+    twitterTitle = document.createElement("meta");
+    twitterTitle.setAttribute("name", "twitter:title");
+    document.head.appendChild(twitterTitle);
+  }
+  twitterTitle.setAttribute("content", pageTitle);
+
+  let twitterDesc = document.querySelector('meta[name="twitter:description"]');
+  if (!twitterDesc) {
+    twitterDesc = document.createElement("meta");
+    twitterDesc.setAttribute("name", "twitter:description");
+    document.head.appendChild(twitterDesc);
+  }
+  twitterDesc.setAttribute("content", pageDescription);
+
+  let twitterImage = document.querySelector('meta[name="twitter:image"]');
+  if (!twitterImage) {
+    twitterImage = document.createElement("meta");
+    twitterImage.setAttribute("name", "twitter:image");
+    document.head.appendChild(twitterImage);
+  }
+  twitterImage.setAttribute("content", "https://godavaridesigners.com/og-image.png");
 
   // Apply Meta Robots (noindex for private/transactional/admin pages)
   const isNoIndex = !!(matchedRoute.noindex || matchedRoute.requiresAdmin);

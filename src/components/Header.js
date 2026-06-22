@@ -17,7 +17,7 @@ export function renderHeader(isMobile) {
         </button>
 
         <!-- Brand Logo (Centered on Mobile) -->
-        <a class="brand-lockup" href="#/" aria-label="${attr(site.brand.name)} home">
+        <a class="brand-lockup" href="#/" title="Godavari Designers logo" aria-label="Godavari Designers logo - Home">
           <span class="brand-name">${escapeHtml(site.brand.name.split(" ")[0] || site.brand.name)}</span>
           <span class="brand-sub">${escapeHtml(site.brand.name.split(" ").slice(1).join(" ") || "Designer")}</span>
           <span class="brand-tagline">${escapeHtml(site.brand.tagline)}</span>
@@ -44,7 +44,7 @@ export function renderHeader(isMobile) {
   return `
     <header class="site-header" id="siteHeader">
       <!-- Brand -->
-      <a class="brand-lockup" href="#/" aria-label="${attr(site.brand.name)} home">
+      <a class="brand-lockup" href="#/" title="Godavari Designers logo" aria-label="Godavari Designers logo - Home">
         <span class="brand-name">${escapeHtml(site.brand.name.split(" ")[0] || site.brand.name)}</span>
         <span class="brand-sub">${escapeHtml(site.brand.name.split(" ").slice(1).join(" ") || "Designer")}</span>
         <span class="brand-tagline">${escapeHtml(site.brand.tagline)}</span>

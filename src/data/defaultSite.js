@@ -10,9 +10,9 @@ export const defaultSite = {
     sage: "#8D9B83"
   },
   brand: {
-    name: "Godavari Designer",
+    name: "Godavari Designers",
     tagline: "Precision. Passion. Perfection.",
-    descriptor: "Luxury embroidery designs, digitized to perfection for fashion that inspires.",
+    descriptor: "Godavari Designers provides custom embroidery digitizing, bridal blouse embroidery designs, saree border embroidery, and logo digitizing services in Rajahmundry, Andhra Pradesh, India.",
     trustText: "Trusted by 2,500+ Fashion Brands Worldwide",
     storyLabel: "Watch Our Story",
     qualityTitle: "Premium Quality",
@@ -33,9 +33,9 @@ export const defaultSite = {
     { label: "Contact", target: "footer" }
   ],
   hero: {
-    eyebrow: "Passion. Perfection.",
-    heading: "Embroidery Reimagined",
-    subheading: "Custom Digitizing, Luxury Embroidery Designs, Machine-Ready Collections.",
+    eyebrow: "Premium Digitizing Atelier",
+    heading: "Godavari Designers — Custom Embroidery Digitizing in Rajahmundry",
+    subheading: "Godavari Designers provides custom embroidery digitizing services in Rajahmundry for bridal blouse designs, saree borders, logo embroidery, and machine-ready embroidery files for boutiques and fashion businesses.",
     primaryButton: "Browse Designs",
     secondaryButton: "Request Custom Quote",
     videoUrl: "media-hero-video",

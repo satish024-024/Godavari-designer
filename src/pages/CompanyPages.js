@@ -30,28 +30,78 @@ export function renderAboutUs() {
     <article class="content-section" style="padding: 120px 24px; background: var(--ivory); min-height: 90vh; font-family: var(--font-sans);">
       <div style="max-width: 900px; margin: 0 auto; display: grid; gap: 48px;">
         <header style="text-align: center; display: grid; gap: 12px;">
-          <span style="font-size: 12px; color: var(--gold); text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em;">Our Story</span>
-          <h1 style="font-family: var(--font-serif); font-size: clamp(32px, 5vw, 48px); color: var(--navy); font-weight: 700; margin: 0;">Heritage & Craftsmanship</h1>
+          <span style="font-size: 12px; color: var(--gold); text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em;">About Godavari Designers</span>
+          <h1 style="font-family: var(--font-serif); font-size: clamp(32px, 5vw, 48px); color: var(--navy); font-weight: 700; margin: 0;">Our Studio & Craftsmanship</h1>
           <div style="width: 60px; height: 1.5px; background: var(--gold); margin: 16px auto 0;"></div>
         </header>
 
-        <section style="display: grid; gap: 32px; line-height: 1.8; color: var(--navy); font-size: 15px;">
-          <p style="font-size: 18px; font-family: var(--font-serif); color: var(--gold); line-height: 1.6; text-align: center; max-width: 720px; margin: 0 auto;">
-            Godavari Designer represents the intersection of classical Indian artisanal embroidery and state-of-the-art digital engineering.
+        <section style="display: grid; gap: 40px; line-height: 1.8; color: var(--navy); font-size: 15px;">
+          <p style="font-size: 19px; font-family: var(--font-serif); color: var(--gold); line-height: 1.6; text-align: center; max-width: 780px; margin: 0 auto; font-style: italic;">
+            Godavari Designers represents the intersection of classical Indian artisanal embroidery and state-of-the-art digital design engineering.
           </p>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 32px; margin-top: 16px;">
-            <div style="display: grid; gap: 12px; background: #ffffff; padding: 32px; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-deep);">
-              <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; margin: 0; color: var(--navy);">The Atelier Philosophy</h3>
-              <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">We treat machine embroidery not merely as a production process, but as an art form. Every stitch direction, tie-off, and density profile is meticulously hand-placed by master digitizers to achieve the look and feel of manual handiwork.</p>
+
+          <div style="display: grid; gap: 24px;">
+            <h2 style="font-family: var(--font-serif); font-size: 24px; color: var(--navy); margin: 0; text-align: center;">Who We Are & Where We Operate</h2>
+            <p style="margin: 0; color: var(--ink-soft); text-align: justify;">
+              Founded on the banks of the sacred Godavari river in <strong>Rajahmundry, Andhra Pradesh, India</strong>, Godavari Designers is a professional, registered custom embroidery digitizing studio. We serve boutiques, fashion designers, apparel brands, custom garment workshops, and embroidery businesses across Andhra Pradesh, India, and internationally. Our mission is to preserve heirloom textile traditions while engineering files that run flawlessly on modern industrial and home embroidery machines.
+            </p>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px;">
+            <div style="display: grid; gap: 12px; background: #ffffff; padding: 28px; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-deep);">
+              <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; margin: 0; color: var(--navy);">Custom Digitizing</h3>
+              <p style="margin: 0; color: var(--ink-soft); font-size: 13.5px; line-height: 1.6;">We convert logos, vector designs, and hand-drawn sketches into high-performance stitch files (DST, PES, EXP, JEF, XXX) optimized for Tajima, Brother, Bernina, Janome, and Singer machines.</p>
             </div>
-            <div style="display: grid; gap: 12px; background: #ffffff; padding: 32px; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-deep);">
-              <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; margin: 0; color: var(--navy);">Precision Engineering</h3>
-              <p style="margin: 0; color: var(--ink-soft); font-size: 14px;">By optimizing path routing and minimizing trim sequences, our designs run smoothly on industrial machines, preventing thread breaks and fabric puckering while reducing wear and tear on your equipment.</p>
+            <div style="display: grid; gap: 12px; background: #ffffff; padding: 28px; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-deep);">
+              <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; margin: 0; color: var(--navy);">Bridal & Blouse Design</h3>
+              <p style="margin: 0; color: var(--ink-soft); font-size: 13.5px; line-height: 1.6;">We create heavy bridal blouse embroidery designs, intricate necklines, and sleeve borders. Every coordinate is digitized with stitch length and density adjustments tailored to silk, velvet, and organza.</p>
+            </div>
+            <div style="display: grid; gap: 12px; background: #ffffff; padding: 28px; border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-deep);">
+              <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 600; margin: 0; color: var(--navy);">Saree Borders & Logos</h3>
+              <p style="margin: 0; color: var(--ink-soft); font-size: 13.5px; line-height: 1.6;">We specialize in continuous repeating saree borders and precision logo digitizing for left-chest shirts, corporate uniforms, caps, and leather goods, ensuring clean lettering and zero thread breaks.</p>
             </div>
           </div>
-          <p style="text-align: center; max-width: 680px; margin: 20px auto 0; color: var(--ink-soft);">
-            Founded on the banks of the sacred Godavari region, our team preserves heirloom textile traditions by rendering them compatible with Tajima, Brother, Bernina, Janome, and Singer formats for designers worldwide.
-          </p>
+
+          <div style="display: grid; gap: 24px; background: #ffffff; border: 1.5px solid var(--gold); border-radius: 8px; padding: 32px; box-shadow: var(--shadow-deep); margin-top: 16px;">
+            <h3 style="font-family: var(--font-serif); font-size: 20px; font-weight: 700; color: var(--navy); margin: 0; text-align: center;">Verified Business Information (NAP)</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 12px; font-size: 14px; color: var(--navy);">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: var(--gold);">${icon("building-2", 20)}</span>
+                <div>
+                  <strong>Registered Brand:</strong><br />
+                  <span>Godavari Designers</span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: var(--gold);">${icon("map-pin", 20)}</span>
+                <div>
+                  <strong>Studio Location:</strong><br />
+                  <span>Rajahmundry, Andhra Pradesh, India</span>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: var(--gold);">${icon("phone", 20)}</span>
+                <div>
+                  <strong>Phone / WhatsApp:</strong><br />
+                  <a href="tel:+918309897055" style="color: inherit; text-decoration: none;">+91 83098 97055</a>
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: var(--gold);">${icon("mail", 20)}</span>
+                <div>
+                  <strong>Primary Email:</strong><br />
+                  <a href="mailto:godavaridesigner@gmail.com" style="color: inherit; text-decoration: none;">godavaridesigner@gmail.com</a>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; margin-top: 24px;">
+              <a href="https://wa.me/918309897055" target="_blank" rel="noopener noreferrer" class="button button-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 12px 28px; border-radius: 4px;">
+                <span>Discuss Your Project on WhatsApp</span>
+                ${icon("arrow-right", 16)}
+              </a>
+            </div>
+          </div>
         </section>
       </div>
     </article>

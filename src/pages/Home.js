@@ -54,9 +54,9 @@ function renderHero() {
       ${renderThreads()}
       <div class="hero-inner">
         <div class="hero-copy reveal">
-          <p class="section-kicker">${escapeHtml(site.hero.eyebrow)}</p>
-          <h1>${escapeHtml(site.hero.heading).replace(" ", "<br />")}</h1>
-          <p class="hero-subtitle">${escapeHtml(site.hero.subheading)}</p>
+          <p class="section-kicker">Premium Digitizing Atelier</p>
+          <h1 style="font-size: clamp(32px, 6vw, 56px); line-height: 1.15; font-weight: 700; margin: 0 0 20px;">Godavari Designers — Custom Embroidery Digitizing in Rajahmundry</h1>
+          <p class="hero-subtitle" style="font-size: 15.5px; line-height: 1.7; color: rgba(255, 255, 255, 0.88); max-width: 680px; margin: 0 0 32px;">Godavari Designers provides custom embroidery digitizing services in Rajahmundry for bridal blouse designs, saree borders, logo embroidery, and machine-ready embroidery files for boutiques and fashion businesses.</p>
           <div class="hero-actions">
             <a href="#/catalog" class="button button-primary">
               <span>${escapeHtml(site.hero.primaryButton)}</span>
@@ -369,6 +369,55 @@ function renderServicesSection() {
   `;
 }
 
+function renderAboutSection() {
+  return `
+    <section class="content-section about-trust-section" id="about-brand" style="background: var(--ivory); padding: 80px 24px; border-top: 1px solid var(--border);">
+      <div style="max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 48px; align-items: center;">
+        <div class="reveal">
+          <p class="section-kicker" style="color: var(--gold); text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; margin: 0 0 8px;">About The Studio</p>
+          <h2 style="font-family: var(--font-serif); font-size: clamp(28px, 4vw, 36px); font-weight: 700; color: var(--navy); margin: 0 0 20px; line-height: 1.2;">Godavari Designers</h2>
+          <p style="font-size: 14.5px; color: var(--ink-soft); line-height: 1.7; margin: 0 0 16px;">
+            Based in the historic city of <strong>Rajahmundry, Andhra Pradesh</strong>, Godavari Designers is a premier custom embroidery digitizing studio and digital design library. We bridge classical textile craftsmanship with advanced digital embroidery technology.
+          </p>
+          <p style="font-size: 14.5px; color: var(--ink-soft); line-height: 1.7; margin: 0;">
+            We specialize in engineering flawless, machine-ready files for boutiques, fashion designers, and apparel brands. From complex bridal blouse zari work to continuous saree border repeats and precision corporate logos, our digitizing is built to minimize thread breaks and maximize fabric stability.
+          </p>
+        </div>
+        <div class="reveal" style="display: grid; gap: 24px; background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 36px; box-shadow: var(--shadow-deep);">
+          <h3 style="font-family: var(--font-serif); font-size: 20px; font-weight: 700; color: var(--navy); margin: 0; border-bottom: 1.5px solid var(--gold); padding-bottom: 12px;">Why Choose Us</h3>
+          
+          <div style="display: grid; gap: 6px;">
+            <strong style="font-size: 14px; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+              <span style="color: var(--gold);">${icon("award", 16)}</span> Custom Digitizing Specialization
+            </strong>
+            <p style="font-size: 13px; color: var(--ink-soft); margin: 0 0 0 24px; line-height: 1.5;">
+              Every stitch angle, density, and underlay path is calibrated manually to preserve the premium feel of hand-embroidery.
+            </p>
+          </div>
+
+          <div style="display: grid; gap: 6px;">
+            <strong style="font-size: 14px; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+              <span style="color: var(--gold);">${icon("heart", 16)}</span> Bridal & Boutique Focus
+            </strong>
+            <p style="font-size: 13px; color: var(--ink-soft); margin: 0 0 0 24px; line-height: 1.5;">
+              Tailored necklines, heavy sleeve designs, and continuous borders optimized for silk, organza, and velvet fabrics.
+            </p>
+          </div>
+
+          <div style="display: grid; gap: 6px;">
+            <strong style="font-size: 14px; color: var(--navy); display: flex; align-items: center; gap: 8px;">
+              <span style="color: var(--gold);">${icon("package-check", 16)}</span> Machine-Ready Deliverables
+            </strong>
+            <p style="font-size: 13px; color: var(--ink-soft); margin: 0 0 0 24px; line-height: 1.5;">
+              Get DST, PES, EXP, JEF, or XXX files. Physically test-stitched to ensure flawless production on your machines.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 export function renderHome() {
   return `
     ${renderHero()}
@@ -376,6 +425,7 @@ export function renderHome() {
     ${renderCollections()}
     ${renderProcess()}
     ${renderBestSellers()}
+    ${renderAboutSection()}
     ${renderStories()}
     ${renderCta()}
   `;
