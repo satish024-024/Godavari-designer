@@ -6,28 +6,28 @@ export const SERVICES_DATA = {
     metaTitle: "Custom Embroidery Digitizing Services | Godavari Designers",
     metaDescription: "Convert your logos, sketches, and corporate artwork into high-quality, machine-ready embroidery files. Fast 12-24h turnaround, optimized stitch paths.",
     valueProposition: "Professional vector to embroidery stitch conversion calibrated for seamless commercial production and home machine stability.",
-    intro: "Transform your creative sketches, digital illustrations, and custom branding into flawless, machine-ready embroidery files. At Godavari Designers, we combine over a decade of hands-on digitizing experience with industrial-grade software (such as Wilcom and Pulse) to deliver stitch files that run smoothly on Tajima, Brother, Bernina, Janome, Barudan, and all other commercial or home embroidery machines. Our digitizing process is focused on minimizing thread breaks, optimizing path runs, and maintaining tension consistency.",
+    intro: "Transform your creative sketches, digital illustrations, and custom branding into flawless, machine-ready embroidery files. At Godavari Designers, we combine over a decade of hands-on digitizing experience with industrial-grade software (such as Wilcom EmbroideryStudio and Pulse) to deliver stitch files that run smoothly on Tajima, Brother, Bernina, Janome, Barudan, and all other commercial or home embroidery machines. Our digitizing process is focused on minimizing thread breaks, optimizing path runs, and maintaining tension consistency by applying exact push-pull compensation values based on your target fabric type.",
     targetAudience: [
-      "Boutiques and independent fashion designers looking to scale their custom collections.",
-      "Garment manufacturers requiring production-optimized, high-speed stitch sequencing.",
-      "Corporate uniform vendors needing crisp, clean brand logo stitch conversions.",
-      "Embroidery hobbyists and home business owners demanding error-free machine files."
+      "Boutiques and independent fashion designers looking to scale custom collections with clean sew-outs.",
+      "Garment manufacturers requiring production-optimized, high-speed stitch sequencing for multi-head runs.",
+      "Corporate uniform vendors needing crisp, clean brand logo stitch conversions with legible small text.",
+      "Embroidery hobbyists and home business owners demanding error-free machine files in various hoops."
     ],
     deliverables: [
       "Flawless, machine-ready stitch files in all requested formats (DST, PES, EXP, JEF, XXX).",
-      "Realistic 3D digital sewout simulation previews indicating exact stitch layouts.",
-      "Color run worksheets specifying recommended thread changes and sequence mappings.",
-      "Stitch density calibration data sheets matching the specific target fabric properties.",
-      "Complimentary design revisions and density tuning adjustments within 14 days of delivery."
+      "Realistic 3D digital sew-out simulation previews indicating exact stitch layouts and density maps.",
+      "Color run worksheets specifying recommended thread changes, sequence mappings, and Pantone matching.",
+      "Stitch density calibration data sheets matching specific fabric properties (knits, woven, or leather).",
+      "Complimentary design revisions and density tuning adjustments within 14 days of file delivery."
     ],
     process: [
-      { title: "Artwork Submission", desc: "Submit your artwork file, dimensions, and fabric selection through our quote request form or WhatsApp." },
-      { title: "Stitch Mapping", desc: "Our senior digitizers analyze details, mapping path runs and selecting optimal stitch types (satin, fill, running)." },
-      { title: "Tension & Pull Setup", desc: "We apply precise custom underlays and pull compensation ratios to prevent fabric puckering during production." },
-      { title: "Simulation Testing", desc: "We run computer-simulated stitch-out diagnostics to check for design friction and unnecessary trim commands." },
-      { title: "Quality Delivery", desc: "Your final zipped production files and visual stitch-out sheet are delivered directly via email and WhatsApp." }
+      { title: "Artwork & Specs Submission", desc: "Submit your logo vector (AI/PDF) or hand sketch, specifying dimensions, target fabric, and machine format." },
+      { title: "Path & Stitch Mapping", desc: "Our senior digitizers map out the sequencing, selecting optimal stitch types like tatami fills, satin columns, and running outlines." },
+      { title: "Push-Pull & Underlay Calibration", desc: "We apply stable grid underlays and custom push-pull compensation ratios to prevent fabric puckering during production." },
+      { title: "Computer Simulation Test", desc: "We run simulated stitch-out diagnostics to check for design friction, path collisions, and unnecessary trim commands." },
+      { title: "Delivery & Run Verification", desc: "Your final zipped production files and visual color run sheets are delivered directly via email and WhatsApp." }
     ],
-    machineCompatibility: "Optimized for Tajima, Brother, Bernina, Janome, Barudan, Happy, and Singer machines.",
+    machineCompatibility: "Optimized for Tajima, Brother, Bernina, Janome, Barudan, Happy, Singer, and all major industrial and home machines.",
     faqs: [
       {
         q: "What file formats do you supply with custom orders?",
@@ -65,25 +65,25 @@ export const SERVICES_DATA = {
     metaTitle: "Bridal Blouse Embroidery Digitizing Services | Godavari Designers",
     metaDescription: "Couture bridal blouse neckline and sleeve embroidery digitizing. Specialized in heavy zari, metallic thread, and beadwork placements.",
     valueProposition: "Intricate wedding lehenga and bridal blouse embroidery layouts scaled perfectly to client body measurements.",
-    intro: "Make your wedding collections truly unforgettable with couture bridal blouse digitizing. We specialize in mapping intricate, heavy stitch designs for bridal blouse back-necks, front necklines, and sleeve borders. From traditional zardosi-inspired gold thread layouts to contemporary multi-colored floral patterns, our designs are engineered for dense, luxurious fills. Every bridal blouse design is custom-mapped to the client's exact measurements to ensure the motifs line up flawlessly during tailoring.",
+    intro: "Make your wedding collections truly unforgettable with couture bridal blouse digitizing. We specialize in mapping intricate, heavy stitch designs for bridal blouse back-necks, front necklines, and sleeve borders. From traditional zardosi-inspired gold thread layouts to contemporary multi-colored floral patterns, our designs are engineered for dense, luxurious fills. Every bridal blouse design is custom-mapped to the client's exact measurements (including neckline width, depth, and sleeve length) to ensure the motifs line up flawlessly during tailoring.",
     targetAudience: [
       "Exclusive bridal boutiques and couture designer labels creating luxury wedding wear.",
-      "Bespoke tailors and boutiques needing custom-fit neckline embroidery dimensions.",
-      "Individual bridal customers seeking unique, high-end traditional embroidery files."
+      "Bespoke tailors and boutiques needing custom-fit neckline embroidery templates (pot-neck, boat-neck).",
+      "Individual bridal customers seeking unique, high-end traditional embroidery files for their big day."
     ],
     deliverables: [
       "Perfectly scaled neckline and sleeve border design files in Tajima DST or Brother PES format.",
-      "High-resolution 3D digital simulation layout previewing the embroidery placement.",
+      "High-resolution 3D digital simulation layout previewing the embroidery placement and stitch directions.",
       "Coordinate marker guides indicating the exact center and alignment points on fabric.",
-      "Detailed color sequencing chart matching standard zari and metallic thread weights.",
+      "Detailed color sequencing chart matching standard zari, metallic, and cotton thread weights.",
       "Three rounds of sizing and density adjustments to accommodate tailoring refinements."
     ],
     process: [
-      { title: "Neckline Measurements", desc: "Upload neck width, depth, sleeve lengths, and blouse sizing along with your design concepts." },
+      { title: "Neckline Measurements", desc: "Upload neck width, depth, neckline style (V-neck, pot, boat, U-neck), and sleeve lengths along with your designs." },
       { title: "Couture Stitch Layering", desc: "Our specialists map dense zari fills, satin borders, and outline runs for metallic thread stability." },
-      { title: "Embellishment Offsets", desc: "We leave calculated gaps and placement guides for manual stone-fixing or beadwork overlays." },
-      { title: "High-Resolution Preview", desc: "We generate a full-scale digital visual proof of the blouse panels for layout verification." },
-      { title: "Production Files", desc: "Get highly-optimized files designed to run smoothly on multi-head commercial machines." }
+      { title: "Embellishment Clearances", desc: "We leave calculated gaps and placement guides within the file for manual stone-fixing or beadwork overlays." },
+      { title: "Full-Scale proof", desc: "We generate a full-scale digital visual proof of the blouse panels for alignment and tailoring verification." },
+      { title: "Production Files", desc: "Get highly-optimized files designed to run smoothly on multi-head commercial machines without tension warping." }
     ],
     machineCompatibility: "Calibrated for metallic zari thread stability on Tajima, Brother, and Bernina commercial frames.",
     faqs: [
@@ -127,11 +127,11 @@ export const SERVICES_DATA = {
     targetAudience: [
       "Saree manufacturers and wholesale fabric merchants running multi-head embroidery lines.",
       "Boutique owners creating custom borders, laces, and dupattas for ethnic collections.",
-      "Fashion designers looking to digitize custom continuous border ideas."
+      "Fashion designers looking to digitize custom continuous border ideas with exact repeat heights."
     ],
     deliverables: [
       "Repeating tile stitch files with exact start and end coordinate lock markers.",
-      "Coordinate alignment instructions for seamless multi-hoop repositioning.",
+      "Coordinate alignment instructions for seamless multi-hoop repositioning on the frame.",
       "Stitch density optimizations calibrated to lightweight georgette, net, or heavy silk.",
       "Full digital pattern repeat simulation to preview the continuous border run.",
       "Production-ready machine formats (.DST, .PES, .EXP)."
@@ -185,11 +185,11 @@ export const SERVICES_DATA = {
     targetAudience: [
       "Uniform manufacturers and corporate apparel suppliers requiring high-speed production files.",
       "Promotional product agencies and custom merchandise printers scaling client branding.",
-      "Sports teams, clubs, and local businesses needing custom apparel stitch files."
+      "Sports teams, clubs, and local businesses needing custom apparel stitch files for caps and polos."
     ],
     deliverables: [
       "Clean left-chest or cap-ready stitch files with center-outward sequence setups.",
-      "Optimized lettering files utilizing micro-satin and running stitches for small fonts.",
+      "Optimized lettering files utilizing micro-satin and running stitches for small fonts under 5mm.",
       "Garment-specific calibration worksheets (pique cotton, fleece, polyester, structured caps).",
       "Stitched preview rendering showcasing 3D thread highlights and contours.",
       "Zipped files delivered in DST, PES, EXP, and JEF formats."
@@ -222,7 +222,7 @@ export const SERVICES_DATA = {
     ],
     internalLinks: [
       { text: "Design Library", url: "#/catalog" },
-      { text: "Custom Request", url: "#/custom-order" },
+      { text: "Request Custom Quote", url: "#/custom-order" },
       { text: "Andhra Pradesh Services", url: "#/locations/andhra-pradesh-embroidery-design-services" }
     ],
     useCases: [
@@ -241,17 +241,17 @@ export const LOCATIONS_DATA = {
     h1: "Embroidery Digitizing Services in Rajahmundry",
     metaTitle: "Embroidery Digitizing Services in Rajahmundry | Godavari Designers",
     metaDescription: "Premier local embroidery digitizing in Rajahmundry. Custom designs, bridal blouse necklines, and corporate logos. 12-24h turnaround, WhatsApp support.",
-    intro: "Godavari Designers is Rajahmundry's premier embroidery digitizing studio. We serve local boutiques, design ateliers, and garment manufacturers across Rajahmundry and the East Godavari region with high-precision, machine-ready embroidery files. Our physical roots in East Godavari, combined with our world-class digitizing standards, make us the trusted partner for local fashion creators. Whether you operate a high-volume manufacturing unit near Rajamahendravaram or a luxury bridal boutique in the heart of the city, we understand the local fabric preferences, from fine local cottons to rich wedding silks. We calibrate every stitch file specifically for the fabric it will run on, ensuring zero puckering, minimal thread breaks, and smooth machine runs.",
+    intro: "Godavari Designers is Rajahmundry's premier embroidery digitizing studio. We serve local boutiques, design ateliers, and garment manufacturers across Rajahmundry, Danavaipeta, Syamala Nagar, and the entire East Godavari region with high-precision, machine-ready embroidery files. Our physical roots in Rajahmundry, combined with our world-class digitizing standards, make us the trusted partner for local fashion creators. Whether you operate a high-volume manufacturing unit near Rajamahendravaram or a luxury bridal boutique in the heart of the city, we understand the local fabric preferences, from fine local cottons to rich wedding silks. We calibrate every stitch file specifically for the fabric it will run on, ensuring zero puckering, minimal thread breaks, and smooth machine runs.",
     serviceCoverage: [
-      "Custom embroidery digitizing for local fashion designers and boutique shops.",
-      "Bridal blouse necklines, back-necks, and sleeve borders scaled to custom sizing.",
+      "Custom embroidery digitizing for local fashion designers and Rajahmundry boutique shops.",
+      "Bridal blouse necklines, back-necks, and sleeve borders scaled to custom sizing and pot/boat-neck fits.",
       "Repeating border patterns (buttah and all-over lace) for sarees and dupattas.",
       "Corporate logo digitizing for local schools, businesses, and event organizers."
     ],
     remoteOrdering: [
       "Send Design Details: Share your design references, dimensions, and fabric selection via our website or directly on WhatsApp (+91 83098 97055).",
       "Get Cost Estimate: Our local team reviews the requirements and sends a transparent cost estimate within a few hours.",
-      "Stitch Path Digitizing: Our specialists map out the coordinates, choosing optimal stitch patterns and underlays.",
+      "Stitch Path Digitizing: Our specialists map out the coordinates, choosing optimal stitch patterns, underlays, and push-pull compensations.",
       "Receive Files: Get machine-ready embroidery files (DST, PES, etc.) and a realistic 3D preview sheet directly on your phone."
     ],
     trustSection: {
@@ -291,7 +291,7 @@ export const LOCATIONS_DATA = {
     h1: "Custom Embroidery Design Services in Andhra Pradesh",
     metaTitle: "Custom Embroidery Design Services in Andhra Pradesh | Godavari Designers",
     metaDescription: "High-quality custom embroidery design and digitizing services across Andhra Pradesh. Fast digital delivery to Vijayawada, Visakhapatnam, Kakinada, and Guntur.",
-    intro: "Godavari Designers provides custom embroidery design and digitizing services for fashion brands, boutique houses, and textile manufacturers across Andhra Pradesh. We deliver flawless, machine-ready stitch files to clients in major cities including Visakhapatnam, Vijayawada, Guntur, Kakinada, Nellore, Tirupati, and Anantapur. By choosing an experienced partner based in Andhra Pradesh, you gain a team that understands the traditional aesthetics of South Indian wedding couture, local embroidery styles (such as Aari and Zardosi machine-adaptations), and high-speed commercial production constraints.",
+    intro: "Godavari Designers provides custom embroidery design and digitizing services for fashion brands, boutique houses, and textile manufacturers across Andhra Pradesh. We deliver flawless, machine-ready stitch files to clients in major cities including Visakhapatnam (Vizag), Vijayawada, Guntur, Kakinada, Nellore, Tirupati, Kurnool, and Eluru. By choosing an experienced partner based in Andhra Pradesh, you gain a team that understands the traditional aesthetics of South Indian wedding couture, local embroidery styles (such as Aari and Zardosi machine-adaptations), and high-speed commercial production constraints.",
     serviceCoverage: [
       "Heavy wedding lehenga and bridal blouse necklines digitized for Andhra's boutique network.",
       "Repeating border patterns and lace trims for traditional Kanchipuram and Dharmavaram sarees.",

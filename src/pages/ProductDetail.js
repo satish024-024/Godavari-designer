@@ -103,7 +103,7 @@ export function renderProductDetail() {
   const rpmProgress = getRpmProgress(product.rpm);
 
   // WhatsApp prefills
-  const whatsappNumber = (site.brand.contact.phone || "+91 98765 43210").replace(/[^0-9+]/g, '');
+  const whatsappNumber = (site.brand.contact.phone || "+91 83098 97055").replace(/[^0-9+]/g, '');
   const whatsappMsg = encodeURIComponent(
     `Inquiry Details:\n` +
     `- Design Name: ${product.title}\n` +

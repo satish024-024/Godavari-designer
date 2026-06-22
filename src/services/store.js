@@ -733,7 +733,7 @@ Total Estimate: ${money(totalEst)}
 
 Please confirm the pricing and availability. Thank you!`;
 
-    const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+    const whatsappPhone = (site.brand?.contact?.phone || "918309897055").replace(/[^0-9]/g, '');
     const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMsg)}`;
 
     try {
@@ -844,7 +844,7 @@ export async function submitQuoteModal(formData) {
       };
     }
 
-    const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+    const whatsappPhone = (site.brand?.contact?.phone || "918309897055").replace(/[^0-9]/g, '');
     let whatsappMsg = `Hello Godavari Designer, I would like to request a quote.
 
 Reference: ${result.referenceNumber}

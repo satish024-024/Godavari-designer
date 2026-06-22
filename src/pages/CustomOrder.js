@@ -278,7 +278,7 @@ export function renderCustomOrder() {
                   </label>
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Phone Number *</span>
-                    <input type="tel" name="customerPhone" required value="${attr(defaultPhone)}" placeholder="+91 98765 43210" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                     <input type="tel" name="customerPhone" required value="${attr(defaultPhone)}" placeholder="+91 83098 97055" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
                 </div>
               </div>
@@ -701,7 +701,7 @@ export function initCustomOrderEvents() {
         }
 
         // Open WhatsApp
-        const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+        const whatsappPhone = (site.brand?.contact?.phone || "918309897055").replace(/[^0-9]/g, '');
         const whatsappMsg = `Hello Godavari Designer, I would like to request a Custom Digitizing Quote.
 
 Reference: ${result.referenceNumber}

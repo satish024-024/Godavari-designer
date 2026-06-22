@@ -305,7 +305,7 @@ export function renderAuth() {
               <span>Phone Number</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("phone", 17)}</span>
-                <input type="text" name="phone" placeholder="98765 43210" class="auth-input" />
+                <input type="text" name="phone" placeholder="83098 97055" class="auth-input" />
               </div>
             </label>
 

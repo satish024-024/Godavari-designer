@@ -251,10 +251,10 @@ const defaultSite = {
     qualityTitle: "Premium Quality",
     qualityText: "Machine-Ready Designs",
     contact: {
-      email: "hello@godavaridesigner.com",
-      phone: "+91 98765 43210",
-      address: "Hyderabad, India",
-      instagram: "@godavaridesigner"
+      email: "godavaridesigner@gmail.com",
+      phone: "+91 83098 97055",
+      address: "Rajahmundry, Andhra Pradesh, India",
+      instagram: "@godavaridesigners"
     }
   },
   navigation: [

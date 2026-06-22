@@ -40,7 +40,7 @@ Customer Name: ${submissionResult.name}
 Phone: ${submissionResult.phone}
 Please confirm my order.`;
 
-    const whatsappPhone = (site.brand?.contact?.phone || "919876543210").replace(/[^0-9]/g, '');
+    const whatsappPhone = (site.brand?.contact?.phone || "918309897055").replace(/[^0-9]/g, '');
     const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMsg)}`;
 
     return `
@@ -242,7 +242,7 @@ Please confirm my order.`;
 
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Phone Number (Mandatory) *</span>
-                    <input type="tel" name="customerPhone" required placeholder="+91 98765 43210" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                    <input type="tel" name="customerPhone" required placeholder="+91 83098 97055" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
                 </div>
               </div>

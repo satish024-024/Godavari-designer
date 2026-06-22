@@ -247,7 +247,7 @@ export function renderCart() {
 
                 <div style="display: grid; gap: 4px;">
                   <label for="quote-phone" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: var(--navy);">Phone Number *</label>
-                  <input type="tel" id="quote-phone" name="phone" required value="${escapeHtml(currentUser?.phone || '')}" placeholder="e.g. +91 98765 43210" style="padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; background: var(--surface); color: var(--navy); width: 100%; box-sizing: border-box;" />
+                  <input type="tel" id="quote-phone" name="phone" required value="${escapeHtml(currentUser?.phone || '')}" placeholder="e.g. +91 83098 97055" style="padding: 10px 12px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; background: var(--surface); color: var(--navy); width: 100%; box-sizing: border-box;" />
                 </div>
 
                 <div style="display: grid; gap: 4px;">

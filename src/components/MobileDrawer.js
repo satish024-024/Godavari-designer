@@ -43,11 +43,11 @@ export function renderMobileDrawer() {
       <div class="drawer-footer">
         <div class="drawer-divider"></div>
         <div class="drawer-contact-actions">
-          <a href="https://wa.me/${(site.brand?.contact?.phone || "919999999999").replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" class="drawer-contact-btn whatsapp-btn">
+          <a href="https://wa.me/${(site.brand?.contact?.phone || "918309897055").replace(/[^0-9]/g, '')}" target="_blank" rel="noopener" class="drawer-contact-btn whatsapp-btn">
             ${icon("phone", 16)}
             <span>WhatsApp</span>
           </a>
-          <a href="tel:${(site.brand?.contact?.phone || "+919999999999").replace(/\s+/g, '')}" class="drawer-contact-btn call-btn">
+          <a href="tel:${(site.brand?.contact?.phone || "+918309897055").replace(/\s+/g, '')}" class="drawer-contact-btn call-btn">
             ${icon("phone-call", 16)}
             <span>Call Us</span>
           </a>

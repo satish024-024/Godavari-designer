@@ -53,7 +53,7 @@ export function renderServicePage(slug) {
               
               <!-- What we deliver -->
               <div>
-                <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 700; margin: 0 0 16px; color: var(--navy);">What You Deliverables</h3>
+                <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 700; margin: 0 0 16px; color: var(--navy);">What We Deliver</h3>
                 <ul style="margin: 0; padding-left: 20px; color: var(--ink-soft); font-size: 14px; display: grid; gap: 10px;">
                   ${service.deliverables.map(item => `<li>${escapeHtml(item)}</li>`).join("")}
                 </ul>
