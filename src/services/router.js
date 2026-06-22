@@ -377,7 +377,7 @@ export function handleRouting() {
           "url": "https://godavaridesigners.com",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://godavaridesigners.com/logo.jpeg",
+            "url": "https://godavaridesigners.com/favicon-512x512.png",
             "width": "512",
             "height": "512"
           },
@@ -403,7 +403,7 @@ export function handleRouting() {
           "url": "https://godavaridesigners.com",
           "telephone": "+91 83098 97055",
           "email": "godavaridesigner@gmail.com",
-          "logo": "https://godavaridesigners.com/logo.jpeg",
+          "logo": "https://godavaridesigners.com/favicon-512x512.png",
           "priceRange": "$$",
           "address": {
             "@type": "PostalAddress",
