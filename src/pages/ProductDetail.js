@@ -1,4 +1,4 @@
-import { site, wishlist, ui, addToCart, toggleWishlist, currentUser, showToast, triggerRender } from "../services/store.js";
+import { site, wishlist, ui, addToCart, toggleWishlist, currentUser, showToast, triggerRender, getCategories } from "../services/store.js";
 import { customRequestService } from "../services/supabase.js";
 import { escapeHtml, attr, icon, money, mediaUrl, isMobileViewport } from "../utils/helpers.js";
 
