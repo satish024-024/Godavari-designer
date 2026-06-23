@@ -246,17 +246,25 @@ export function handleRouting() {
     if (queryParams.category) {
       if (dataSynced) {
         const cats = DB.getCategories();
-        if (!cats.some((c) => c.slug === queryParams.category)) {
+        const match = cats.find((c) => c.slug.toLowerCase() === queryParams.category.toLowerCase());
+        if (!match) {
           window.location.hash = "#/404";
           return;
+        } else {
+          // Normalize to database casing (typically lowercase)
+          queryParams.category = match.slug;
         }
       }
     }
     if (queryParams.collection) {
       const allowedCollections = ["bridal", "blouses", "saree", "kids", "floral"];
-      if (!allowedCollections.includes(queryParams.collection)) {
+      const colLower = queryParams.collection.toLowerCase();
+      if (!allowedCollections.includes(colLower)) {
         window.location.hash = "#/404";
         return;
+      } else {
+        // Normalize to lowercase
+        queryParams.collection = colLower;
       }
     }
   }

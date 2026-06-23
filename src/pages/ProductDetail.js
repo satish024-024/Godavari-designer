@@ -134,6 +134,10 @@ export function renderProductDetail() {
   const relatedProducts = scoredProducts.slice(0, 6).map(item => item.product);
 
   const isMobile = isMobileViewport();
+  const cats = getCategories();
+  const categoryObj = cats.find((c) => c.name === product.category || c.slug === product.category?.toLowerCase());
+  const categoryLink = categoryObj ? `#/catalog?category=${categoryObj.slug}` : `#/catalog?category=${(product.category || "").toLowerCase().replace(/\s+/g, "-")}`;
+
   if (isMobile) {
     return `
       <section class="content-section product-detail-section" style="padding-top: var(--header-height); background: var(--ivory);">
@@ -145,7 +149,7 @@ export function renderProductDetail() {
             <span style="color: var(--border);">&gt;</span>
             <a href="#/catalog" style="color: inherit; text-decoration: none;">Design Library</a>
             <span style="color: var(--border);">&gt;</span>
-            <a href="#/catalog?category=${attr(product.category)}" style="color: inherit; text-decoration: none;">${escapeHtml(product.category)}</a>
+            <a href="${categoryLink}" style="color: inherit; text-decoration: none;">${escapeHtml(product.category)}</a>
             <span style="color: var(--border);">&gt;</span>
             <span style="color: var(--gold); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px;">${escapeHtml(product.title)}</span>
           </div>
@@ -557,7 +561,7 @@ export function renderProductDetail() {
           <span style="margin: 0 8px; color: var(--border);">&gt;</span>
           <a href="#/catalog" style="color: inherit; text-decoration: none;">Design Library</a>
           <span style="margin: 0 8px; color: var(--border);">&gt;</span>
-          <a href="#/catalog?category=${attr(product.category)}" style="color: inherit; text-decoration: none;">${escapeHtml(product.category)}</a>
+          <a href="${categoryLink}" style="color: inherit; text-decoration: none;">${escapeHtml(product.category)}</a>
           <span style="margin: 0 8px; color: var(--border);">&gt;</span>
           <span style="color: var(--gold); font-weight: 600;">${escapeHtml(product.title)}</span>
         </div>
