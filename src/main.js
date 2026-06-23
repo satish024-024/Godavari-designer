@@ -756,6 +756,25 @@ document.addEventListener("click", (event) => {
     }
   }
 
+  if (action === "buy-whatsapp") {
+    const title = trigger.dataset.title;
+    const code = trigger.dataset.code;
+    const price = trigger.dataset.price;
+    const formats = trigger.dataset.formats || "DST, PES, EXP";
+    
+    const text = `Hello Godavari Designers! I am interested in purchasing/inquiring about the design:\n` +
+                 `• Title: ${title}\n` +
+                 `• Code: ${code}\n` +
+                 `• Price: ₹${Number(price || 0).toLocaleString('en-IN')}\n` +
+                 `• Formats: ${formats}`;
+                 
+    const encoded = encodeURIComponent(text);
+    const whatsappUrl = `https://wa.me/918309897055?text=${encoded}`;
+    
+    showToast("Opening WhatsApp for quick purchase...");
+    window.open(whatsappUrl, "_blank");
+  }
+
   if (action === "download-production-file") {
     const id = trigger.dataset.id;
     const format = trigger.dataset.format || "DST";

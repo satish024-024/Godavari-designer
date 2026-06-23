@@ -470,15 +470,16 @@ export function renderCatalog() {
                           <div class="product-info" style="padding: 14px 16px 16px;">
 
                             <!-- Code tag + Title -->
-                            <a href="#/product/${product.slug}" style="text-decoration:none; color:inherit; display:block; margin-bottom: 12px;">
-                              <div style="display:flex; align-items:center; gap:6px; margin-bottom:5px;">
+                            <a href="#/product/${product.slug}" style="text-decoration:none; color:inherit; display:block; margin-bottom: 8px;">
+                              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
                                 <span style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--gold); background:rgba(200,161,90,0.1); border:1px solid rgba(200,161,90,0.25); border-radius:4px; padding:2px 6px; flex-shrink:0;">${escapeHtml(product.code)}</span>
+                                <span style="font-size:15px; font-weight:800; color:var(--gold); white-space:nowrap;">${money(product.price)}</span>
                               </div>
                               <h3 style="font-family:var(--font-serif); font-size:16px; font-weight:700; margin:0; color:var(--navy); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:43px;">${escapeHtml(product.title)}</h3>
                             </a>
 
                             <!-- Specs row -->
-                            <div style="display:flex; flex-direction:column; gap:4px; padding-top:10px; border-top:1px solid rgba(230,222,209,0.7); margin-bottom:12px;">
+                            <div style="display:flex; flex-direction:column; gap:4px; padding-top:10px; border-top:1px solid rgba(230,222,209,0.7); margin-bottom:8px;">
                               <div style="display:flex; align-items:center; gap:6px;">
                                 ${icon("activity", 11)}
                                 <span style="font-size:11px; font-weight:600; color:rgba(17,29,66,0.55); letter-spacing:0.02em;">${product.totalStitchCount.toLocaleString()} stitches</span>
@@ -496,11 +497,28 @@ export function renderCatalog() {
                               </div>
                             </div>
 
-                            <!-- Bottom: category + quick view -->
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
-                              <span style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:rgba(17,29,66,0.38); border:1px solid rgba(17,29,66,0.12); border-radius:99px; padding:3px 9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:55%;">${escapeHtml(product.category)}</span>
+                            <!-- Available Formats badges row -->
+                            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px; padding-top:8px; border-top:1px dashed rgba(230,222,209,0.5);">
+                              ${(product.machineFormats || []).map(f => `
+                                <span style="font-size:9.5px; font-weight:700; color:var(--navy); background:#fcfbfa; border:1px solid rgba(200, 161, 90, 0.2); border-radius:4px; padding:1px 5px;">${escapeHtml(f)}</span>
+                              `).join("")}
+                            </div>
+
+                            <!-- Bottom details & CTA row -->
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:12px;">
+                              <span style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:rgba(17,29,66,0.38); border:1px solid rgba(17,29,66,0.12); border-radius:99px; padding:3px 9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:70%;">${escapeHtml(product.category)}</span>
                               <button type="button" class="quick-view-text-btn" data-action="quick-view" data-id="${attr(product.id)}" style="border:none; background:transparent; font-size:11px; font-weight:700; color:var(--navy); letter-spacing:0.04em; cursor:pointer; white-space:nowrap; flex-shrink:0; padding:0; text-transform:uppercase; opacity:0.65; transition:opacity 180ms;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'">
-                                View →
+                                Quick View
+                              </button>
+                            </div>
+
+                            <!-- Direct Actions Group -->
+                            <div style="display:flex; gap:8px; margin-top:12px; border-top:1px solid rgba(230,222,209,0.7); padding-top:12px;">
+                              <a href="#/product/${product.slug}" class="button button-secondary" style="flex:1; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; text-decoration:none; font-weight:700; border-radius:6px;">
+                                Details
+                              </a>
+                              <button type="button" class="button button-whatsapp" data-action="buy-whatsapp" data-id="${attr(product.id)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" data-price="${attr(product.price)}" data-formats="${attr((product.machineFormats || []).join(', '))}" style="flex:1.3; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; gap:6px; font-weight:700; border-radius:6px; cursor:pointer;">
+                                ${icon("message-circle", 12)} Buy via WA
                               </button>
                             </div>
 
