@@ -69,7 +69,7 @@ import { renderMobileShell } from "./components/mobile/MobileShell.js";
 
 
 // Pages
-import { renderHome } from "./pages/Home.js";
+import { renderHome } from "./pages/Home.js?v=2";
 import { renderCatalog, catalogState } from "./pages/Catalog.js";
 import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js";
 import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js";
@@ -253,6 +253,40 @@ function render() {
 }
 
 
+// --- Infinite Scroll Observer ---
+let catalogObserver = null;
+
+function stopCatalogInfiniteScroll() {
+  if (catalogObserver) {
+    catalogObserver.disconnect();
+    catalogObserver = null;
+  }
+}
+
+function initCatalogInfiniteScroll() {
+  stopCatalogInfiniteScroll();
+
+  const sentinel = document.getElementById("catalog-sentinel");
+  if (!sentinel) return;
+
+  catalogObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const total = parseInt(sentinel.dataset.totalCount || "0", 10);
+        const limit = parseInt(sentinel.dataset.limit || "0", 10);
+        if (total > limit) {
+          catalogState.visibleLimit += 8;
+          triggerRender();
+        }
+      }
+    });
+  }, {
+    rootMargin: "300px"
+  });
+
+  catalogObserver.observe(sentinel);
+}
+
 // --- Carousel Autoscroll Animations ---
 let autoscrollFrameId = null;
 
@@ -388,6 +422,14 @@ function afterRender() {
     stopCollectionAutoscroll();
   }
 
+  // Initialize Catalog Infinite Scroll if active page
+  if (ui.page === "catalog") {
+    initCatalogInfiniteScroll();
+  } else {
+    stopCatalogInfiniteScroll();
+  }
+
+
   // Initialize Product Detail events if active page
   if (ui.page === "product-detail") {
     initProductDetailEvents();
@@ -478,6 +520,11 @@ function updateHeaderState() {
   if (!header) return;
   header.classList.toggle("is-scrolled", window.scrollY > 24);
   document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
+  
+  const toTop = document.querySelector(".to-top");
+  if (toTop) {
+    toTop.classList.toggle("visible", window.scrollY > 300);
+  }
 }
 
 function scrollToTarget(target) {
@@ -550,6 +597,117 @@ function showImageDownloadModal(imageUrl, filename) {
     if (e.target === modal) closeModal();
   });
 }
+
+function generateBrandedImage(imageUrl, productCode, callback) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = imageUrl;
+
+  const logo = new Image();
+  logo.src = "/logo.jpeg";
+
+  let imgLoaded = false;
+  let logoLoaded = false;
+
+  const draw = () => {
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth || img.width || 800;
+      canvas.height = img.naturalHeight || img.height || 800;
+      const ctx = canvas.getContext("2d");
+
+      // Draw original image
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // Calculations for dynamic sizing
+      const scale = canvas.width / 800;
+      const fontSize = Math.max(10, Math.round(13 * scale));
+      const paddingH = Math.max(10, Math.round(16 * scale));
+      const paddingV = Math.max(6, Math.round(10 * scale));
+      const margin = Math.max(12, Math.round(20 * scale));
+      const logoSize = Math.max(16, Math.round(24 * scale));
+      const gap = Math.max(6, Math.round(8 * scale));
+
+      ctx.font = `bold ${fontSize}px "Inter", -apple-system, sans-serif`;
+      const text = `GD • ${productCode} • +91 83098 97055`;
+      const textWidth = ctx.measureText(text).width;
+
+      const watermarkWidth = paddingH * 2 + logoSize + gap + textWidth;
+      const watermarkHeight = paddingV * 2 + logoSize;
+
+      const x = canvas.width - watermarkWidth - margin;
+      const y = canvas.height - watermarkHeight - margin;
+
+      // Draw rounded rectangle container
+      ctx.fillStyle = "rgba(17, 29, 66, 0.85)";
+      const radius = Math.max(4, Math.round(6 * scale));
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + watermarkWidth - radius, y);
+      ctx.quadraticCurveTo(x + watermarkWidth, y, x + watermarkWidth, y + radius);
+      ctx.lineTo(x + watermarkWidth, y + watermarkHeight - radius);
+      ctx.quadraticCurveTo(x + watermarkWidth, y + watermarkHeight, x + watermarkWidth - radius, y + watermarkHeight);
+      ctx.lineTo(x + radius, y + watermarkHeight);
+      ctx.quadraticCurveTo(x, y + watermarkHeight, x, y + watermarkHeight - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      ctx.fill();
+
+      // Draw Logo
+      if (logoLoaded) {
+        ctx.save();
+        ctx.beginPath();
+        const logoX = x + paddingH + logoSize / 2;
+        const logoY = y + paddingV + logoSize / 2;
+        ctx.arc(logoX, logoY, logoSize / 2, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(logo, x + paddingH, y + paddingV, logoSize, logoSize);
+        ctx.restore();
+      }
+
+      // Draw Text
+      ctx.fillStyle = "#ffffff";
+      ctx.textBaseline = "middle";
+      const textX = x + paddingH + (logoLoaded ? logoSize + gap : 0);
+      const textY = y + paddingV + logoSize / 2;
+      ctx.fillText(text, textX, textY);
+
+      canvas.toBlob((blob) => {
+        callback(blob);
+      }, "image/jpeg", 0.92);
+    } catch (err) {
+      console.error("Watermark drawing failed:", err);
+      callback(null);
+    }
+  };
+
+  img.onload = () => {
+    imgLoaded = true;
+    if (logoLoaded) draw();
+  };
+  img.onerror = () => callback(null);
+
+  logo.onload = () => {
+    logoLoaded = true;
+    if (imgLoaded) draw();
+  };
+  logo.onerror = () => {
+    logoLoaded = false;
+    if (imgLoaded) draw();
+  };
+
+  // Fallback timeout
+  setTimeout(() => {
+    if (!imgLoaded) {
+      callback(null);
+    } else {
+      draw();
+    }
+  }, 3500);
+}
+
 
 function printSpecSheet(product) {
   const printWindow = window.open("", "_blank");
@@ -737,13 +895,37 @@ document.addEventListener("click", (event) => {
   if (action === "share-product") {
     const url = window.location.href;
     const title = document.title;
+    const code = trigger.dataset.code || "design";
+    const imageSrc = trigger.dataset.image;
+
     if (navigator.share) {
-      navigator.share({
-        title: title,
-        url: url
-      }).catch(err => {
-        console.log("Error sharing:", err);
-      });
+      if (imageSrc) {
+        const imageUrl = mediaUrl(imageSrc);
+        generateBrandedImage(imageUrl, code, (blob) => {
+          if (blob) {
+            try {
+              const file = new File([blob], `${code}-branded.jpg`, { type: 'image/jpeg' });
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                navigator.share({
+                  files: [file],
+                  title: title,
+                  text: `Check out this premium design (ID: ${code}) from Godavari Designers:`,
+                  url: url
+                }).catch(err => {
+                  console.log("Error sharing file, falling back to url-only:", err);
+                  navigator.share({ title: title, url: url }).catch(err => console.log(err));
+                });
+                return;
+              }
+            } catch (err) {
+              console.warn("File sharing not supported or failed, falling back to url-only:", err);
+            }
+          }
+          navigator.share({ title: title, url: url }).catch(err => console.log(err));
+        });
+      } else {
+        navigator.share({ title: title, url: url }).catch(err => console.log(err));
+      }
     } else {
       navigator.clipboard.writeText(url)
         .then(() => {
@@ -816,28 +998,44 @@ document.addEventListener("click", (event) => {
     const product = site.products.find(p => p.id === id);
     if (product) {
       const imageUrl = mediaUrl(imageSrc);
-      showToast("Downloading design image...");
+      showToast("Baking watermark into design image...");
       
-      fetch(imageUrl, { mode: 'cors' })
-        .then(res => {
-          if (!res.ok) throw new Error("Network response was not ok");
-          return res.blob();
-        })
-        .then(blob => {
+      generateBrandedImage(imageUrl, product.code, (blob) => {
+        if (blob) {
           const downloadUrl = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = downloadUrl;
-          a.download = `${product.code}-image.jpg`;
+          a.download = `${product.code}-branded.jpg`;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(downloadUrl);
-          showToast("Design image downloaded successfully!");
-        })
-        .catch(err => {
-          console.warn("CORS fetch failed, falling back to overlay manual download instructions:", err);
-          showImageDownloadModal(imageUrl, `${product.code}-image.jpg`);
-        });
+          showToast("Watermarked design downloaded successfully!");
+        } else {
+          // Fallback if canvas draw fails
+          console.warn("Watermark baking failed. Attempting standard download...");
+          fetch(imageUrl, { mode: 'cors' })
+            .then(res => {
+              if (!res.ok) throw new Error("Network response was not ok");
+              return res.blob();
+            })
+            .then(fallbackBlob => {
+              const downloadUrl = URL.createObjectURL(fallbackBlob);
+              const a = document.createElement("a");
+              a.href = downloadUrl;
+              a.download = `${product.code}-image.jpg`;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+              URL.revokeObjectURL(downloadUrl);
+              showToast("Design image downloaded (unwatermarked fallback)");
+            })
+            .catch(err => {
+              console.warn("CORS fetch failed, falling back to overlay manual download instructions:", err);
+              showImageDownloadModal(imageUrl, `${product.code}-image.jpg`);
+            });
+        }
+      });
     }
   }
 
@@ -969,10 +1167,6 @@ document.addEventListener("click", (event) => {
     triggerRender();
   }
 
-  if (action === "load-more-designs") {
-    catalogState.visibleLimit += 8;
-    triggerRender();
-  }
 
   // --- Quick View Actions ---
   if (action === "quick-view") {

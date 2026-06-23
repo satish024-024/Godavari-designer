@@ -461,11 +461,17 @@ export function renderCatalog() {
                               ${icon("heart", 16)}
                             </button>
 
-                            <!-- Hover Overlay Quick View Trigger -->
-                            <button type="button" class="quick-view-overlay-btn" data-action="quick-view" data-id="${attr(product.id)}">
-                              Quick View
-                            </button>
-                          </div>
+                             <!-- Hover Overlay Quick View Trigger -->
+                             <button type="button" class="quick-view-overlay-btn" data-action="quick-view" data-id="${attr(product.id)}">
+                               Quick View
+                             </button>
+
+                             <!-- Watermark Overlay -->
+                             <div class="watermark-overlay">
+                               <img src="/logo.jpeg" class="watermark-logo" alt="logo" />
+                               <span class="watermark-text">GD • ${escapeHtml(product.code)}</span>
+                             </div>
+                           </div>
                           
                           <div class="product-info" style="padding: 14px 16px 16px;">
 
@@ -538,16 +544,14 @@ export function renderCatalog() {
               </div>`
         }
 
-        <!-- Load More Pagination Button -->
-        ${
-          totalCount > catalogState.visibleLimit
-            ? `<div style="display:flex; justify-content:center; margin: 48px 0 24px;">
-                <button type="button" class="button button-secondary" data-action="load-more-designs" style="min-height: 48px; border-radius: 99px; padding: 0 40px; border-color: var(--border); font-size: 13px; font-weight:700; display: inline-flex; align-items:center; gap:8px;">
-                  ${icon("refresh-cw", 16)} Load More Designs
-                </button>
-              </div>`
-            : ""
-        }
+        <!-- Infinite Scroll Sentinel -->
+        <div id="catalog-sentinel" data-total-count="${totalCount}" data-limit="${catalogState.visibleLimit}" style="display: ${totalCount > catalogState.visibleLimit ? 'flex' : 'none'}; justify-content: center; align-items: center; padding: 48px 0 24px; min-height: 60px;">
+          <div class="infinite-loader" style="display: flex; gap: 6px; align-items: center;">
+            <span style="width: 8px; height: 8px; background-color: var(--navy); border-radius: 50%; display: inline-block; opacity: 0.3; animation: infinite-pulse 1.4s ease-in-out infinite;"></span>
+            <span style="width: 8px; height: 8px; background-color: var(--navy); border-radius: 50%; display: inline-block; opacity: 0.3; animation: infinite-pulse 1.4s ease-in-out infinite; animation-delay: 0.2s;"></span>
+            <span style="width: 8px; height: 8px; background-color: var(--navy); border-radius: 50%; display: inline-block; opacity: 0.3; animation: infinite-pulse 1.4s ease-in-out infinite; animation-delay: 0.4s;"></span>
+          </div>
+        </div>
 
       </div>
 

@@ -164,8 +164,13 @@ export function renderProductDetail() {
           <!-- Gallery -->
           <div class="detail-gallery-container" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
             <!-- Main Image Box -->
-            <div id="detailMainImgContainer" class="detail-main-image-wrapper mode-${activeGalleryMode}" data-action="open-lightbox" style="border: 1px solid var(--border); border-radius: 8px; background: #fff; overflow: hidden; aspect-ratio: 1/1; display: grid; place-items: center; width: 100%;">
+            <div id="detailMainImgContainer" class="detail-main-image-wrapper mode-${activeGalleryMode}" data-action="open-lightbox" style="position: relative; border: 1px solid var(--border); border-radius: 8px; background: #fff; overflow: hidden; aspect-ratio: 1/1; display: grid; place-items: center; width: 100%;">
               <img id="detailMainImg" src="${attr(mediaUrl(activeImageSrc))}" alt="${attr(product.title)}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;" />
+              <!-- Watermark Overlay -->
+              <div class="watermark-overlay" style="bottom: 12px; right: 12px; padding: 6px 10px;">
+                <img src="/logo.jpeg" class="watermark-logo" style="width: 18px; height: 18px;" alt="logo" />
+                <span class="watermark-text" style="font-size: 10px;">GD • ${escapeHtml(product.code)}</span>
+              </div>
             </div>
             
             <!-- Thumbnails -->
@@ -577,8 +582,13 @@ export function renderProductDetail() {
               </div>
 
               <!-- Main Image Box -->
-              <div id="detailMainImgContainer" class="detail-main-image-wrapper mode-${activeGalleryMode}" data-action="open-lightbox">
+              <div id="detailMainImgContainer" class="detail-main-image-wrapper mode-${activeGalleryMode}" data-action="open-lightbox" style="position: relative;">
                 <img id="detailMainImg" src="${attr(mediaUrl(activeImageSrc))}" alt="${attr(product.title)}" />
+                <!-- Watermark Overlay -->
+                <div class="watermark-overlay" style="bottom: 12px; right: 12px; padding: 6px 10px;">
+                  <img src="/logo.jpeg" class="watermark-logo" style="width: 18px; height: 18px;" alt="logo" />
+                  <span class="watermark-text" style="font-size: 10px;">GD • ${escapeHtml(product.code)}</span>
+                </div>
               </div>
             </div>
 
@@ -660,6 +670,9 @@ export function renderProductDetail() {
                 type="button"
                 class="button button-secondary"
                 data-action="share-product"
+                data-id="${attr(product.id)}"
+                data-code="${attr(product.code)}"
+                data-image="${attr(activeImageSrc)}"
                 style="min-height: 40px; padding: 0 14px; white-space: nowrap;"
               >
                 ${icon("share-2", 16)} Share

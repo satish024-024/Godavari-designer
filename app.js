@@ -1471,6 +1471,11 @@ function updateHeaderState() {
   if (!header) return;
   header.classList.toggle("is-scrolled", window.scrollY > 24);
   document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
+  
+  const toTop = document.querySelector(".to-top");
+  if (toTop) {
+    toTop.classList.toggle("visible", window.scrollY > 300);
+  }
 }
 
 const revealObserver = new IntersectionObserver(

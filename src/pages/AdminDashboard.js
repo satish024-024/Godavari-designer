@@ -110,6 +110,7 @@ let customerSearchQuery = "";
 // Creation / editing states
 let editingProduct = null;
 let isAddingProduct = false;
+let isBulkImporting = false;
 
 let editingCategory = null;
 let isAddingCategory = false;
@@ -494,8 +495,156 @@ function renderDashboardOverview() {
   `;
 }
 
+function renderBulkImportForm() {
+  const cats = getCategories();
+  const collections = site.collections || [];
+  const categoryOptions = cats.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
+  const collectionOptions = `<option value="">None</option>` + collections.map(col => `<option value="${col.id}">${escapeHtml(col.name)}</option>`).join("");
+  
+  // Find highest existing code number in site.products
+  let highestCodeNumber = 2000;
+  site.products.forEach(p => {
+    if (p.code) {
+      const match = p.code.match(/\d+/);
+      if (match) {
+        const num = parseInt(match[0], 10);
+        if (num > highestCodeNumber) highestCodeNumber = num;
+      }
+    }
+  });
+  const nextStartNumber = highestCodeNumber + 1;
+
+  return `
+    <div class="admin-module">
+      <div style="margin-bottom: 24px;">
+        <button class="admin-btn admin-btn-secondary admin-bulk-cancel-btn">
+          ${icon("arrow-left", 16)} Back to Catalog
+        </button>
+      </div>
+
+      <form id="adminBulkImportForm" class="admin-form">
+        <div style="grid-column: span 2;">
+          <h2 class="admin-form-title">Bulk Upload & Import Designs</h2>
+          <p style="font-size: 13px; color: rgba(17,29,66,0.5); margin: 0;">Upload multiple images at once. All designs will inherit the shared details entered below, and their codes will auto-increment.</p>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Base Design Title</label>
+          <input type="text" name="baseTitle" required class="admin-form-control" placeholder="e.g. Bridal Blouse Saree, Velvet Border">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Category</label>
+          <select name="categoryId" required class="admin-form-control">
+            ${categoryOptions}
+          </select>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Collection (Optional)</label>
+          <select name="collectionId" class="admin-form-control">
+            ${collectionOptions}
+          </select>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Price (₹)</label>
+          <input type="number" name="price" value="1500" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">Available Machine Formats</label>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+              <input type="checkbox" name="formatOption" value="DST" checked> Tajima (DST)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+              <input type="checkbox" name="formatOption" value="PES" checked> Brother (PES)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+              <input type="checkbox" name="formatOption" value="EXP" checked> Bernina (EXP)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+              <input type="checkbox" name="formatOption" value="JEF" checked> Janome (JEF)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+              <input type="checkbox" name="formatOption" value="XXX"> Singer (XXX)
+            </label>
+          </div>
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Code Prefix</label>
+          <input type="text" name="codePrefix" value="GD-" required class="admin-form-control" placeholder="e.g. GD-">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Starting Code Number</label>
+          <input type="number" name="startNumber" value="${nextStartNumber}" required class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Stitch Count (Default)</label>
+          <input type="number" name="totalStitchCount" value="28000" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Thread Colors (Default)</label>
+          <input type="number" name="threadColors" value="4" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Width (mm)</label>
+          <input type="number" name="width" value="120" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group">
+          <label class="admin-form-label">Height (mm)</label>
+          <input type="number" name="height" value="120" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">Recommended Fabrics (comma-separated)</label>
+          <input type="text" name="recommendedFabrics" value="Silk, Velvet, Organza, Cotton" class="admin-form-control">
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2;">
+          <label class="admin-form-label">Description / Features</label>
+          <textarea name="description" class="admin-form-control" rows="3" placeholder="e.g. High-density embroidery design optimized for premium blouses.">Premium machine-ready embroidery design.</textarea>
+        </div>
+
+        <div class="admin-form-group" style="grid-column: span 2; border: 1px dashed var(--border); padding: 24px; border-radius: 8px; background: #faf8f5;">
+          <label class="admin-form-label" style="display: block; text-align: center; margin-bottom: 12px; font-weight:700;">Select Images for Upload</label>
+          <input type="file" id="bulkImagesInput" multiple accept="image/*" required class="admin-form-control" style="display: block; max-width: 320px; margin: 0 auto;">
+          <p style="font-size: 11px; color: rgba(17,29,66,0.5); text-align: center; margin-top: 8px;">Select one or more images. A new design card will be created for each image.</p>
+        </div>
+
+        <!-- Real-Time Upload Progress Panel -->
+        <div id="bulkUploadProgressPanel" style="display: none; grid-column: span 2; border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: #fff; margin-top: 12px;">
+          <h4 style="margin: 0 0 10px; font-family: var(--font-serif); color: var(--navy);">Processing Images...</h4>
+          <div style="width: 100%; background: #f0ede9; border-radius: 99px; height: 10px; overflow: hidden; margin-bottom: 12px;">
+            <div id="bulkUploadProgressBar" style="width: 0%; background: var(--navy); height: 100%; transition: width 0.3s ease;"></div>
+          </div>
+          <div id="bulkUploadProgressLog" style="font-size: 12px; font-family: monospace; max-height: 120px; overflow-y: auto; background: #fdfcfb; padding: 10px; border: 1px solid rgba(230,222,209,0.5); border-radius: 4px; line-height: 1.5;"></div>
+        </div>
+
+        <div class="admin-form-actions" style="grid-column: span 2; display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 20px;">
+          <button type="button" class="admin-btn admin-btn-secondary admin-bulk-cancel-btn">Cancel</button>
+          <button type="submit" id="adminBulkSubmitBtn" class="admin-btn admin-btn-primary" style="background: var(--navy); border-color: var(--navy);">
+            ${icon("upload-cloud", 16)} Start Bulk Import
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
 function renderProductsModule() {
   const cats = getCategories();
+
+  if (isBulkImporting) {
+    return renderBulkImportForm();
+  }
   
   if (isAddingProduct || editingProduct) {
     const isEdit = !!editingProduct;
@@ -553,6 +702,27 @@ function renderProductsModule() {
               <option value="">None</option>
               ${site.collections.map(col => `<option value="${col.id}" ${isEdit && p.collectionId === col.id ? 'selected' : ''}>${escapeHtml(col.title)}</option>`).join('')}
             </select>
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Available Machine Formats</label>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+                <input type="checkbox" name="formatOption" value="DST" ${!isEdit || (p.machineFormats && p.machineFormats.includes("DST")) ? "checked" : ""}> Tajima (DST)
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+                <input type="checkbox" name="formatOption" value="PES" ${!isEdit || (p.machineFormats && p.machineFormats.includes("PES")) ? "checked" : ""}> Brother (PES)
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+                <input type="checkbox" name="formatOption" value="EXP" ${!isEdit || (p.machineFormats && p.machineFormats.includes("EXP")) ? "checked" : ""}> Bernina (EXP)
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+                <input type="checkbox" name="formatOption" value="JEF" ${!isEdit || (p.machineFormats && p.machineFormats.includes("JEF")) ? "checked" : ""}> Janome (JEF)
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
+                <input type="checkbox" name="formatOption" value="XXX" ${isEdit && p.machineFormats && p.machineFormats.includes("XXX") ? "checked" : ""}> Singer (XXX)
+              </label>
+            </div>
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
@@ -661,9 +831,14 @@ function renderProductsModule() {
           <h1 class="admin-module-title">Products Catalog</h1>
           <p class="admin-module-subtitle">View, add, edit, and delete designs in your digital library.</p>
         </div>
-        <button id="adminAddProductBtn" class="admin-btn admin-btn-primary">
-          ${icon("plus", 16)} Add Design
-        </button>
+        <div style="display: flex; gap: 8px;">
+          <button id="adminAddProductBtn" class="admin-btn admin-btn-primary">
+            ${icon("plus", 16)} Add Design
+          </button>
+          <button id="adminBulkImportBtn" class="admin-btn admin-btn-secondary" style="background: var(--navy); color: #fff; border-color: var(--navy);">
+            ${icon("files", 16)} Bulk Upload
+          </button>
+        </div>
       </div>
 
       <!-- Search & Filters -->
@@ -1914,6 +2089,11 @@ function renderModule(section) {
 
 export function renderAdminDashboard(params = {}) {
   const activeSection = getActiveSection(params);
+  if (activeSection !== "products") {
+    isAddingProduct = false;
+    isBulkImporting = false;
+    editingProduct = null;
+  }
   triggerDataLoad(activeSection);
 
   return `
@@ -2089,6 +2269,15 @@ export function initAdminDashboardDelegates() {
     // ------------------------------------------
     if (e.target.closest("#adminAddProductBtn")) {
       isAddingProduct = true;
+      isBulkImporting = false;
+      editingProduct = null;
+      triggerRender();
+      return;
+    }
+
+    if (e.target.closest("#adminBulkImportBtn")) {
+      isBulkImporting = true;
+      isAddingProduct = false;
       editingProduct = null;
       triggerRender();
       return;
@@ -2097,6 +2286,12 @@ export function initAdminDashboardDelegates() {
     if (e.target.closest(".admin-product-cancel-btn")) {
       isAddingProduct = false;
       editingProduct = null;
+      triggerRender();
+      return;
+    }
+
+    if (e.target.closest(".admin-bulk-cancel-btn")) {
+      isBulkImporting = false;
       triggerRender();
       return;
     }
@@ -2428,6 +2623,166 @@ export function initAdminDashboardDelegates() {
   // Form Submissions Delegator
   document.addEventListener("submit", async (e) => {
     // ------------------------------------------
+    // Products CMS Bulk Import Form Submit
+    // ------------------------------------------
+    if (e.target.id === "adminBulkImportForm") {
+      e.preventDefault();
+      const form = e.target;
+      const submitBtn = form.querySelector("#adminBulkSubmitBtn");
+      const progressPanel = document.getElementById("bulkUploadProgressPanel");
+      const progressBar = document.getElementById("bulkUploadProgressBar");
+      const progressLog = document.getElementById("bulkUploadProgressLog");
+
+      const fileInput = document.getElementById("bulkImagesInput");
+      const files = fileInput ? fileInput.files : [];
+      if (files.length === 0) {
+        showToast("Please select at least one image file.");
+        return;
+      }
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (progressPanel) progressPanel.style.display = "block";
+      if (progressBar) progressBar.style.width = "0%";
+      if (progressLog) progressLog.innerHTML = "";
+
+      const log = (msg) => {
+        if (progressLog) {
+          progressLog.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}<br>`;
+          progressLog.scrollTop = progressLog.scrollHeight;
+        }
+      };
+
+      try {
+        const formData = new FormData(form);
+        const baseTitle = formData.get("baseTitle");
+        const price = Number(formData.get("price") || 1500);
+        const categoryId = formData.get("categoryId");
+        const collectionId = formData.get("collectionId") || null;
+        const codePrefix = formData.get("codePrefix") || "GD-";
+        const startNumber = parseInt(formData.get("startNumber") || "2001", 10);
+        
+        // formats checkboxes
+        const formatsCheckboxOptions = Array.from(form.querySelectorAll("input[name='formatOption']:checked")).map(el => el.value);
+        
+        // categories look up
+        const cats = getCategories();
+        const activeCategory = cats.find(c => c.id === categoryId);
+        const categoryName = activeCategory ? activeCategory.name : "";
+
+        // collections look up
+        const collectionsList = site.collections || [];
+        const activeCollection = collectionsList.find(c => c.id === collectionId);
+        const collectionName = activeCollection ? activeCollection.name : "";
+
+        const fabricsStr = formData.get("recommendedFabrics") || "";
+        const recommendedFabrics = fabricsStr.split(",").map(t => t.trim()).filter(Boolean);
+        const description = formData.get("description") || "Premium embroidery design.";
+        
+        const totalStitchCount = parseInt(formData.get("totalStitchCount") || 28000, 10);
+        const threadColors = parseInt(formData.get("threadColors") || 4, 10);
+        const width = parseInt(formData.get("width") || 120, 10);
+        const height = parseInt(formData.get("height") || 120, 10);
+
+        log(`Starting bulk import of ${files.length} designs...`);
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const codeNumber = startNumber + i;
+          const code = `${codePrefix}${codeNumber}`;
+          const productTitle = `${baseTitle} - ${code}`;
+          const slug = `${baseTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${code.toLowerCase()}`;
+
+          log(`Processing ${i + 1}/${files.length}: ${file.name}...`);
+          
+          // 1. Upload the image file to Supabase storage
+          const cleanName = `bulk_${Date.now()}_${i}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+          log(`Uploading image ${file.name} to storage...`);
+          const publicUrl = await storageService.uploadImage(file, cleanName);
+          log(`Uploaded successfully! Public URL: ${publicUrl}`);
+
+          // 2. Prepare formats structure
+          const formats = formatsCheckboxOptions.map(fmt => {
+            let machineBrand = "Tajima";
+            let machineModel = "TMEZ-SC";
+            let hoopSize = "200mm x 200mm";
+            if (fmt === "PES") {
+              machineBrand = "Brother";
+              machineModel = "PR1055X";
+            } else if (fmt === "EXP") {
+              machineBrand = "Bernina";
+              machineModel = "E16";
+            } else if (fmt === "JEF") {
+              machineBrand = "Janome";
+              machineModel = "MC550E";
+            } else if (fmt === "XXX") {
+              machineBrand = "Singer";
+              machineModel = "EM9305";
+            }
+            return {
+              format: fmt,
+              machineBrand,
+              machineModel,
+              hoopSize,
+              price
+            };
+          });
+
+          // 3. Insert product details to Supabase
+          const prodPayload = {
+            title: productTitle,
+            code,
+            slug,
+            price,
+            categoryId,
+            collectionId,
+            description,
+            backStitchCount: 0,
+            handStitchCount: 0,
+            totalStitchCount,
+            rpm: 850,
+            estimatedEmbroideryTime: Math.round(totalStitchCount / 850),
+            threadColors,
+            width,
+            height,
+            image: publicUrl,
+            gallery: [publicUrl],
+            difficultyLevel: "Intermediate",
+            recommendedFabrics,
+            tags: [categoryName, collectionName].filter(Boolean),
+            formats,
+            featured: true,
+            bestSeller: true
+          };
+
+          log(`Saving design details for ${code}...`);
+          await productService.createProduct(prodPayload);
+          log(`Design ${code} created successfully!`);
+
+          // Update progress bar
+          const percent = Math.round(((i + 1) / files.length) * 100);
+          if (progressBar) progressBar.style.width = `${percent}%`;
+        }
+
+        log(`Refreshing product catalog from server...`);
+        site.products = await productService.getProducts();
+        log(`All done! Imported ${files.length} products successfully.`);
+        showToast(`Bulk imported ${files.length} designs successfully!`);
+
+        setTimeout(() => {
+          isBulkImporting = false;
+          triggerRender();
+        }, 1500);
+
+      } catch (err) {
+        log(`ERROR: ${err.message}`);
+        showToast(`Bulk upload failed: ${err.message}`);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+      return;
+    }
+
+    // ------------------------------------------
     // Products CMS Form Submit
     // ------------------------------------------
     if (e.target.id === "adminProductForm") {
@@ -2450,23 +2805,46 @@ export function initAdminDashboardDelegates() {
       const price = Number(formData.get("price") || 0);
       const title = formData.get("title");
       
-      let formats = [];
-      if (id) {
-        const existing = site.products.find(p => p.id === id);
-        if (existing) {
-          formats = existing.formats || [];
-          formats.forEach(f => f.price = price);
+      const formatsCheckboxOptions = Array.from(e.target.querySelectorAll("input[name='formatOption']:checked")).map(el => el.value);
+      
+      const formats = formatsCheckboxOptions.map(fmt => {
+        let existingFormat = null;
+        if (id) {
+          const existing = site.products.find(p => p.id === id);
+          if (existing && existing.formats) {
+            existingFormat = existing.formats.find(f => f.format === fmt);
+          }
         }
-      }
-      if (formats.length === 0) {
-        formats = [
-          { format: "DST", machineBrand: "Tajima", machineModel: "TMEZ-SC", hoopSize: "200mm x 200mm", price },
-          { format: "PES", machineBrand: "Brother", machineModel: "PR1055X", hoopSize: "200mm x 200mm", price },
-          { format: "EXP", machineBrand: "Bernina", machineModel: "E16", hoopSize: "200mm x 200mm", price },
-          { format: "JEF", machineBrand: "Janome", machineModel: "MC550E", hoopSize: "200mm x 200mm", price },
-          { format: "XXX", machineBrand: "Singer", machineModel: "EM9305", hoopSize: "200mm x 200mm", price }
-        ];
-      }
+        if (existingFormat) {
+          existingFormat.price = price;
+          return existingFormat;
+        }
+        
+        let machineBrand = "Tajima";
+        let machineModel = "TMEZ-SC";
+        let hoopSize = "200mm x 200mm";
+        if (fmt === "PES") {
+          machineBrand = "Brother";
+          machineModel = "PR1055X";
+        } else if (fmt === "EXP") {
+          machineBrand = "Bernina";
+          machineModel = "E16";
+        } else if (fmt === "JEF") {
+          machineBrand = "Janome";
+          machineModel = "MC550E";
+        } else if (fmt === "XXX") {
+          machineBrand = "Singer";
+          machineModel = "EM9305";
+        }
+        return {
+          format: fmt,
+          machineBrand,
+          machineModel,
+          hoopSize,
+          price
+        };
+      });
+
       
       const prodPayload = {
         title,

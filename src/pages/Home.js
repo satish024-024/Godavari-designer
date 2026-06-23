@@ -317,49 +317,49 @@ function renderCta() {
 
 function renderServicesSection() {
   return `
-    <section class="content-section services-grid-section" style="padding: 80px 24px 20px; background: var(--ivory);">
+    <section class="content-section services-grid-section">
       <div class="section-heading reveal" style="text-align: center; max-width: 800px; margin: 0 auto 40px; display: grid; gap: 8px;">
         <p class="section-kicker" style="color: var(--gold); text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; margin: 0;">What We Do</p>
         <h2 style="font-family: var(--font-serif); font-size: clamp(24px, 4vw, 32px); font-weight: 700; color: var(--navy); margin: 0;">Specialized Embroidery Services</h2>
         <div style="width: 50px; height: 1.5px; background: var(--gold); margin: 12px auto 0;"></div>
       </div>
-      <div style="max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;">
+      <div class="services-grid">
         <!-- Card 1 -->
-        <article style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; display: grid; gap: 14px; box-shadow: var(--shadow-deep); transition: transform 200ms ease;">
-          <div style="color: var(--gold);">${icon("upload-cloud", 28)}</div>
-          <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 700; margin: 0; color: var(--navy);">Custom Embroidery Digitizing</h3>
-          <p style="font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0;">Convert logos, hand sketches, and vectors into flawless, machine-ready stitch files.</p>
-          <a href="#/services/custom-embroidery-digitizing" style="font-size: 13px; font-weight: 700; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+        <article class="service-card">
+          <div class="service-icon">${icon("upload-cloud", 28)}</div>
+          <h3>Custom Embroidery Digitizing</h3>
+          <p>Convert logos, hand sketches, and vectors into flawless, machine-ready stitch files.</p>
+          <a href="#/services/custom-embroidery-digitizing" class="service-link">
             <span>Learn More</span>
             ${icon("arrow-right", 14)}
           </a>
         </article>
         <!-- Card 2 -->
-        <article style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; display: grid; gap: 14px; box-shadow: var(--shadow-deep); transition: transform 200ms ease;">
-          <div style="color: var(--gold);">${icon("heart", 28)}</div>
-          <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 700; margin: 0; color: var(--navy);">Bridal Blouse Designs</h3>
-          <p style="font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0;">Intricate zari embroidery placements, custom necklines, and sleeve borders for bridal wear.</p>
-          <a href="#/services/bridal-blouse-embroidery-designs" style="font-size: 13px; font-weight: 700; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+        <article class="service-card">
+          <div class="service-icon">${icon("heart", 28)}</div>
+          <h3>Bridal Blouse Designs</h3>
+          <p>Intricate zari embroidery placements, custom necklines, and sleeve borders for bridal wear.</p>
+          <a href="#/services/bridal-blouse-embroidery-designs" class="service-link">
             <span>Learn More</span>
             ${icon("arrow-right", 14)}
           </a>
         </article>
         <!-- Card 3 -->
-        <article style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; display: grid; gap: 14px; box-shadow: var(--shadow-deep); transition: transform 200ms ease;">
-          <div style="color: var(--gold);">${icon("repeat", 28)}</div>
-          <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 700; margin: 0; color: var(--navy);">Saree Border Digitizing</h3>
-          <p style="font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0;">Seamless repeating border files and lace trims engineered for continuous multi-hoop runs.</p>
-          <a href="#/services/saree-border-embroidery-designs" style="font-size: 13px; font-weight: 700; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+        <article class="service-card">
+          <div class="service-icon">${icon("repeat", 28)}</div>
+          <h3>Saree Border Digitizing</h3>
+          <p>Seamless repeating border files and lace trims engineered for continuous multi-hoop runs.</p>
+          <a href="#/services/saree-border-embroidery-designs" class="service-link">
             <span>Learn More</span>
             ${icon("arrow-right", 14)}
           </a>
         </article>
         <!-- Card 4 -->
-        <article style="background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; display: grid; gap: 14px; box-shadow: var(--shadow-deep); transition: transform 200ms ease;">
-          <div style="color: var(--gold);">${icon("award", 28)}</div>
-          <h3 style="font-family: var(--font-serif); font-size: 18px; font-weight: 700; margin: 0; color: var(--navy);">Logo & Branding</h3>
-          <p style="font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0;">Precision lettering and stable underlays optimized for left-chest shirts, caps, and workwear.</p>
-          <a href="#/services/logo-embroidery-digitizing" style="font-size: 13px; font-weight: 700; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 6px;">
+        <article class="service-card">
+          <div class="service-icon">${icon("award", 28)}</div>
+          <h3>Logo & Branding</h3>
+          <p>Precision lettering and stable underlays optimized for left-chest shirts, caps, and workwear.</p>
+          <a href="#/services/logo-embroidery-digitizing" class="service-link">
             <span>Learn More</span>
             ${icon("arrow-right", 14)}
           </a>
