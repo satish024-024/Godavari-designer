@@ -70,17 +70,17 @@ import { renderMobileShell } from "./components/mobile/MobileShell.js";
 
 // Pages
 import { renderHome } from "./pages/Home.js?v=2";
-import { renderCatalog, catalogState } from "./pages/Catalog.js";
-import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js";
-import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js";
-import { renderCart } from "./pages/Cart.js";
-import { renderWishlist } from "./pages/Wishlist.js";
-import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js";
-import { renderAuth, initAuthDelegates } from "./pages/Auth.js";
-import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js";
-import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js";
-import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js";
-import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js";
+import { renderCatalog, catalogState } from "./pages/Catalog.js?v=2";
+import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=2";
+import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=2";
+import { renderCart } from "./pages/Cart.js?v=2";
+import { renderWishlist } from "./pages/Wishlist.js?v=2";
+import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=2";
+import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=2";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=2";
+import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=2";
+import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=2";
+import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=2";
 
 // Company & Support Pages
 import {
@@ -89,7 +89,7 @@ import {
   renderWhyGodavari,
   renderReviews,
   renderCareers
-} from "./pages/CompanyPages.js";
+} from "./pages/CompanyPages.js?v=2";
 import {
   renderFAQs,
   renderShippingDelivery,
