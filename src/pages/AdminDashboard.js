@@ -768,9 +768,21 @@ function renderProductsModule() {
             <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--gold); margin: 0 0 14px;">Media & Additional Parameters</h3>
           </div>
 
-          <div class="admin-form-group">
-            <label class="admin-form-label">Primary Image Asset Code / URL</label>
-            <input type="text" name="image" value="${isEdit ? escapeHtml(p.image) : ''}" required class="admin-form-control" placeholder="e.g. media-product-peony">
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Design Image</label>
+            <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
+              <input type="file" id="productImageFile" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <div class="upload-placeholder" style="${isEdit && p.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
+                ${icon("upload-cloud", 32)}
+                <span style="font-size: 13px; font-weight: 500; color: var(--navy);">Click or drag image here to upload design</span>
+                <span style="font-size: 11px; color: var(--ink-soft);">PNG, JPG, WEBP up to 10MB</span>
+              </div>
+              <div class="upload-preview" style="${isEdit && p.image ? 'display: flex; flex-direction: column; align-items: center; gap: 8px;' : 'display: none;'}">
+                <img src="${isEdit && p.image ? attr(mediaUrl(p.image)) : ''}" style="max-height: 140px; max-width: 100%; object-fit: contain; border-radius: 6px; border: 1px solid var(--border);">
+                <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Click to replace image</span>
+              </div>
+              <input type="hidden" name="image" value="${isEdit ? escapeHtml(p.image || '') : ''}">
+            </div>
           </div>
 
           <div class="admin-form-group">
@@ -955,9 +967,21 @@ function renderCategoriesModule() {
             <textarea name="description" rows="3" class="admin-form-control" placeholder="Describe the category...">${isEdit ? escapeHtml(c.description || "") : ''}</textarea>
           </div>
 
-          <div class="admin-form-group">
-            <label class="admin-form-label">Image Code / URL</label>
-            <input type="text" name="image" value="${isEdit ? escapeHtml(c.image || '') : ''}" class="admin-form-control" placeholder="e.g. media-collection-blouses">
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Category Image</label>
+            <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
+              <input type="file" id="categoryImageFile" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <div class="upload-placeholder" style="${isEdit && c.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
+                ${icon("upload-cloud", 32)}
+                <span style="font-size: 13px; font-weight: 500; color: var(--navy);">Click or drag image here to upload category image</span>
+                <span style="font-size: 11px; color: var(--ink-soft);">PNG, JPG, WEBP up to 10MB</span>
+              </div>
+              <div class="upload-preview" style="${isEdit && c.image ? 'display: flex; flex-direction: column; align-items: center; gap: 8px;' : 'display: none;'}">
+                <img src="${isEdit && c.image ? attr(mediaUrl(c.image)) : ''}" style="max-height: 140px; max-width: 100%; object-fit: contain; border-radius: 6px; border: 1px solid var(--border);">
+                <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Click to replace image</span>
+              </div>
+              <input type="hidden" name="image" value="${isEdit ? escapeHtml(c.image || '') : ''}">
+            </div>
           </div>
 
           <div class="admin-form-group">
@@ -1066,9 +1090,21 @@ function renderCollectionsModule() {
             <textarea name="description" rows="3" class="admin-form-control" placeholder="Description...">${isEdit ? escapeHtml(col.description || "") : ''}</textarea>
           </div>
 
-          <div class="admin-form-group">
-            <label class="admin-form-label">Image Code / URL</label>
-            <input type="text" name="image" value="${isEdit ? escapeHtml(col.image || '') : ''}" class="admin-form-control" placeholder="e.g. media-collection-bridal">
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label">Collection Image</label>
+            <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
+              <input type="file" id="collectionImageFile" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <div class="upload-placeholder" style="${isEdit && col.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
+                ${icon("upload-cloud", 32)}
+                <span style="font-size: 13px; font-weight: 500; color: var(--navy);">Click or drag image here to upload collection image</span>
+                <span style="font-size: 11px; color: var(--ink-soft);">PNG, JPG, WEBP up to 10MB</span>
+              </div>
+              <div class="upload-preview" style="${isEdit && col.image ? 'display: flex; flex-direction: column; align-items: center; gap: 8px;' : 'display: none;'}">
+                <img src="${isEdit && col.image ? attr(mediaUrl(col.image)) : ''}" style="max-height: 140px; max-width: 100%; object-fit: contain; border-radius: 6px; border: 1px solid var(--border);">
+                <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Click to replace image</span>
+              </div>
+              <input type="hidden" name="image" value="${isEdit ? escapeHtml(col.image || '') : ''}">
+            </div>
           </div>
 
           <div class="admin-form-group">
@@ -1430,8 +1466,23 @@ function renderCustomRequestsModule() {
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-form-label">Digitized File URL / Code (If Completed)</label>
-              <input type="text" name="digitizedFile" value="${escapeHtml(r.digitizedFile || '')}" class="admin-form-control" placeholder="e.g. digitized-designs/1234.pes">
+              <label class="admin-form-label">Digitized File (PES, DST, EXP, etc.)</label>
+              <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 8px; padding: 16px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
+                <input type="file" id="digitizedDesignFile" accept=".pes,.dst,.exp,.jef,.xxx,.pdf,.zip" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                <div class="upload-placeholder" style="${r.digitizedFile ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 6px;'}">
+                  ${icon("upload-cloud", 24)}
+                  <span style="font-size: 12px; font-weight: 500; color: var(--navy);">Click or drag file to upload design</span>
+                  <span style="font-size: 10px; color: var(--ink-soft);">PES, DST, EXP, ZIP etc.</span>
+                </div>
+                <div class="upload-preview" style="${r.digitizedFile ? 'display: flex; flex-direction: column; align-items: center; gap: 6px;' : 'display: none;'}">
+                  ${icon("file-check", 24)}
+                  <span style="font-size: 12px; color: var(--navy); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%;">
+                    ${r.digitizedFile ? r.digitizedFile.split('/').pop() : 'Design file uploaded'}
+                  </span>
+                  ${r.digitizedFile ? `<a href="${attr(mediaUrl(r.digitizedFile))}" target="_blank" style="font-size: 11px; color: var(--gold); font-weight: bold; text-decoration: underline;" onclick="event.stopPropagation();">Download Current File</a>` : ''}
+                </div>
+                <input type="hidden" name="digitizedFile" value="${escapeHtml(r.digitizedFile || '')}">
+              </div>
             </div>
 
             <div class="admin-form-group">
@@ -2787,92 +2838,106 @@ export function initAdminDashboardDelegates() {
     // ------------------------------------------
     if (e.target.id === "adminProductForm") {
       e.preventDefault();
-      const submitBtn = e.target.querySelector("button[type='submit']");
+      const form = e.target;
+      const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = "Saving Design...";
       }
       
-      const formData = new FormData(e.target);
+      const formData = new FormData(form);
       const id = formData.get("id");
-      
-      const tagsStr = formData.get("tags") || "";
-      const tags = tagsStr.split(",").map(t => t.trim()).filter(Boolean);
-      
-      const fabricsStr = formData.get("recommendedFabrics") || "";
-      const recommendedFabrics = fabricsStr.split(",").map(t => t.trim()).filter(Boolean);
-      
-      const price = Number(formData.get("price") || 0);
-      const title = formData.get("title");
-      
-      const formatsCheckboxOptions = Array.from(e.target.querySelectorAll("input[name='formatOption']:checked")).map(el => el.value);
-      
-      const formats = formatsCheckboxOptions.map(fmt => {
-        let existingFormat = null;
-        if (id) {
-          const existing = site.products.find(p => p.id === id);
-          if (existing && existing.formats) {
-            existingFormat = existing.formats.find(f => f.format === fmt);
-          }
-        }
-        if (existingFormat) {
-          existingFormat.price = price;
-          return existingFormat;
-        }
-        
-        let machineBrand = "Tajima";
-        let machineModel = "TMEZ-SC";
-        let hoopSize = "200mm x 200mm";
-        if (fmt === "PES") {
-          machineBrand = "Brother";
-          machineModel = "PR1055X";
-        } else if (fmt === "EXP") {
-          machineBrand = "Bernina";
-          machineModel = "E16";
-        } else if (fmt === "JEF") {
-          machineBrand = "Janome";
-          machineModel = "MC550E";
-        } else if (fmt === "XXX") {
-          machineBrand = "Singer";
-          machineModel = "EM9305";
-        }
-        return {
-          format: fmt,
-          machineBrand,
-          machineModel,
-          hoopSize,
-          price
-        };
-      });
-
-      
-      const prodPayload = {
-        title,
-        code: formData.get("code"),
-        slug: formData.get("slug"),
-        price,
-        categoryId: formData.get("categoryId"),
-        collectionId: formData.get("collectionId") || null,
-        description: formData.get("description"),
-        backStitchCount: parseInt(formData.get("backStitchCount") || 0),
-        handStitchCount: parseInt(formData.get("handStitchCount") || 0),
-        totalStitchCount: parseInt(formData.get("totalStitchCount") || 0),
-        rpm: parseInt(formData.get("rpm") || 850),
-        estimatedEmbroideryTime: parseInt(formData.get("estimatedEmbroideryTime") || 0),
-        threadColors: parseInt(formData.get("threadColors") || 0),
-        width: parseInt(formData.get("width") || 100),
-        height: parseInt(formData.get("height") || 100),
-        image: formData.get("image"),
-        gallery: [formData.get("image")],
-        difficultyLevel: formData.get("difficultyLevel") || "Intermediate",
-        recommendedFabrics,
-        tags,
-        formats,
-        featured: true,
-        bestSeller: true
-      };
 
       try {
+        const fileInput = document.getElementById("productImageFile");
+        const file = fileInput ? fileInput.files[0] : null;
+        let imageUrl = formData.get("image");
+
+        if (file) {
+          if (submitBtn) submitBtn.innerText = "Uploading Image...";
+          const cleanName = `prod_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+          imageUrl = await storageService.uploadImage(file, cleanName);
+        }
+
+        if (!id && !imageUrl) {
+          throw new Error("An image file is required for new product designs.");
+        }
+        
+        const tagsStr = formData.get("tags") || "";
+        const tags = tagsStr.split(",").map(t => t.trim()).filter(Boolean);
+        
+        const fabricsStr = formData.get("recommendedFabrics") || "";
+        const recommendedFabrics = fabricsStr.split(",").map(t => t.trim()).filter(Boolean);
+        
+        const price = Number(formData.get("price") || 0);
+        const title = formData.get("title");
+        
+        const formatsCheckboxOptions = Array.from(form.querySelectorAll("input[name='formatOption']:checked")).map(el => el.value);
+        
+        const formats = formatsCheckboxOptions.map(fmt => {
+          let existingFormat = null;
+          if (id) {
+            const existing = site.products.find(p => p.id === id);
+            if (existing && existing.formats) {
+              existingFormat = existing.formats.find(f => f.format === fmt);
+            }
+          }
+          if (existingFormat) {
+            existingFormat.price = price;
+            return existingFormat;
+          }
+          
+          let machineBrand = "Tajima";
+          let machineModel = "TMEZ-SC";
+          let hoopSize = "200mm x 200mm";
+          if (fmt === "PES") {
+            machineBrand = "Brother";
+            machineModel = "PR1055X";
+          } else if (fmt === "EXP") {
+            machineBrand = "Bernina";
+            machineModel = "E16";
+          } else if (fmt === "JEF") {
+            machineBrand = "Janome";
+            machineModel = "MC550E";
+          } else if (fmt === "XXX") {
+            machineBrand = "Singer";
+            machineModel = "EM9305";
+          }
+          return {
+            format: fmt,
+            machineBrand,
+            machineModel,
+            hoopSize,
+            price
+          };
+        });
+
+        const prodPayload = {
+          title,
+          code: formData.get("code"),
+          slug: formData.get("slug"),
+          price,
+          categoryId: formData.get("categoryId"),
+          collectionId: formData.get("collectionId") || null,
+          description: formData.get("description"),
+          backStitchCount: parseInt(formData.get("backStitchCount") || 0),
+          handStitchCount: parseInt(formData.get("handStitchCount") || 0),
+          totalStitchCount: parseInt(formData.get("totalStitchCount") || 0),
+          rpm: parseInt(formData.get("rpm") || 850),
+          estimatedEmbroideryTime: parseInt(formData.get("estimatedEmbroideryTime") || 0),
+          threadColors: parseInt(formData.get("threadColors") || 0),
+          width: parseInt(formData.get("width") || 100),
+          height: parseInt(formData.get("height") || 100),
+          image: imageUrl,
+          gallery: [imageUrl],
+          difficultyLevel: formData.get("difficultyLevel") || "Intermediate",
+          recommendedFabrics,
+          tags,
+          formats,
+          featured: true,
+          bestSeller: true
+        };
+
         if (id) {
           await productService.updateProduct(id, prodPayload);
           showToast("Design updated successfully!");
@@ -2886,6 +2951,7 @@ export function initAdminDashboardDelegates() {
         triggerRender();
       } catch (err) {
         showToast(`Failed to save: ${err.message}`);
+      } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerText = "Save Design";
@@ -2900,16 +2966,36 @@ export function initAdminDashboardDelegates() {
       e.preventDefault();
       const form = e.target;
       const id = form.id.value;
-      const payload = {
-        name: form.name.value,
-        slug: form.slug.value,
-        description: form.description.value,
-        image: form.image.value,
-        displayOrder: parseInt(form.displayOrder.value || 1),
-        featured: form.featured.checked
-      };
+      const submitBtn = form.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Saving Category...";
+      }
 
       try {
+        const fileInput = document.getElementById("categoryImageFile");
+        const file = fileInput ? fileInput.files[0] : null;
+        let imageUrl = form.image.value;
+
+        if (file) {
+          if (submitBtn) submitBtn.innerText = "Uploading Image...";
+          const cleanName = `cat_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+          imageUrl = await storageService.uploadImage(file, cleanName);
+        }
+
+        if (!id && !imageUrl) {
+          throw new Error("An image file is required for new categories.");
+        }
+
+        const payload = {
+          name: form.name.value,
+          slug: form.slug.value,
+          description: form.description.value,
+          image: imageUrl,
+          displayOrder: parseInt(form.displayOrder.value || 1),
+          featured: form.featured.checked
+        };
+
         if (id) {
           await categoryService.updateCategory(id, payload);
           showToast("Category updated!");
@@ -2923,6 +3009,11 @@ export function initAdminDashboardDelegates() {
         triggerRender();
       } catch (err) {
         showToast(`Error: ${err.message}`);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Save Category";
+        }
       }
     }
 
@@ -2933,16 +3024,36 @@ export function initAdminDashboardDelegates() {
       e.preventDefault();
       const form = e.target;
       const id = form.id.value;
-      const payload = {
-        title: form.title.value,
-        slug: form.slug.value,
-        description: form.description.value,
-        image: form.image.value,
-        displayOrder: parseInt(form.displayOrder.value || 1),
-        featured: form.featured.checked
-      };
+      const submitBtn = form.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Saving Collection...";
+      }
 
       try {
+        const fileInput = document.getElementById("collectionImageFile");
+        const file = fileInput ? fileInput.files[0] : null;
+        let imageUrl = form.image.value;
+
+        if (file) {
+          if (submitBtn) submitBtn.innerText = "Uploading Image...";
+          const cleanName = `col_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+          imageUrl = await storageService.uploadImage(file, cleanName);
+        }
+
+        if (!id && !imageUrl) {
+          throw new Error("An image file is required for new collections.");
+        }
+
+        const payload = {
+          title: form.title.value,
+          slug: form.slug.value,
+          description: form.description.value,
+          image: imageUrl,
+          displayOrder: parseInt(form.displayOrder.value || 1),
+          featured: form.featured.checked
+        };
+
         if (id) {
           await collectionService.updateCollection(id, payload);
           showToast("Collection updated!");
@@ -2956,6 +3067,11 @@ export function initAdminDashboardDelegates() {
         triggerRender();
       } catch (err) {
         showToast(`Error: ${err.message}`);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Save Collection";
+        }
       }
     }
 
@@ -2987,21 +3103,36 @@ export function initAdminDashboardDelegates() {
       e.preventDefault();
       const form = e.target;
       const id = form.id.value;
-      
-      const payload = {
-        quoteAmount: Number(form.quoteAmount.value || 0),
-        status: form.status.value,
-        paymentStatus: form.paymentStatus.value,
-        digitizedFile: form.digitizedFile.value || null,
-        adminNotes: form.adminNotes.value || null,
-        name: selectedRequest.name,
-        email: selectedRequest.email,
-        notes: selectedRequest.notes,
-        requestSource: selectedRequest.requestSource,
-        cartItems: selectedRequest.cartItems
-      };
+      const submitBtn = form.querySelector("button[type='submit']");
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Saving Request...";
+      }
 
       try {
+        const fileInput = document.getElementById("digitizedDesignFile");
+        const file = fileInput ? fileInput.files[0] : null;
+        let designUrl = form.digitizedFile.value;
+
+        if (file) {
+          if (submitBtn) submitBtn.innerText = "Uploading Design File...";
+          const cleanName = `dsn_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+          designUrl = await storageService.uploadDesignFile(file, cleanName);
+        }
+
+        const payload = {
+          quoteAmount: Number(form.quoteAmount.value || 0),
+          status: form.status.value,
+          paymentStatus: form.paymentStatus.value,
+          digitizedFile: designUrl || null,
+          adminNotes: form.adminNotes.value || null,
+          name: selectedRequest.name,
+          email: selectedRequest.email,
+          notes: selectedRequest.notes,
+          requestSource: selectedRequest.requestSource,
+          cartItems: selectedRequest.cartItems
+        };
+
         await customRequestService.updateRequest(id, payload);
         showToast("Request updated successfully!");
         requestsList = await customRequestService.getRequests();
@@ -3009,6 +3140,11 @@ export function initAdminDashboardDelegates() {
         triggerRender();
       } catch (err) {
         showToast(`Error updating request: ${err.message}`);
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Update Request / Send Quote";
+        }
       }
     }
 

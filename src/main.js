@@ -1366,14 +1366,27 @@ document.addEventListener("change", (event) => {
   if (event.target.classList.contains("category-image-upload")) {
     const file = event.target.files[0];
     if (file) {
-      const filename = `cat-${Date.now()}-${file.name}`;
+      const card = event.target.closest(".image-upload-card");
+      if (card) {
+        const placeholder = card.querySelector(".upload-placeholder");
+        const preview = card.querySelector(".upload-preview");
+        const img = card.querySelector(".upload-preview img");
+        if (placeholder && preview && img) {
+          const reader = new FileReader();
+          reader.onload = (e) => { img.src = e.target.result; };
+          reader.readAsDataURL(file);
+          placeholder.style.display = "none";
+          preview.style.display = "flex";
+        }
+      }
+
+      const filename = `cat-${Date.now()}-${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
       storageService.uploadImage(file, filename)
         .then((url) => {
-          const input = document.querySelector('input[name="image"]');
+          const input = card ? card.querySelector('input[name="image"]') : document.querySelector('input[name="image"]');
           if (input) {
             input.value = url;
             showToast("Cover image uploaded to cloud");
-            triggerRender();
           }
         })
         .catch((err) => {
@@ -1385,19 +1398,87 @@ document.addEventListener("change", (event) => {
   if (event.target.classList.contains("category-banner-upload")) {
     const file = event.target.files[0];
     if (file) {
-      const filename = `banner-${Date.now()}-${file.name}`;
+      const card = event.target.closest(".image-upload-card");
+      if (card) {
+        const placeholder = card.querySelector(".upload-placeholder");
+        const preview = card.querySelector(".upload-preview");
+        const img = card.querySelector(".upload-preview img");
+        if (placeholder && preview && img) {
+          const reader = new FileReader();
+          reader.onload = (e) => { img.src = e.target.result; };
+          reader.readAsDataURL(file);
+          placeholder.style.display = "none";
+          preview.style.display = "flex";
+        }
+      }
+
+      const filename = `banner-${Date.now()}-${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
       storageService.uploadImage(file, filename)
         .then((url) => {
-          const input = document.querySelector('input[name="bannerImage"]');
+          const input = card ? card.querySelector('input[name="bannerImage"]') : document.querySelector('input[name="bannerImage"]');
           if (input) {
             input.value = url;
             showToast("Banner image uploaded to cloud");
-            triggerRender();
           }
         })
         .catch((err) => {
           showToast(`Upload failed: ${err.message}`);
         });
+    }
+  }
+
+  // --- Media Library Row File Upload in Admin Drawer ---
+  if (event.target.classList.contains("media-row-upload")) {
+    const file = event.target.files[0];
+    const path = event.target.dataset.path;
+    if (file && path) {
+      const field = event.target.closest(".media-field");
+      const previewImg = field ? field.querySelector(".media-row-preview") : null;
+      if (previewImg) {
+        const reader = new FileReader();
+        reader.onload = (e) => { previewImg.src = e.target.result; };
+        reader.readAsDataURL(file);
+      }
+
+      const filename = `media_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+      storageService.uploadImage(file, filename)
+        .then((url) => {
+          const hiddenInput = event.target.parentNode.querySelector('input[type="hidden"]');
+          if (hiddenInput) {
+            hiddenInput.value = url;
+          }
+          setByPath(site, path, url);
+          saveSite();
+          applyTheme();
+          showToast("Media updated and saved to cloud!");
+          triggerRender();
+        })
+        .catch((err) => {
+          showToast(`Upload failed: ${err.message}`);
+        });
+    }
+  }
+
+  // --- Universal Image/File Upload Card Live Preview (Admin Dashboard) ---
+  if (event.target.type === "file" && event.target.closest(".image-upload-card")) {
+    const file = event.target.files[0];
+    if (file) {
+      const card = event.target.closest(".image-upload-card");
+      const placeholder = card ? card.querySelector(".upload-placeholder") : null;
+      const preview = card ? card.querySelector(".upload-preview") : null;
+      const img = card ? card.querySelector(".upload-preview img") : null;
+      const span = card ? card.querySelector(".upload-preview span") : null;
+      if (placeholder && preview) {
+        if (img) {
+          const reader = new FileReader();
+          reader.onload = (e) => { img.src = e.target.result; };
+          reader.readAsDataURL(file);
+        } else if (span) {
+          span.textContent = file.name;
+        }
+        placeholder.style.display = "none";
+        preview.style.display = "flex";
+      }
     }
   }
 
@@ -1510,6 +1591,34 @@ document.addEventListener("submit", (event) => {
     );
     event.target.reset();
     showToast("Subscribed to newsletter!");
+  }
+});
+
+// Global auto-generation of URL Slugs from Name/Title inputs
+document.addEventListener("input", (event) => {
+  const target = event.target;
+  if (target.tagName === "INPUT" && (target.name === "title" || target.name === "name")) {
+    const form = target.closest("form");
+    if (form) {
+      const slugInput = form.querySelector('input[name="slug"]');
+      if (slugInput) {
+        // Auto-generate slug if it is empty, or has not been manually edited
+        const isNew = !form.querySelector('input[name="id"]') || !form.querySelector('input[name="id"]').value;
+        if (isNew || !slugInput.value || slugInput.dataset.autoSync === "true") {
+          slugInput.value = target.value
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+            .trim()
+            .replace(/\s+/g, '-')        // Replace spaces with hyphens
+            .replace(/-+/g, '-');         // Remove double hyphens
+          slugInput.dataset.autoSync = "true";
+        }
+      }
+    }
+  }
+  // If the user manually edits the slug, stop auto-syncing
+  if (target.tagName === "INPUT" && target.name === "slug") {
+    target.dataset.autoSync = "false";
   }
 });
 

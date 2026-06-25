@@ -6863,11 +6863,11 @@ main:has(.admin-shell) {
   }
 }
 
-
-
-
-
-
-
-
-
+/* --- Admin Upload Card Style --- */
+.image-upload-card:hover {
+  border-color: var(--gold) !important;
+  background-color: rgba(200, 161, 90, 0.02) !important;
+}
+.image-upload-card input[type="file"] {
+  z-index: 10;
+}

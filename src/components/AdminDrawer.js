@@ -53,10 +53,13 @@ function renderMediaAdminRows() {
   return rows
     .map(
       (row) => `
-        <label class="media-field">
-          <img src="${attr(mediaUrl(row.preview))}" alt="" />
-          <span>${escapeHtml(row.label)}</span>
-          <input data-setting="${attr(row.path)}" value="${attr(row.value)}" />
+        <label class="media-field" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; width: 100%; box-sizing: border-box;">
+          <img class="media-row-preview" src="${attr(mediaUrl(row.preview))}" alt="" style="width: 44px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border); flex-shrink: 0;" />
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+            <span style="font-weight: 600; display: block; font-size: 13px; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(row.label)}</span>
+            <input type="file" class="media-row-upload" data-path="${attr(row.path)}" accept="image/*" style="font-size: 11px; width: 100%; color: var(--navy);" />
+            <input type="hidden" data-setting="${attr(row.path)}" value="${attr(row.value)}" />
+          </div>
         </label>
       `
     )
@@ -166,16 +169,34 @@ export function renderAdminDrawer() {
           ${adminInput("Category Name", "name", isEdit ? cat.name : "", "e.g. Peacock motif")}
           ${adminInput("Slug (URL parameter)", "slug", isEdit ? cat.slug : "", "e.g. peacock-motif")}
           <label class="admin-field">
-            <span>Cover Image Media ID</span>
-            <input name="image" value="${attr(isEdit ? cat.image : "media-collection-bridal")}" placeholder="e.g. media-collection-bridal" required />
-            <span style="font-size: 11px; color: var(--gold); margin-top: 4px; display: block;">Or upload file:</span>
-            <input type="file" class="category-image-upload" accept="image/*" style="font-size:12px; margin-top: 4px; color: var(--navy);" />
+            <span>Cover Image</span>
+            <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 8px; padding: 16px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
+              <input type="file" class="category-image-upload" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <div class="upload-placeholder" style="${isEdit && cat.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 6px;'}">
+                ${icon("upload-cloud", 24)}
+                <span style="font-size: 12px; font-weight: 500; color: var(--navy);">Click or drag image to upload cover</span>
+              </div>
+              <div class="upload-preview cover-image-preview-container" style="${isEdit && cat.image ? 'display: flex; flex-direction: column; align-items: center; gap: 6px;' : 'display: none;'}">
+                <img src="${isEdit && cat.image ? attr(mediaUrl(cat.image)) : ''}" style="max-height: 80px; max-width: 100%; object-fit: contain; border-radius: 4px; border: 1px solid var(--border);">
+                <span style="font-size: 11px; color: var(--gold); font-weight: 600;">Click to replace cover</span>
+              </div>
+              <input type="hidden" name="image" value="${attr(isEdit ? cat.image : 'media-collection-bridal')}" required />
+            </div>
           </label>
           <label class="admin-field">
-            <span>Banner Image Media ID</span>
-            <input name="bannerImage" value="${attr(isEdit ? cat.bannerImage : "media-collection-bridal")}" placeholder="e.g. media-collection-bridal" required />
-            <span style="font-size: 11px; color: var(--gold); margin-top: 4px; display: block;">Or upload file:</span>
-            <input type="file" class="category-banner-upload" accept="image/*" style="font-size:12px; margin-top: 4px; color: var(--navy);" />
+            <span>Banner Image</span>
+            <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 8px; padding: 16px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
+              <input type="file" class="category-banner-upload" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <div class="upload-placeholder" style="${isEdit && cat.bannerImage ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 6px;'}">
+                ${icon("upload-cloud", 24)}
+                <span style="font-size: 12px; font-weight: 500; color: var(--navy);">Click or drag image to upload banner</span>
+              </div>
+              <div class="upload-preview banner-image-preview-container" style="${isEdit && cat.bannerImage ? 'display: flex; flex-direction: column; align-items: center; gap: 6px;' : 'display: none;'}">
+                <img src="${isEdit && cat.bannerImage ? attr(mediaUrl(cat.bannerImage)) : ''}" style="max-height: 80px; max-width: 100%; object-fit: contain; border-radius: 4px; border: 1px solid var(--border);">
+                <span style="font-size: 11px; color: var(--gold); font-weight: 600;">Click to replace banner</span>
+              </div>
+              <input type="hidden" name="bannerImage" value="${attr(isEdit ? cat.bannerImage : 'media-collection-bridal')}" required />
+            </div>
           </label>
           ${adminTextarea("Description", "description", isEdit ? cat.description : "", "Enter collection descriptions...")}
           
