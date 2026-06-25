@@ -135,7 +135,7 @@ export function renderProductDetail() {
 
   const isMobile = isMobileViewport();
   const cats = getCategories();
-  const categoryObj = cats.find((c) => c.name === product.category || c.slug === product.category?.toLowerCase());
+  const categoryObj = cats.find((c) => c.id === product.categoryId || c.name === product.category || c.slug === product.category?.toLowerCase());
   const categoryLink = categoryObj ? `#/catalog?category=${categoryObj.slug}` : `#/catalog?category=${(product.category || "").toLowerCase().replace(/\s+/g, "-")}`;
 
   if (isMobile) {

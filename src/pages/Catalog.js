@@ -27,27 +27,23 @@ let lastCategoryParam = null;
 let lastCollectionParam = null;
 let lastSearchParam = null;
 
-export function renderCatalog() {
-  const cats = getCategories() || [];
-  const query = (catalogState.searchQuery || "").toLowerCase().trim();
-  const dbCollections = site.collections || [];
-
-  // --- Filter State Sanitizer & Hardener ---
-  // Ensures that deleted or hidden items don't lock the UI in a broken state
+// Controlled State Update Path: Decoupled filter state validator.
+// Prevents deleted or hidden items from locking the user in a broken filter state.
+export function sanitizeCatalogState(cats, dbCollections) {
   if (catalogState.selectedCategory !== "All") {
-    const activeCatObj = cats.find(c => c.name === catalogState.selectedCategory && !c.parentCategoryId);
+    const activeCatObj = cats.find(c => c.slug === catalogState.selectedCategory && !c.parentCategoryId);
     if (!activeCatObj || !isVisible(activeCatObj)) {
-      console.warn(`Catalog: Selected category "${catalogState.selectedCategory}" is no longer available. Resetting filters.`);
+      console.warn(`Catalog State Sanitizer: Selected category "${catalogState.selectedCategory}" is no longer available. Resetting filters.`);
       catalogState.selectedCategory = "All";
       catalogState.selectedSubcategory = "All";
     }
   }
 
   if (catalogState.selectedSubcategory !== "All") {
-    const activeSubObj = cats.find(c => c.name === catalogState.selectedSubcategory && c.parentCategoryId);
-    const parentCatObj = cats.find(c => c.name === catalogState.selectedCategory && !c.parentCategoryId);
+    const activeSubObj = cats.find(c => c.slug === catalogState.selectedSubcategory && c.parentCategoryId);
+    const parentCatObj = cats.find(c => c.slug === catalogState.selectedCategory && !c.parentCategoryId);
     if (!activeSubObj || !isVisible(activeSubObj) || !parentCatObj || activeSubObj.parentCategoryId !== parentCatObj.id) {
-      console.warn(`Catalog: Selected subcategory "${catalogState.selectedSubcategory}" is invalid or does not belong to selected parent. Resetting subcategory.`);
+      console.warn(`Catalog State Sanitizer: Selected subcategory "${catalogState.selectedSubcategory}" is invalid or does not belong to parent. Resetting subcategory.`);
       catalogState.selectedSubcategory = "All";
     }
   }
@@ -55,10 +51,16 @@ export function renderCatalog() {
   if (catalogState.selectedCollection !== "All") {
     const activeColObj = dbCollections.find(c => c.slug === catalogState.selectedCollection);
     if (!activeColObj) {
-      console.warn(`Catalog: Selected collection "${catalogState.selectedCollection}" is no longer available. Resetting collection filter.`);
+      console.warn(`Catalog State Sanitizer: Selected collection "${catalogState.selectedCollection}" is no longer available. Resetting collection.`);
       catalogState.selectedCollection = "All";
     }
   }
+}
+
+export function renderCatalog() {
+  const cats = getCategories() || [];
+  const query = (catalogState.searchQuery || "").toLowerCase().trim();
+  const dbCollections = site.collections || [];
 
   // --- Router Parameters Synchronizer ---
   // If the router set category/collection/search parameters in store, apply it
@@ -78,12 +80,12 @@ export function renderCatalog() {
       const cat = cats.find(c => c.slug === categoryParam && isVisible(c));
       if (cat) {
         if (!cat.parentCategoryId) {
-          catalogState.selectedCategory = cat.name;
+          catalogState.selectedCategory = cat.slug; // Store stable slug
           catalogState.selectedSubcategory = "All";
         } else {
           const parent = cats.find(p => p.id === cat.parentCategoryId && isVisible(p));
-          catalogState.selectedCategory = parent ? parent.name : "All";
-          catalogState.selectedSubcategory = cat.name;
+          catalogState.selectedCategory = parent ? parent.slug : "All";
+          catalogState.selectedSubcategory = cat.slug;
         }
       }
     } else {
@@ -107,13 +109,12 @@ export function renderCatalog() {
   const parentCats = cats
     .filter(c => !c.parentCategoryId && isVisible(c))
     .sort((a, b) => (a.displayOrder || 1) - (b.displayOrder || 1) || a.name.localeCompare(b.name));
-  const pillCategories = ["All", ...parentCats.map(c => c.name)];
+  const pillCategories = ["All", ...parentCats];
   
   // Find parent of selected category (if it is a subcategory) or the selected category itself (if it is a parent)
   let activeParent = null;
-  const selectedCat = cats.find(c => c.name === catalogState.selectedCategory && !c.parentCategoryId);
-  if (selectedCat) {
-    activeParent = selectedCat;
+  if (catalogState.selectedCategory !== "All") {
+    activeParent = cats.find(c => c.slug === catalogState.selectedCategory && !c.parentCategoryId);
   }
 
   // Find subcategories of the active parent
@@ -122,37 +123,32 @@ export function renderCatalog() {
     const childCats = cats
       .filter(c => c.parentCategoryId === activeParent.id && isVisible(c))
       .sort((a, b) => (a.displayOrder || 1) - (b.displayOrder || 1) || a.name.localeCompare(b.name));
-    subcategories = ["All", ...childCats.map(c => c.name)];
+    subcategories = ["All", ...childCats];
   }
 
 
   // --- Filters Application ---
   let filtered = site.products.filter((product) => {
-    // 1. Search Query Match (instant, matches name, code, category, collection, tags, stitchType)
+    // 1. Search Query Match
     if (query) {
       const matchText = `${product.title} ${product.code} ${product.category} ${product.collection} ${product.stitchType} ${product.tags.join(" ")}`.toLowerCase();
       if (!matchText.includes(query)) return false;
     }
 
-    // 2. Category Match
+    // 2. Parent Category Match (Strict UUID checks via active category hierarchy)
     if (catalogState.selectedCategory !== "All") {
-      // Find parent category ID
-      const parentCat = cats.find(c => c.name === catalogState.selectedCategory && !c.parentCategoryId);
+      const parentCat = cats.find(c => c.slug === catalogState.selectedCategory && !c.parentCategoryId);
       if (parentCat) {
-        // If product category matches parent, or matches any of its subcategories
-        const productCat = cats.find(c => c.name === product.category);
-        if (!productCat) return false;
-        
-        const isDirectMatch = productCat.id === parentCat.id;
-        const isChildMatch = productCat.parentCategoryId === parentCat.id;
-        
-        if (!isDirectMatch && !isChildMatch) return false;
+        const childCatIds = cats.filter(c => c.parentCategoryId === parentCat.id).map(c => c.id);
+        const isChild = childCatIds.includes(product.categoryId) || product.categoryId === parentCat.id;
+        if (!isChild) return false;
       }
     }
 
-    // 3. Subcategory Match
+    // 3. Subcategory Match (Strict UUID check)
     if (catalogState.selectedSubcategory !== "All") {
-      if (product.category !== catalogState.selectedSubcategory) return false;
+      const subCat = cats.find(c => c.slug === catalogState.selectedSubcategory && c.parentCategoryId);
+      if (!subCat || product.categoryId !== subCat.id) return false;
     }
 
     // 4. Collection Match
@@ -256,11 +252,17 @@ export function renderCatalog() {
       <div class="category-pills-row" style="max-width: 1540px; margin: 0 auto 28px; padding: 0 clamp(22px, 5vw, 78px); display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
         ${pillCategories
           .map(
-            (c) => `
-              <button type="button" class="filter-pill ${catalogState.selectedCategory === c ? "active" : ""}" data-action="filter-category" data-value="${attr(c)}" style="border-radius: 99px; font-weight:700; padding: 10px 22px;">
-                ${escapeHtml(c === "All" ? "All Designs" : c)}
-              </button>
-            `
+            (c) => {
+              const isAll = c === "All";
+              const value = isAll ? "All" : c.slug;
+              const label = isAll ? "All Designs" : c.name;
+              const isActive = catalogState.selectedCategory === value;
+              return `
+                <button type="button" class="filter-pill ${isActive ? "active" : ""}" data-action="filter-category" data-value="${attr(value)}" style="border-radius: 99px; font-weight:700; padding: 10px 22px;">
+                  ${escapeHtml(label)}
+                </button>
+              `;
+            }
           )
           .join("")}
         
@@ -277,11 +279,17 @@ export function renderCatalog() {
               <span style="font-size:12px; font-weight:700; text-transform:uppercase; color: var(--gold); align-self:center; margin-right: 8px;">Subcategory:</span>
               ${subcategories
                 .map(
-                  (sub) => `
-                    <button type="button" class="filter-pill ${catalogState.selectedSubcategory === sub ? "active" : ""}" data-action="filter-subcategory" data-value="${attr(sub)}" style="font-size:13px; padding: 6px 14px; border-radius: 99px; border-color: rgba(200, 161, 90, 0.28);">
-                      ${escapeHtml(sub)}
-                    </button>
-                  `
+                  (sub) => {
+                    const isAll = sub === "All";
+                    const value = isAll ? "All" : sub.slug;
+                    const label = isAll ? "All" : sub.name;
+                    const isActive = catalogState.selectedSubcategory === value;
+                    return `
+                      <button type="button" class="filter-pill ${isActive ? "active" : ""}" data-action="filter-subcategory" data-value="${attr(value)}" style="font-size:13px; padding: 6px 14px; border-radius: 99px; border-color: rgba(200, 161, 90, 0.28);">
+                        ${escapeHtml(label)}
+                      </button>
+                    `;
+                  }
                 )
                 .join("")}
             </div>`

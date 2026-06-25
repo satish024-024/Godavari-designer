@@ -79,62 +79,93 @@ function mapStoriesFromTestimonials(rows) {
 // ASYNC INITIALIZATION & SYNC LAYER
 // ==========================================
 
+let isSyncing = false;
+let pendingSyncPromise = null;
+let lastLocalWriteTime = 0;
+
+export function recordLocalWrite() {
+  lastLocalWriteTime = Date.now();
+  console.log("Store: Local write recorded at", lastLocalWriteTime);
+}
+
 export async function syncFromSupabase() {
-  initSupabase();
-  try {
-    // 1. Fetch website settings (section rows)
-    const settings = await settingsService.getWebsiteSettings();
-    const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
-    sections.forEach((sec) => {
-      if (settings[sec]) {
-        site[sec] = mergeDefaults(defaultSite[sec], settings[sec]);
-      }
-    });
-
-    // 2. Fetch testimonials & map to stories
-    const testimonials = await testimonialService.getTestimonials();
-    if (testimonials && testimonials.length > 0) {
-      site.stories = mapStoriesFromTestimonials(testimonials);
-    }
-
-    // 3. Fetch categories
-    const cats = await categoryService.getCategories();
-    DB.saveCategories(cats); // Cache categories in LocalStorage
-
-    // 4. Fetch collections
-    const cols = await collectionService.getCollections();
-    site.collections = cols;
-
-    // 5. Fetch products
-    const prods = await productService.getProducts();
-    site.products = prods;
-    DB.saveProducts(prods); // Cache products in LocalStorage
-
-    // 6. Fetch FAQs
-    faqs = await faqService.getFaqs();
-
-    dataSynced = true;
-    import("./router.js").then(({ handleRouting }) => {
-      handleRouting();
-    }).catch((e) => {
-      triggerRender();
-    });
-  } catch (err) {
-    console.error("Failed to sync state from Supabase:", err);
-    showToast("Running in offline mode");
-    
-    // Fallback: restore from local cache
-    const cachedCats = DB.getCategories();
-    const cachedProds = DB.getProducts();
-    if (cachedProds.length > 0) site.products = cachedProds;
-    
-    dataSynced = true;
-    import("./router.js").then(({ handleRouting }) => {
-      handleRouting();
-    }).catch((e) => {
-      triggerRender();
-    });
+  if (isSyncing) {
+    console.log("Store: Sync already in progress, returning existing pending promise to prevent duplicate requests");
+    return pendingSyncPromise;
   }
+
+  isSyncing = true;
+  pendingSyncPromise = (async () => {
+    initSupabase();
+    try {
+      console.log("Store: Initiating full state sync from Supabase...");
+      // 1. Fetch website settings (section rows)
+      const settings = await settingsService.getWebsiteSettings();
+      const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
+      sections.forEach((sec) => {
+        if (settings[sec]) {
+          site[sec] = mergeDefaults(defaultSite[sec], settings[sec]);
+        }
+      });
+
+      // 2. Fetch testimonials & map to stories
+      const testimonials = await testimonialService.getTestimonials();
+      if (testimonials && testimonials.length > 0) {
+        site.stories = mapStoriesFromTestimonials(testimonials);
+      }
+
+      // 3. Fetch categories
+      const cats = await categoryService.getCategories();
+      DB.saveCategories(cats); // Cache categories in LocalStorage
+
+      // 4. Fetch collections
+      const cols = await collectionService.getCollections();
+      site.collections = cols;
+
+      // 5. Fetch products
+      const prods = await productService.getProducts();
+      site.products = prods;
+      DB.saveProducts(prods); // Cache products in LocalStorage
+
+      // 6. Fetch FAQs
+      faqs = await faqService.getFaqs();
+
+      // Controlled State Update Path: Sanitize Catalog State (decoupled from rendering)
+      try {
+        const { sanitizeCatalogState } = await import("../pages/Catalog.js");
+        sanitizeCatalogState(cats, cols);
+      } catch (err) {
+        // Catalog.js might not be loaded yet or active; ignore safely
+      }
+
+      dataSynced = true;
+      import("./router.js").then(({ handleRouting }) => {
+        handleRouting();
+      }).catch((e) => {
+        triggerRender();
+      });
+    } catch (err) {
+      console.error("Failed to sync state from Supabase:", err);
+      showToast("Running in offline mode");
+      
+      // Fallback: restore from local cache
+      const cachedCats = DB.getCategories();
+      const cachedProds = DB.getProducts();
+      if (cachedProds.length > 0) site.products = cachedProds;
+      
+      dataSynced = true;
+      import("./router.js").then(({ handleRouting }) => {
+        handleRouting();
+      }).catch((e) => {
+        triggerRender();
+      });
+    } finally {
+      isSyncing = false;
+      pendingSyncPromise = null;
+    }
+  })();
+
+  return pendingSyncPromise;
 }
 
 const authCallbacks = [];
@@ -250,23 +281,23 @@ export const isVisible = (item) => item?.visibility !== false;
 export function initRealtimeSubscriptions() {
   initSupabase();
 
-  // 1. Clean up any existing channel to prevent subscription leaks
+  // Guard against duplicate subscription setups
   if (realtimeChannel) {
-    console.log("Realtime: Unsubscribing from existing channel to prevent memory leaks");
-    try {
-      supabase.removeChannel(realtimeChannel);
-    } catch (err) {
-      console.warn("Failed to remove channel:", err);
-    }
-    realtimeChannel = null;
+    console.log("Realtime: Subscriptions already initialized, skipping duplicate setup");
+    return;
   }
 
-  // 2. Centralized debounced refresh function to sync all storefront data
+  // Centralized debounced refresh function to sync all storefront data
   const debouncedRefresh = () => {
     if (refreshTimeout) {
       clearTimeout(refreshTimeout);
     }
     refreshTimeout = setTimeout(async () => {
+      // Skip if we just did a local write within 2.5 seconds to prevent refresh loops/storms
+      if (Date.now() - lastLocalWriteTime < 2500) {
+        console.log("Realtime: Skipping refresh, local write was just processed synchronously");
+        return;
+      }
       console.log("Realtime: Executing debounced full site data refresh...");
       try {
         await syncFromSupabase();
@@ -277,7 +308,7 @@ export function initRealtimeSubscriptions() {
     }, 500); // 500ms debounce window
   };
 
-  // 3. Create fresh subscription and attach listeners
+  // Create fresh subscription and attach listeners
   realtimeChannel = supabase
     .channel('schema-db-changes')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, debouncedRefresh)
@@ -306,6 +337,7 @@ export async function saveSite() {
     for (const sec of sections) {
       await settingsService.updateWebsiteSettings(sec, site[sec]);
     }
+    recordLocalWrite();
     showToast("Settings synchronized with database!");
   } catch (error) {
     console.error("Failed to save site settings to Supabase:", error);
@@ -613,6 +645,7 @@ export async function saveCategories(cats) {
 export async function createCategory(cat) {
   try {
     await categoryService.createCategory(cat);
+    recordLocalWrite();
     const cats = await categoryService.getCategories();
     DB.saveCategories(cats);
     triggerRender();
@@ -624,6 +657,7 @@ export async function createCategory(cat) {
 export async function updateCategory(id, updatedCat) {
   try {
     await categoryService.updateCategory(id, updatedCat);
+    recordLocalWrite();
     const cats = await categoryService.getCategories();
     DB.saveCategories(cats);
     triggerRender();
@@ -635,6 +669,7 @@ export async function updateCategory(id, updatedCat) {
 export async function deleteCategory(id) {
   try {
     await categoryService.deleteCategory(id);
+    recordLocalWrite();
     const cats = await categoryService.getCategories();
     DB.saveCategories(cats);
     triggerRender();

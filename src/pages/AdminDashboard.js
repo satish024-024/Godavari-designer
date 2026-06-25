@@ -6,7 +6,8 @@ import {
   getCategories,
   saveCategories,
   triggerRender,
-  saveSite
+  saveSite,
+  recordLocalWrite
 } from "../services/store.js";
 import { navigate } from "../services/router.js";
 import { DB } from "../services/db.js";
@@ -2452,6 +2453,7 @@ export function initAdminDashboardDelegates() {
       if (prod && confirm(`Are you sure you want to delete "${prod.title}"?`)) {
         try {
           await productService.deleteProduct(id);
+          recordLocalWrite();
           showToast("Design deleted successfully!");
           site.products = await productService.getProducts();
           DB.saveProducts(site.products); // Update local cache
@@ -2498,23 +2500,37 @@ export function initAdminDashboardDelegates() {
       const id = deleteCatBtn.dataset.id;
       const cat = categoriesList.find(c => c.id === id);
       if (cat) {
-        // Pre-check 1: Check for subcategories (strict 2-level hierarchy check)
-        const childCats = categoriesList.filter(c => c.parentCategoryId === id);
-        if (childCats.length > 0) {
-          alert(`Cannot delete: This category has ${childCats.length} subcategories. Please reassign or delete them first.`);
+        // Recursive helper to collect all descendant category IDs (supports arbitrary category tree depth)
+        const getDescendantIds = (catId) => {
+          let ids = [];
+          const children = categoriesList.filter(c => c.parentCategoryId === catId);
+          for (const child of children) {
+            ids.push(child.id);
+            ids = ids.concat(getDescendantIds(child.id));
+          }
+          return ids;
+        };
+
+        const descendantIds = getDescendantIds(id);
+        const allTargetIds = [id, ...descendantIds];
+        const associatedProducts = (site.products || []).filter(p => allTargetIds.includes(p.categoryId));
+
+        // Pre-check 1: Check for subcategories or deeper descendants
+        if (descendantIds.length > 0) {
+          alert("Cannot delete: this category has subcategories. Reassign or delete them first.");
           return;
         }
 
         // Pre-check 2: Check for associated products
-        const associatedProducts = (site.products || []).filter(p => p.categoryId === id);
         if (associatedProducts.length > 0) {
-          alert(`Cannot delete: This category has ${associatedProducts.length} associated products. Please reassign or delete them first.`);
+          alert("Cannot delete: this category has associated products. Reassign or delete them first.");
           return;
         }
 
         if (confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
           try {
             await categoryService.deleteCategory(id);
+            recordLocalWrite();
             showToast("Category deleted successfully!");
             categoriesList = await categoryService.getCategories();
             saveCategories(categoriesList); // Update local cache & trigger render
@@ -2567,6 +2583,7 @@ export function initAdminDashboardDelegates() {
       if (col && confirm(`Are you sure you want to delete collection "${col.title}"?`)) {
         try {
           await collectionService.deleteCollection(id);
+          recordLocalWrite();
           showToast("Collection deleted successfully!");
           site.collections = await collectionService.getCollections();
           DB.save("godavari-designer-site-v1", site); // Update local cache
@@ -2653,6 +2670,7 @@ export function initAdminDashboardDelegates() {
       if (confirm("Are you sure you want to delete this testimonial?")) {
         try {
           await testimonialService.deleteTestimonial(id);
+          recordLocalWrite();
           showToast("Testimonial deleted successfully!");
           testimonialsList = await testimonialService.getTestimonials();
           triggerRender();
@@ -2698,6 +2716,7 @@ export function initAdminDashboardDelegates() {
       if (confirm("Are you sure you want to delete this FAQ?")) {
         try {
           await faqService.deleteFaq(id);
+          recordLocalWrite();
           showToast("FAQ deleted successfully!");
           faqsList = await faqService.getFaqs();
           triggerRender();
@@ -2924,6 +2943,7 @@ export function initAdminDashboardDelegates() {
         }
 
         log(`Refreshing product catalog from server...`);
+        recordLocalWrite();
         site.products = await productService.getProducts();
         log(`All done! Imported ${files.length} products successfully.`);
         showToast(`Bulk imported ${files.length} designs successfully!`);
@@ -2969,7 +2989,7 @@ export function initAdminDashboardDelegates() {
         }
 
         if (!id && !imageUrl) {
-          throw new Error("An image file is required for new product designs.");
+          throw new Error("Please select a design image file to upload.");
         }
         
         const tagsStr = formData.get("tags") || "";
@@ -3049,9 +3069,11 @@ export function initAdminDashboardDelegates() {
 
         if (id) {
           await productService.updateProduct(id, prodPayload);
+          recordLocalWrite();
           showToast("Design updated successfully!");
         } else {
           await productService.createProduct(prodPayload);
+          recordLocalWrite();
           showToast("Design added successfully!");
         }
         site.products = await productService.getProducts();
@@ -3096,23 +3118,25 @@ export function initAdminDashboardDelegates() {
         }
 
         if (!id && !imageUrl) {
-          throw new Error("An image file is required for new categories.");
+          throw new Error("Please select a category image file to upload.");
         }
 
         const payload = {
           name: formData.get("name"),
           slug: formData.get("slug"),
-          description: formData.get("description"),
+          description: formData.get("description") || "",
           image: imageUrl,
           displayOrder: parseInt(formData.get("displayOrder") || 1),
-          featured: form.featured.checked
+          featured: !!form.querySelector("#catFeatured")?.checked
         };
 
         if (id) {
           await categoryService.updateCategory(id, payload);
+          recordLocalWrite();
           showToast("Category updated!");
         } else {
           await categoryService.createCategory(payload);
+          recordLocalWrite();
           showToast("Category added!");
         }
         categoriesList = await categoryService.getCategories();
@@ -3156,23 +3180,25 @@ export function initAdminDashboardDelegates() {
         }
 
         if (!id && !imageUrl) {
-          throw new Error("An image file is required for new collections.");
+          throw new Error("Please select a collection image file to upload.");
         }
 
         const payload = {
           title: formData.get("title"),
           slug: formData.get("slug"),
-          description: formData.get("description"),
+          description: formData.get("description") || "",
           image: imageUrl,
           displayOrder: parseInt(formData.get("displayOrder") || 1),
-          featured: form.featured.checked
+          featured: !!form.querySelector("#colFeatured")?.checked
         };
 
         if (id) {
           await collectionService.updateCollection(id, payload);
+          recordLocalWrite();
           showToast("Collection updated!");
         } else {
           await collectionService.createCollection(payload);
+          recordLocalWrite();
           showToast("Collection added!");
         }
         site.collections = await collectionService.getCollections();
