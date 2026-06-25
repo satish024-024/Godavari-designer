@@ -1,11 +1,16 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { config } from './config.js';
 
-export let supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+let currentUrl = config.supabaseUrl;
+let currentKey = config.supabaseAnonKey;
+
+export let supabase = createClient(currentUrl, currentKey);
 
 export function initSupabase(forceRecreate = false) {
-  if (!supabase || forceRecreate) {
-    supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+  if (!supabase || (forceRecreate && (config.supabaseUrl !== currentUrl || config.supabaseAnonKey !== currentKey))) {
+    currentUrl = config.supabaseUrl;
+    currentKey = config.supabaseAnonKey;
+    supabase = createClient(currentUrl, currentKey);
   }
 }
 
