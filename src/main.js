@@ -1,3 +1,15 @@
+window.addEventListener("error", (e) => {
+  const errorMsg = `JS_ERROR: ${e.message} at ${e.filename}:${e.lineno}:${e.colno}`;
+  console.error(errorMsg);
+  fetch(`/error-log?msg=${encodeURIComponent(errorMsg)}`).catch(() => {});
+});
+
+window.addEventListener("unhandledrejection", (e) => {
+  const errorMsg = `JS_REJECTION: ${e.reason ? e.reason.message || e.reason : 'Unknown reason'}`;
+  console.error(errorMsg);
+  fetch(`/error-log?msg=${encodeURIComponent(errorMsg)}`).catch(() => {});
+});
+
 import { initDB } from "./services/db.js";
 import { initRouter } from "./services/router.js";
 import { MediaLibrary } from "./services/media.js";
