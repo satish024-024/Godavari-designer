@@ -531,31 +531,31 @@ function renderBulkImportForm() {
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Base Design Title</label>
-          <input type="text" name="baseTitle" required class="admin-form-control" placeholder="e.g. Bridal Blouse Saree, Velvet Border">
+          <label class="admin-form-label" for="bulkBaseTitle">Base Design Title</label>
+          <input type="text" id="bulkBaseTitle" name="baseTitle" required class="admin-form-control" placeholder="e.g. Bridal Blouse Saree, Velvet Border">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Category</label>
-          <select name="categoryId" required class="admin-form-control">
+          <label class="admin-form-label" for="bulkCategoryId">Category</label>
+          <select id="bulkCategoryId" name="categoryId" required class="admin-form-control">
             ${categoryOptions}
           </select>
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Collection (Optional)</label>
-          <select name="collectionId" class="admin-form-control">
+          <label class="admin-form-label" for="bulkCollectionId">Collection (Optional)</label>
+          <select id="bulkCollectionId" name="collectionId" class="admin-form-control">
             ${collectionOptions}
           </select>
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Price (₹)</label>
-          <input type="number" name="price" value="1500" required class="admin-form-control">
+          <label class="admin-form-label" for="bulkPrice">Price (₹)</label>
+          <input type="number" id="bulkPrice" name="price" value="1500" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">Available Machine Formats</label>
+          <span class="admin-form-label">Available Machine Formats</span>
           <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
             <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
               <input type="checkbox" name="formatOption" value="DST" checked> Tajima (DST)
@@ -576,47 +576,47 @@ function renderBulkImportForm() {
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Code Prefix</label>
-          <input type="text" name="codePrefix" value="GD-" required class="admin-form-control" placeholder="e.g. GD-">
+          <label class="admin-form-label" for="bulkCodePrefix">Code Prefix</label>
+          <input type="text" id="bulkCodePrefix" name="codePrefix" value="GD-" required class="admin-form-control" placeholder="e.g. GD-">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Starting Code Number</label>
-          <input type="number" name="startNumber" value="${nextStartNumber}" required class="admin-form-control">
+          <label class="admin-form-label" for="bulkStartNumber">Starting Code Number</label>
+          <input type="number" id="bulkStartNumber" name="startNumber" value="${nextStartNumber}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Stitch Count (Default)</label>
-          <input type="number" name="totalStitchCount" value="28000" class="admin-form-control">
+          <label class="admin-form-label" for="bulkTotalStitchCount">Stitch Count (Default)</label>
+          <input type="number" id="bulkTotalStitchCount" name="totalStitchCount" value="28000" class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Thread Colors (Default)</label>
-          <input type="number" name="threadColors" value="4" class="admin-form-control">
+          <label class="admin-form-label" for="bulkThreadColors">Thread Colors (Default)</label>
+          <input type="number" id="bulkThreadColors" name="threadColors" value="4" class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Width (mm)</label>
-          <input type="number" name="width" value="120" class="admin-form-control">
+          <label class="admin-form-label" for="bulkWidth">Width (mm)</label>
+          <input type="number" id="bulkWidth" name="width" value="120" class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Height (mm)</label>
-          <input type="number" name="height" value="120" class="admin-form-control">
+          <label class="admin-form-label" for="bulkHeight">Height (mm)</label>
+          <input type="number" id="bulkHeight" name="height" value="120" class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">Recommended Fabrics (comma-separated)</label>
-          <input type="text" name="recommendedFabrics" value="Silk, Velvet, Organza, Cotton" class="admin-form-control">
+          <label class="admin-form-label" for="bulkRecommendedFabrics">Recommended Fabrics (comma-separated)</label>
+          <input type="text" id="bulkRecommendedFabrics" name="recommendedFabrics" value="Silk, Velvet, Organza, Cotton" class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">Description / Features</label>
-          <textarea name="description" class="admin-form-control" rows="3" placeholder="e.g. High-density embroidery design optimized for premium blouses.">Premium machine-ready embroidery design.</textarea>
+          <label class="admin-form-label" for="bulkDescription">Description / Features</label>
+          <textarea id="bulkDescription" name="description" class="admin-form-control" rows="3" placeholder="e.g. High-density embroidery design optimized for premium blouses.">Premium machine-ready embroidery design.</textarea>
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2; border: 1px dashed var(--border); padding: 24px; border-radius: 8px; background: #faf8f5;">
-          <label class="admin-form-label" style="display: block; text-align: center; margin-bottom: 12px; font-weight:700;">Select Images for Upload</label>
+          <label class="admin-form-label" for="bulkImagesInput" style="display: block; text-align: center; margin-bottom: 12px; font-weight:700;">Select Images for Upload</label>
           <input type="file" id="bulkImagesInput" multiple accept="image/*" required class="admin-form-control" style="display: block; max-width: 320px; margin: 0 auto;">
           <p style="font-size: 11px; color: rgba(17,29,66,0.5); text-align: center; margin-top: 8px;">Select one or more images. A new design card will be created for each image.</p>
         </div>
@@ -671,43 +671,43 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Design Title</label>
-            <input type="text" name="title" value="${isEdit ? escapeHtml(p.title) : ''}" required class="admin-form-control" placeholder="e.g. Royal Peony Floral">
+            <label class="admin-form-label" for="prodTitle">Design Title</label>
+            <input type="text" id="prodTitle" name="title" value="${isEdit ? escapeHtml(p.title) : ''}" required class="admin-form-control" placeholder="e.g. Royal Peony Floral">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Design Code</label>
-            <input type="text" name="code" value="${isEdit ? escapeHtml(p.code) : ''}" required class="admin-form-control" placeholder="e.g. JC-1028">
+            <label class="admin-form-label" for="prodCode">Design Code</label>
+            <input type="text" id="prodCode" name="code" value="${isEdit ? escapeHtml(p.code) : ''}" required class="admin-form-control" placeholder="e.g. JC-1028">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">URL Slug</label>
-            <input type="text" name="slug" value="${isEdit ? escapeHtml(p.slug) : ''}" required class="admin-form-control" placeholder="e.g. royal-peony-floral">
+            <label class="admin-form-label" for="prodSlug">URL Slug</label>
+            <input type="text" id="prodSlug" name="slug" value="${isEdit ? escapeHtml(p.slug) : ''}" required class="admin-form-control" placeholder="e.g. royal-peony-floral">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Price ($)</label>
-            <input type="number" name="price" value="${isEdit ? p.price : ''}" required class="admin-form-control" placeholder="e.g. 45">
+            <label class="admin-form-label" for="prodPrice">Price ($)</label>
+            <input type="number" id="prodPrice" name="price" value="${isEdit ? p.price : ''}" required class="admin-form-control" placeholder="e.g. 45">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Category</label>
-            <select name="categoryId" required class="admin-form-control">
+            <label class="admin-form-label" for="prodCategoryId">Category</label>
+            <select id="prodCategoryId" name="categoryId" required class="admin-form-control">
               <option value="">Select Category</option>
               ${cats.map(c => `<option value="${c.id}" ${isEdit && p.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
             </select>
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Collection (Optional)</label>
-            <select name="collectionId" class="admin-form-control">
+            <label class="admin-form-label" for="prodCollectionId">Collection (Optional)</label>
+            <select id="prodCollectionId" name="collectionId" class="admin-form-control">
               <option value="">None</option>
               ${site.collections.map(col => `<option value="${col.id}" ${isEdit && p.collectionId === col.id ? 'selected' : ''}>${escapeHtml(col.title)}</option>`).join('')}
             </select>
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Available Machine Formats</label>
+            <span class="admin-form-label">Available Machine Formats</span>
             <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
               <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight:600; cursor:pointer;">
                 <input type="checkbox" name="formatOption" value="DST" ${!isEdit || (p.machineFormats && p.machineFormats.includes("DST")) ? "checked" : ""}> Tajima (DST)
@@ -728,8 +728,8 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Description</label>
-            <textarea name="description" rows="3" class="admin-form-control" placeholder="An exquisite design for...">${isEdit ? escapeHtml(p.description || "") : ''}</textarea>
+            <label class="admin-form-label" for="prodDescription">Description</label>
+            <textarea id="prodDescription" name="description" rows="3" class="admin-form-control" placeholder="An exquisite design for...">${isEdit ? escapeHtml(p.description || "") : ''}</textarea>
           </div>
 
           <div style="grid-column: span 2; border-top: 1px solid var(--border); padding-top: 16px; margin-top: 8px;">
@@ -737,32 +737,32 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Back Stitch Count</label>
+            <label class="admin-form-label" for="formBackStitches">Back Stitch Count</label>
             <input type="number" id="formBackStitches" name="backStitchCount" value="${isEdit ? (p.backStitchCount || 0) : 0}" required class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Hands Stitch Count</label>
+            <label class="admin-form-label" for="formHandsStitches">Hands Stitch Count</label>
             <input type="number" id="formHandsStitches" name="handStitchCount" value="${isEdit ? (p.handStitchCount || 0) : 0}" required class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Total Stitch Count (Auto-Summed)</label>
+            <label class="admin-form-label" for="formTotalStitches">Total Stitch Count (Auto-Summed)</label>
             <input type="number" id="formTotalStitches" name="totalStitchCount" value="${isEdit ? (p.totalStitchCount || 0) : 0}" readonly class="admin-form-control" style="background:var(--ivory);" title="Auto-calculates as Back + Hands stitches">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Default Running Speed (RPM)</label>
+            <label class="admin-form-label" for="formRpm">Default Running Speed (RPM)</label>
             <input type="number" id="formRpm" name="rpm" value="${isEdit ? (p.rpm || 850) : 850}" required class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Thread Colors Count</label>
+            <label class="admin-form-label" for="formColors">Thread Colors Count</label>
             <input type="number" id="formColors" name="threadColors" value="${isEdit ? (p.threadColors || 0) : 0}" required class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Est. Stitch Time (Mins - Auto-Calculated)</label>
+            <label class="admin-form-label" for="formEstTime">Est. Stitch Time (Mins - Auto-Calculated)</label>
             <input type="number" id="formEstTime" name="estimatedEmbroideryTime" value="${isEdit ? (p.estimatedEmbroideryTime || 0) : 0}" class="admin-form-control">
           </div>
 
@@ -771,7 +771,7 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Design Image</label>
+            <label class="admin-form-label" for="productImageFile">Design Image</label>
             <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
               <input type="file" id="productImageFile" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
               <div class="upload-placeholder" style="${isEdit && p.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
@@ -788,8 +788,8 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Difficulty Level</label>
-            <select name="difficultyLevel" class="admin-form-control">
+            <label class="admin-form-label" for="prodDifficultyLevel">Difficulty Level</label>
+            <select id="prodDifficultyLevel" name="difficultyLevel" class="admin-form-control">
               <option value="Beginner" ${isEdit && p.difficultyLevel === 'Beginner' ? 'selected' : ''}>Beginner</option>
               <option value="Intermediate" ${isEdit && p.difficultyLevel === 'Intermediate' ? 'selected' : (!isEdit ? 'selected' : '')}>Intermediate</option>
               <option value="Advanced" ${isEdit && p.difficultyLevel === 'Advanced' ? 'selected' : ''}>Advanced</option>
@@ -797,23 +797,23 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Width (mm)</label>
-            <input type="number" name="width" value="${isEdit ? (p.width || 100) : 100}" required class="admin-form-control">
+            <label class="admin-form-label" for="prodWidth">Width (mm)</label>
+            <input type="number" id="prodWidth" name="width" value="${isEdit ? (p.width || 100) : 100}" required class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Height (mm)</label>
-            <input type="number" name="height" value="${isEdit ? (p.height || 100) : 100}" required class="admin-form-control">
+            <label class="admin-form-label" for="prodHeight">Height (mm)</label>
+            <input type="number" id="prodHeight" name="height" value="${isEdit ? (p.height || 100) : 100}" required class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Tags (comma separated)</label>
-            <input type="text" name="tags" value="${tagsString}" class="admin-form-control" placeholder="e.g. blouse, allover, floral">
+            <label class="admin-form-label" for="prodTags">Tags (comma separated)</label>
+            <input type="text" id="prodTags" name="tags" value="${tagsString}" class="admin-form-control" placeholder="e.g. blouse, allover, floral">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Fabrics (comma separated)</label>
-            <input type="text" name="recommendedFabrics" value="${fabricsString}" class="admin-form-control" placeholder="e.g. Silk, Organza">
+            <label class="admin-form-label" for="prodRecommendedFabrics">Fabrics (comma separated)</label>
+            <input type="text" id="prodRecommendedFabrics" name="recommendedFabrics" value="${fabricsString}" class="admin-form-control" placeholder="e.g. Silk, Organza">
           </div>
 
           <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px; margin-top: 10px;">
@@ -955,22 +955,22 @@ function renderCategoriesModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Category Name</label>
-            <input type="text" name="name" value="${isEdit ? escapeHtml(c.name) : ''}" required class="admin-form-control" placeholder="e.g. Designer Blouses">
+            <label class="admin-form-label" for="catName">Category Name</label>
+            <input type="text" id="catName" name="name" value="${isEdit ? escapeHtml(c.name) : ''}" required class="admin-form-control" placeholder="e.g. Designer Blouses">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Slug</label>
-            <input type="text" name="slug" value="${isEdit ? escapeHtml(c.slug) : ''}" required class="admin-form-control" placeholder="e.g. designer-blouses">
+            <label class="admin-form-label" for="catSlug">Slug</label>
+            <input type="text" id="catSlug" name="slug" value="${isEdit ? escapeHtml(c.slug) : ''}" required class="admin-form-control" placeholder="e.g. designer-blouses">
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Description</label>
-            <textarea name="description" rows="3" class="admin-form-control" placeholder="Describe the category...">${isEdit ? escapeHtml(c.description || "") : ''}</textarea>
+            <label class="admin-form-label" for="catDescription">Description</label>
+            <textarea id="catDescription" name="description" rows="3" class="admin-form-control" placeholder="Describe the category...">${isEdit ? escapeHtml(c.description || "") : ''}</textarea>
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Category Image</label>
+            <label class="admin-form-label" for="categoryImageFile">Category Image</label>
             <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
               <input type="file" id="categoryImageFile" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
               <div class="upload-placeholder" style="${isEdit && c.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
@@ -987,8 +987,8 @@ function renderCategoriesModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Display Order</label>
-            <input type="number" name="displayOrder" value="${isEdit ? c.displayOrder : 1}" class="admin-form-control">
+            <label class="admin-form-label" for="catDisplayOrder">Display Order</label>
+            <input type="number" id="catDisplayOrder" name="displayOrder" value="${isEdit ? c.displayOrder : 1}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; gap: 8px;">
@@ -1078,22 +1078,22 @@ function renderCollectionsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Collection Title</label>
-            <input type="text" name="title" value="${isEdit ? escapeHtml(col.title) : ''}" required class="admin-form-control" placeholder="e.g. Bridal Collection">
+            <label class="admin-form-label" for="colTitle">Collection Title</label>
+            <input type="text" id="colTitle" name="title" value="${isEdit ? escapeHtml(col.title) : ''}" required class="admin-form-control" placeholder="e.g. Bridal Collection">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Slug</label>
-            <input type="text" name="slug" value="${isEdit ? escapeHtml(col.slug) : ''}" required class="admin-form-control" placeholder="e.g. bridal">
+            <label class="admin-form-label" for="colSlug">Slug</label>
+            <input type="text" id="colSlug" name="slug" value="${isEdit ? escapeHtml(col.slug) : ''}" required class="admin-form-control" placeholder="e.g. bridal">
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Description</label>
-            <textarea name="description" rows="3" class="admin-form-control" placeholder="Description...">${isEdit ? escapeHtml(col.description || "") : ''}</textarea>
+            <label class="admin-form-label" for="colDescription">Description</label>
+            <textarea id="colDescription" name="description" rows="3" class="admin-form-control" placeholder="Description...">${isEdit ? escapeHtml(col.description || "") : ''}</textarea>
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Collection Image</label>
+            <label class="admin-form-label" for="collectionImageFile">Collection Image</label>
             <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
               <input type="file" id="collectionImageFile" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
               <div class="upload-placeholder" style="${isEdit && col.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
@@ -1110,8 +1110,8 @@ function renderCollectionsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Display Order</label>
-            <input type="number" name="displayOrder" value="${isEdit ? col.displayOrder : 1}" class="admin-form-control">
+            <label class="admin-form-label" for="colDisplayOrder">Display Order</label>
+            <input type="number" id="colDisplayOrder" name="displayOrder" value="${isEdit ? col.displayOrder : 1}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2; display: flex; flex-direction: row; align-items: center; gap: 8px;">
@@ -1240,8 +1240,8 @@ function renderOrdersModule() {
             <h3 style="font-family:var(--font-serif); font-size:18px; margin: 0 0 16px;">Fulfillment & Payment</h3>
             
             <div class="admin-form-group">
-              <label class="admin-form-label">Order Status</label>
-              <select name="status" class="admin-form-control">
+              <label class="admin-form-label" for="ordStatus">Order Status</label>
+              <select id="ordStatus" name="status" class="admin-form-control">
                 <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Pending</option>
                 <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Processing</option>
                 <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Completed</option>
@@ -1250,8 +1250,8 @@ function renderOrdersModule() {
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-form-label">Payment Status</label>
-              <select name="paymentStatus" class="admin-form-control">
+              <label class="admin-form-label" for="ordPaymentStatus">Payment Status</label>
+              <select id="ordPaymentStatus" name="paymentStatus" class="admin-form-control">
                 <option value="pending" ${o.payment_status === 'pending' ? 'selected' : ''}>Pending</option>
                 <option value="paid" ${o.payment_status === 'paid' ? 'selected' : ''}>Paid</option>
                 <option value="refunded" ${o.payment_status === 'refunded' ? 'selected' : ''}>Refunded</option>
@@ -1440,13 +1440,13 @@ function renderCustomRequestsModule() {
             <h3 style="font-family:var(--font-serif); font-size:18px; margin: 0 0 16px;">Quote Price & Status</h3>
 
             <div class="admin-form-group">
-              <label class="admin-form-label">Quoted Amount ($)</label>
-              <input type="number" name="quoteAmount" value="${r.quoteAmount || ''}" class="admin-form-control" placeholder="e.g. 150">
+              <label class="admin-form-label" for="custQuoteAmount">Quoted Amount ($)</label>
+              <input type="number" id="custQuoteAmount" name="quoteAmount" value="${r.quoteAmount || ''}" class="admin-form-control" placeholder="e.g. 150">
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-form-label">Request Status</label>
-              <select name="status" class="admin-form-control">
+              <label class="admin-form-label" for="custRequestStatus">Request Status</label>
+              <select id="custRequestStatus" name="status" class="admin-form-control">
                 <option value="Submitted" ${r.status === 'Submitted' ? 'selected' : ''}>Submitted</option>
                 <option value="Quote Sent" ${r.status === 'Quote Sent' ? 'selected' : ''}>Quote Sent</option>
                 <option value="Approved" ${r.status === 'Approved' ? 'selected' : ''}>Approved</option>
@@ -1460,15 +1460,15 @@ function renderCustomRequestsModule() {
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-form-label">Payment Status</label>
-              <select name="paymentStatus" class="admin-form-control">
+              <label class="admin-form-label" for="custPaymentStatus">Payment Status</label>
+              <select id="custPaymentStatus" name="paymentStatus" class="admin-form-control">
                 <option value="unpaid" ${r.paymentStatus === 'unpaid' ? 'selected' : ''}>Unpaid</option>
                 <option value="paid" ${r.paymentStatus === 'paid' ? 'selected' : ''}>Paid</option>
               </select>
             </div>
 
             <div class="admin-form-group">
-              <label class="admin-form-label">Digitized File (PES, DST, EXP, etc.)</label>
+              <label class="admin-form-label" for="digitizedDesignFile">Digitized File (PES, DST, EXP, etc.)</label>
               <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 8px; padding: 16px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
                 <input type="file" id="digitizedDesignFile" accept=".pes,.dst,.exp,.jef,.xxx,.pdf,.zip" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
                 <div class="upload-placeholder" style="${r.digitizedFile ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 6px;'}">
@@ -1686,58 +1686,58 @@ function renderContentModule() {
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Brand Name</label>
-          <input type="text" name="brandName" value="${escapeHtml(b.name || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contBrandName">Brand Name</label>
+          <input type="text" id="contBrandName" name="brandName" value="${escapeHtml(b.name || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Brand Tagline</label>
-          <input type="text" name="brandTagline" value="${escapeHtml(b.tagline || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contBrandTagline">Brand Tagline</label>
+          <input type="text" id="contBrandTagline" name="brandTagline" value="${escapeHtml(b.tagline || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">Brand Descriptor</label>
-          <textarea name="brandDescriptor" rows="2" required class="admin-form-control">${escapeHtml(b.descriptor || '')}</textarea>
+          <label class="admin-form-label" for="contBrandDescriptor">Brand Descriptor</label>
+          <textarea id="contBrandDescriptor" name="brandDescriptor" rows="2" required class="admin-form-control">${escapeHtml(b.descriptor || '')}</textarea>
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Contact Email Address</label>
-          <input type="email" name="contactEmail" value="${escapeHtml(c.email || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contContactEmail">Contact Email Address</label>
+          <input type="email" id="contContactEmail" name="contactEmail" value="${escapeHtml(c.email || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Contact Phone Number</label>
-          <input type="text" name="contactPhone" value="${escapeHtml(c.phone || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contContactPhone">Contact Phone Number</label>
+          <input type="text" id="contContactPhone" name="contactPhone" value="${escapeHtml(c.phone || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Instagram Handle</label>
-          <input type="text" name="contactInstagram" value="${escapeHtml(c.instagram || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contContactInstagram">Instagram Handle</label>
+          <input type="text" id="contContactInstagram" name="contactInstagram" value="${escapeHtml(c.instagram || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Trust Bar Text</label>
-          <input type="text" name="brandTrustText" value="${escapeHtml(b.trustText || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contBrandTrustText">Trust Bar Text</label>
+          <input type="text" id="contBrandTrustText" name="brandTrustText" value="${escapeHtml(b.trustText || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Watch Story Button Label</label>
-          <input type="text" name="brandStoryLabel" value="${escapeHtml(b.storyLabel || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contBrandStoryLabel">Watch Story Button Label</label>
+          <input type="text" id="contBrandStoryLabel" name="brandStoryLabel" value="${escapeHtml(b.storyLabel || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Quality Badge Title</label>
-          <input type="text" name="brandQualityTitle" value="${escapeHtml(b.qualityTitle || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contBrandQualityTitle">Quality Badge Title</label>
+          <input type="text" id="contBrandQualityTitle" name="brandQualityTitle" value="${escapeHtml(b.qualityTitle || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">Quality Badge Description</label>
-          <input type="text" name="brandQualityText" value="${escapeHtml(b.qualityText || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contBrandQualityText">Quality Badge Description</label>
+          <input type="text" id="contBrandQualityText" name="brandQualityText" value="${escapeHtml(b.qualityText || '')}" required class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">Physical Address</label>
-          <input type="text" name="contactAddress" value="${escapeHtml(c.address || '')}" required class="admin-form-control">
+          <label class="admin-form-label" for="contContactAddress">Physical Address</label>
+          <input type="text" id="contContactAddress" name="contactAddress" value="${escapeHtml(c.address || '')}" required class="admin-form-control">
         </div>
 
         <!-- Section 2: Hero Section -->
@@ -1746,28 +1746,28 @@ function renderContentModule() {
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Hero Eyebrow</label>
-          <input type="text" name="heroEyebrow" value="${escapeHtml(h.eyebrow || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contHeroEyebrow">Hero Eyebrow</label>
+          <input type="text" id="contHeroEyebrow" name="heroEyebrow" value="${escapeHtml(h.eyebrow || '')}" class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Hero Heading Title</label>
-          <input type="text" name="heroHeading" value="${escapeHtml(h.heading || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contHeroHeading">Hero Heading Title</label>
+          <input type="text" id="contHeroHeading" name="heroHeading" value="${escapeHtml(h.heading || '')}" class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">Hero Subheading</label>
-          <input type="text" name="heroSubheading" value="${escapeHtml(h.subheading || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contHeroSubheading">Hero Subheading</label>
+          <input type="text" id="contHeroSubheading" name="heroSubheading" value="${escapeHtml(h.subheading || '')}" class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Primary Button Text</label>
-          <input type="text" name="heroPrimaryButton" value="${escapeHtml(h.primaryButton || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contHeroPrimaryButton">Primary Button Text</label>
+          <input type="text" id="contHeroPrimaryButton" name="heroPrimaryButton" value="${escapeHtml(h.primaryButton || '')}" class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Secondary Button Text</label>
-          <input type="text" name="heroSecondaryButton" value="${escapeHtml(h.secondaryButton || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contHeroSecondaryButton">Secondary Button Text</label>
+          <input type="text" id="contHeroSecondaryButton" name="heroSecondaryButton" value="${escapeHtml(h.secondaryButton || '')}" class="admin-form-control">
         </div>
 
         <!-- Section 3: Call To Action (CTA) -->
@@ -1776,13 +1776,13 @@ function renderContentModule() {
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">CTA Headline</label>
-          <input type="text" name="ctaHeadline" value="${escapeHtml(ct.headline || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contCtaHeadline">CTA Headline</label>
+          <input type="text" id="contCtaHeadline" name="ctaHeadline" value="${escapeHtml(ct.headline || '')}" class="admin-form-control">
         </div>
 
         <div class="admin-form-group" style="grid-column: span 2;">
-          <label class="admin-form-label">CTA Paragraph Text</label>
-          <textarea name="ctaText" rows="2" class="admin-form-control">${escapeHtml(ct.text || '')}</textarea>
+          <label class="admin-form-label" for="contCtaText">CTA Paragraph Text</label>
+          <textarea id="contCtaText" name="ctaText" rows="2" class="admin-form-control">${escapeHtml(ct.text || '')}</textarea>
         </div>
 
         <!-- Section 4: Footer -->
@@ -1791,13 +1791,13 @@ function renderContentModule() {
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Newsletter Title</label>
-          <input type="text" name="footerNewsletterTitle" value="${escapeHtml(f.newsletterTitle || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contFooterNewsletterTitle">Newsletter Title</label>
+          <input type="text" id="contFooterNewsletterTitle" name="footerNewsletterTitle" value="${escapeHtml(f.newsletterTitle || '')}" class="admin-form-control">
         </div>
 
         <div class="admin-form-group">
-          <label class="admin-form-label">Newsletter Subtitle</label>
-          <input type="text" name="footerNewsletterText" value="${escapeHtml(f.newsletterText || '')}" class="admin-form-control">
+          <label class="admin-form-label" for="contFooterNewsletterText">Newsletter Subtitle</label>
+          <input type="text" id="contFooterNewsletterText" name="footerNewsletterText" value="${escapeHtml(f.newsletterText || '')}" class="admin-form-control">
         </div>
 
         <div style="grid-column: span 2; display: flex; justify-content: flex-end; padding-top: 20px; border-top:1px solid var(--border);">
@@ -1830,28 +1830,28 @@ function renderTestimonialsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Author Name</label>
-            <input type="text" name="name" value="${isEdit ? escapeHtml(t.name) : ''}" required class="admin-form-control" placeholder="e.g. Neha Mehta">
+            <label class="admin-form-label" for="testiName">Author Name</label>
+            <input type="text" id="testiName" name="name" value="${isEdit ? escapeHtml(t.name) : ''}" required class="admin-form-control" placeholder="e.g. Neha Mehta">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Role / Location</label>
-            <input type="text" name="role" value="${isEdit ? escapeHtml(t.role) : ''}" required class="admin-form-control" placeholder="e.g. Boutique Owner, Mumbai">
+            <label class="admin-form-label" for="testiRole">Role / Location</label>
+            <input type="text" id="testiRole" name="role" value="${isEdit ? escapeHtml(t.role) : ''}" required class="admin-form-control" placeholder="e.g. Boutique Owner, Mumbai">
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Review Quote</label>
-            <textarea name="quote" rows="3" required class="admin-form-control" placeholder="Quote...">${isEdit ? escapeHtml(t.quote) : ''}</textarea>
+            <label class="admin-form-label" for="testiQuote">Review Quote</label>
+            <textarea id="testiQuote" name="quote" rows="3" required class="admin-form-control" placeholder="Quote...">${isEdit ? escapeHtml(t.quote) : ''}</textarea>
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Rating (1 to 5 Stars)</label>
-            <input type="number" step="0.1" max="5.0" min="1.0" name="rating" value="${isEdit ? t.rating : 5.0}" required class="admin-form-control">
+            <label class="admin-form-label" for="testiRating">Rating (1 to 5 Stars)</label>
+            <input type="number" id="testiRating" step="0.1" max="5.0" min="1.0" name="rating" value="${isEdit ? t.rating : 5.0}" required class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Display Order</label>
-            <input type="number" name="displayOrder" value="${isEdit ? (t.displayOrder || t.display_order || 1) : 1}" class="admin-form-control">
+            <label class="admin-form-label" for="testiDisplayOrder">Display Order</label>
+            <input type="number" id="testiDisplayOrder" name="displayOrder" value="${isEdit ? (t.displayOrder || t.display_order || 1) : 1}" class="admin-form-control">
           </div>
 
           <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px;">
@@ -1935,23 +1935,23 @@ function renderFAQsModule() {
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Question</label>
-            <input type="text" name="question" value="${isEdit ? escapeHtml(f.question) : ''}" required class="admin-form-control" placeholder="e.g. What formats do you support?">
+            <label class="admin-form-label" for="faqQuestion">Question</label>
+            <input type="text" id="faqQuestion" name="question" value="${isEdit ? escapeHtml(f.question) : ''}" required class="admin-form-control" placeholder="e.g. What formats do you support?">
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label">Answer</label>
-            <textarea name="answer" rows="3" required class="admin-form-control" placeholder="Provide a detailed answer...">${isEdit ? escapeHtml(f.answer) : ''}</textarea>
+            <label class="admin-form-label" for="faqAnswer">Answer</label>
+            <textarea id="faqAnswer" name="answer" rows="3" required class="admin-form-control" placeholder="Provide a detailed answer...">${isEdit ? escapeHtml(f.answer) : ''}</textarea>
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Category</label>
-            <input type="text" name="category" value="${isEdit ? escapeHtml(f.category) : 'General'}" required class="admin-form-control" placeholder="e.g. Formats, Orders, Shipping">
+            <label class="admin-form-label" for="faqCategory">Category</label>
+            <input type="text" id="faqCategory" name="category" value="${isEdit ? escapeHtml(f.category) : 'General'}" required class="admin-form-control" placeholder="e.g. Formats, Orders, Shipping">
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label">Display Order</label>
-            <input type="number" name="displayOrder" value="${isEdit ? (f.displayOrder || f.display_order || 1) : 1}" class="admin-form-control">
+            <label class="admin-form-label" for="faqDisplayOrder">Display Order</label>
+            <input type="number" id="faqDisplayOrder" name="displayOrder" value="${isEdit ? (f.displayOrder || f.display_order || 1) : 1}" class="admin-form-control">
           </div>
 
           <div style="grid-column: span 2; display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 20px;">
@@ -2022,7 +2022,7 @@ function renderMediaModule() {
           <p class="admin-module-subtitle">Upload, view, and retrieve public links for catalog assets.</p>
         </div>
         <form id="adminMediaUploadForm" style="display:flex; gap:10px; align-items:center;">
-          <input type="file" id="mediaUploadInput" required class="admin-form-control" style="padding:6px; max-width:240px;" accept="image/*">
+          <input type="file" id="mediaUploadInput" required class="admin-form-control" style="padding:6px; max-width:240px;" accept="image/*" aria-label="Upload image file">
           <button type="submit" class="admin-btn admin-btn-primary">
             ${icon("upload-cloud", 16)} Upload Image
           </button>

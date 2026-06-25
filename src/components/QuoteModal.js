@@ -20,15 +20,15 @@ export function renderQuoteModal() {
         <form id="quoteForm" class="quote-form">
           <label>
             <span>Name</span>
-            <input name="name" required value="${attr(defaultName)}" placeholder="Your name" />
+            <input name="name" required value="${attr(defaultName)}" placeholder="Your name" autocomplete="name" />
           </label>
           <label>
             <span>Email</span>
-            <input name="email" type="email" required value="${attr(defaultEmail)}" placeholder="you@example.com" />
+            <input name="email" type="email" required value="${attr(defaultEmail)}" placeholder="you@example.com" autocomplete="email" />
           </label>
           <label>
             <span>Phone</span>
-            <input name="phone" value="${attr(defaultPhone)}" placeholder="+91" />
+            <input name="phone" value="${attr(defaultPhone)}" placeholder="+91" autocomplete="tel" />
           </label>
           <label>
             <span>Project Type</span>

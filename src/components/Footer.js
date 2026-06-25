@@ -73,7 +73,7 @@ export function renderFooter() {
         <p>${escapeHtml(site.footer.newsletterText)}</p>
         <label>
           <span>Email address</span>
-          <input name="email" type="email" placeholder="Enter your email" required />
+          <input name="email" type="email" placeholder="Enter your email" required autocomplete="email" />
           <button type="submit" aria-label="Subscribe">${icon("arrow-right", 20)}</button>
         </label>
       </form>

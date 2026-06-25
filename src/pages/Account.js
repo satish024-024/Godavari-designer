@@ -568,12 +568,12 @@ function renderProfileTab() {
         <div class="account-form-row">
           <label class="account-form-label">
             <span>Full Name</span>
-            <input type="text" name="name" class="account-form-input" value="${escapeHtml(currentUser.name)}" required />
+            <input type="text" name="name" class="account-form-input" value="${escapeHtml(currentUser.name)}" required autocomplete="name" />
           </label>
 
           <label class="account-form-label">
             <span>Phone Number</span>
-            <input type="text" name="phone" class="account-form-input" value="${escapeHtml(currentUser.phone || '')}" placeholder="+91 99999 99999" />
+            <input type="text" name="phone" class="account-form-input" value="${escapeHtml(currentUser.phone || '')}" placeholder="+91 99999 99999" autocomplete="tel" />
           </label>
         </div>
 
@@ -582,33 +582,33 @@ function renderProfileTab() {
           
           <label class="account-form-label">
             <span>Address Line 1</span>
-            <input type="text" name="addressLine1" class="account-form-input" value="${escapeHtml(currentUser.addressLine1 || '')}" placeholder="Street address, company name" />
+            <input type="text" name="addressLine1" class="account-form-input" value="${escapeHtml(currentUser.addressLine1 || '')}" placeholder="Street address, company name" autocomplete="address-line1" />
           </label>
 
           <label class="account-form-label">
             <span>Address Line 2 (Optional)</span>
-            <input type="text" name="addressLine2" class="account-form-input" value="${escapeHtml(currentUser.addressLine2 || '')}" placeholder="Apartment, suite, unit, building, floor" />
+            <input type="text" name="addressLine2" class="account-form-input" value="${escapeHtml(currentUser.addressLine2 || '')}" placeholder="Apartment, suite, unit, building, floor" autocomplete="address-line2" />
           </label>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px;" class="account-form-row">
             <label class="account-form-label">
               <span>City</span>
-              <input type="text" name="city" class="account-form-input" value="${escapeHtml(currentUser.city || '')}" />
+              <input type="text" name="city" class="account-form-input" value="${escapeHtml(currentUser.city || '')}" autocomplete="address-level2" />
             </label>
 
             <label class="account-form-label">
               <span>State / Region</span>
-              <input type="text" name="state" class="account-form-input" value="${escapeHtml(currentUser.state || '')}" />
+              <input type="text" name="state" class="account-form-input" value="${escapeHtml(currentUser.state || '')}" autocomplete="address-level1" />
             </label>
 
             <label class="account-form-label">
               <span>Country</span>
-              <input type="text" name="country" class="account-form-input" value="${escapeHtml(currentUser.country || '')}" />
+              <input type="text" name="country" class="account-form-input" value="${escapeHtml(currentUser.country || '')}" autocomplete="country" />
             </label>
 
             <label class="account-form-label">
               <span>Postal / Zip Code</span>
-              <input type="text" name="postalCode" class="account-form-input" value="${escapeHtml(currentUser.postalCode || '')}" />
+              <input type="text" name="postalCode" class="account-form-input" value="${escapeHtml(currentUser.postalCode || '')}" autocomplete="postal-code" />
             </label>
           </div>
         </div>

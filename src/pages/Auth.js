@@ -240,7 +240,7 @@ export function renderAuth() {
           <span>Email Address</span>
           <div class="auth-input-wrapper">
             <span class="auth-input-icon">${icon("mail", 17)}</span>
-            <input type="email" name="email" required placeholder="name@domain.com" class="auth-input" />
+            <input type="email" name="email" required placeholder="name@domain.com" class="auth-input" autocomplete="username email" />
           </div>
         </label>
         
@@ -251,7 +251,7 @@ export function renderAuth() {
           </span>
           <div class="auth-input-wrapper">
             <span class="auth-input-icon">${icon("lock", 17)}</span>
-            <input type="password" name="password" required placeholder="••••••••" class="auth-input" />
+            <input type="password" name="password" required placeholder="••••••••" class="auth-input" autocomplete="current-password" />
           </div>
         </label>
         
@@ -297,7 +297,7 @@ export function renderAuth() {
               <span>Full Name *</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("user", 17)}</span>
-                <input type="text" name="name" required placeholder="Your name" class="auth-input" />
+                <input type="text" name="name" required placeholder="Your name" class="auth-input" autocomplete="name" />
               </div>
             </label>
             
@@ -305,7 +305,7 @@ export function renderAuth() {
               <span>Phone Number</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("phone", 17)}</span>
-                <input type="text" name="phone" placeholder="83098 97055" class="auth-input" />
+                <input type="text" name="phone" placeholder="83098 97055" class="auth-input" autocomplete="tel" />
               </div>
             </label>
 
@@ -313,7 +313,7 @@ export function renderAuth() {
               <span>Email Address *</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("mail", 17)}</span>
-                <input type="email" name="email" required placeholder="name@domain.com" class="auth-input" />
+                <input type="email" name="email" required placeholder="name@domain.com" class="auth-input" autocomplete="email" />
               </div>
             </label>
 
@@ -321,7 +321,7 @@ export function renderAuth() {
               <span>Password *</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("lock", 17)}</span>
-                <input type="password" name="password" required placeholder="Min 6 characters" class="auth-input" />
+                <input type="password" name="password" required placeholder="Min 6 characters" class="auth-input" autocomplete="new-password" />
               </div>
             </label>
           </div>
@@ -336,7 +336,7 @@ export function renderAuth() {
               <span>Address Line 1</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("map-pin", 17)}</span>
-                <input type="text" name="addressLine1" placeholder="House/Flat/Office details" class="auth-input" />
+                <input type="text" name="addressLine1" placeholder="House/Flat/Office details" class="auth-input" autocomplete="address-line1" />
               </div>
             </label>
 
@@ -344,29 +344,29 @@ export function renderAuth() {
               <span>Address Line 2</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("map-pin", 17)}</span>
-                <input type="text" name="addressLine2" placeholder="Street, Area, Landmark" class="auth-input" />
+                <input type="text" name="addressLine2" placeholder="Street, Area, Landmark" class="auth-input" autocomplete="address-line2" />
               </div>
             </label>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <label class="auth-label">
                 <span>City</span>
-                <input type="text" name="city" placeholder="City" class="auth-input" style="padding-left: 14px;" />
+                <input type="text" name="city" placeholder="City" class="auth-input" style="padding-left: 14px;" autocomplete="address-level2" />
               </label>
               <label class="auth-label">
                 <span>State / Region</span>
-                <input type="text" name="state" placeholder="State" class="auth-input" style="padding-left: 14px;" />
+                <input type="text" name="state" placeholder="State" class="auth-input" style="padding-left: 14px;" autocomplete="address-level1" />
               </label>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <label class="auth-label">
                 <span>Country</span>
-                <input type="text" name="country" placeholder="Country" class="auth-input" style="padding-left: 14px;" />
+                <input type="text" name="country" placeholder="Country" class="auth-input" style="padding-left: 14px;" autocomplete="country" />
               </label>
               <label class="auth-label">
                 <span>Postal / Zip Code</span>
-                <input type="text" name="postalCode" placeholder="Postal Code" class="auth-input" style="padding-left: 14px;" />
+                <input type="text" name="postalCode" placeholder="Postal Code" class="auth-input" style="padding-left: 14px;" autocomplete="postal-code" />
               </label>
             </div>
           </div>
@@ -409,7 +409,7 @@ export function renderAuth() {
           <span>Email Address</span>
           <div class="auth-input-wrapper">
             <span class="auth-input-icon">${icon("mail", 17)}</span>
-            <input type="email" name="email" required placeholder="name@domain.com" class="auth-input" />
+            <input type="email" name="email" required placeholder="name@domain.com" class="auth-input" autocomplete="email" />
           </div>
         </label>
         
@@ -432,7 +432,7 @@ export function renderAuth() {
           <span>New Password</span>
           <div class="auth-input-wrapper">
             <span class="auth-input-icon">${icon("lock", 17)}</span>
-            <input type="password" name="password" required placeholder="Min 6 characters" class="auth-input" />
+            <input type="password" name="password" required placeholder="Min 6 characters" class="auth-input" autocomplete="new-password" />
           </div>
         </label>
         

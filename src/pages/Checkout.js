@@ -231,23 +231,23 @@ Please confirm my order.`;
               <div style="display: grid; gap: 16px;">
                 <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                   <span>Full Name *</span>
-                  <input type="text" name="customerName" required value="${attr(defaultName)}" placeholder="e.g. Sameer Kumar" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                  <input type="text" name="customerName" required value="${attr(defaultName)}" placeholder="e.g. Sameer Kumar" autocomplete="name" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                 </label>
-
+ 
                 <div class="checkout-contact-grid">
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Email Address *</span>
-                    <input type="email" name="customerEmail" required value="${attr(defaultEmail)}" placeholder="name@designer.com" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                    <input type="email" name="customerEmail" required value="${attr(defaultEmail)}" placeholder="name@designer.com" autocomplete="email" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
-
+ 
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Phone Number (Mandatory) *</span>
-                    <input type="tel" name="customerPhone" required placeholder="+91 83098 97055" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                    <input type="tel" name="customerPhone" required placeholder="+91 83098 97055" autocomplete="tel" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
                 </div>
               </div>
             </div>
-
+ 
             <!-- Step 3: Shipping (Conditional on Custom Order Selection) -->
             <div id="checkoutShippingContainer" style="border: 1px solid var(--border); padding: 24px; border-radius: 6px; background: #fff; display: ${checkoutOrderType === "custom" ? "grid" : "none"}; gap: 16px;">
               <h2 style="font-family: var(--font-serif); font-size: 20px; color: var(--navy); font-weight: 700; margin: 0; display: flex; align-items: center; gap: 8px;">
@@ -256,7 +256,7 @@ Please confirm my order.`;
               </h2>
               <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                 <span>Shipping Address *</span>
-                <textarea name="shippingAddress" ${checkoutOrderType === "custom" ? "required" : ""} placeholder="Enter physical shipping address details for custom sample garments or bulk roll shipments..." style="width: 100%; height: 90px; padding: 10px; border: 1px solid var(--border); border-radius: 4px; resize: none;"></textarea>
+                <textarea name="shippingAddress" ${checkoutOrderType === "custom" ? "required" : ""} placeholder="Enter physical shipping address details for custom sample garments or bulk roll shipments..." autocomplete="street-address" style="width: 100%; height: 90px; padding: 10px; border: 1px solid var(--border); border-radius: 4px; resize: none;"></textarea>
               </label>
             </div>
 

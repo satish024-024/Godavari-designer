@@ -565,6 +565,7 @@ export function renderOrderTracking() {
                 placeholder="e.g. GD-ORD-2026-A7X9K2M4" 
                 value="${escapeHtml(searchInput)}"
                 required 
+                aria-label="Order ID or Reference Code"
                 style="width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; font-size: 14px; font-family: monospace; text-transform: uppercase;"
               />
             </div>

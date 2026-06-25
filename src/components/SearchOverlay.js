@@ -49,6 +49,7 @@ export function renderSearchOverlay() {
             placeholder="Search by name, category, stitch count..."
             autocomplete="off"
             spellcheck="false"
+            aria-label="Search designs"
             style="flex:1; height:52px; border:none; background:transparent; color:var(--navy); font-size:15px; font-weight:500; outline:none; padding:0;"
           />
           ${raw ? `

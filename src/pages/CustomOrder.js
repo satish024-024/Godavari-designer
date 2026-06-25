@@ -268,17 +268,17 @@ export function renderCustomOrder() {
               <div style="display: grid; gap: 16px;">
                 <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                   <span>Full Name *</span>
-                  <input type="text" name="customerName" value="${attr(defaultName)}" required placeholder="e.g. Sameer Kumar" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                  <input type="text" name="customerName" value="${attr(defaultName)}" required placeholder="e.g. Sameer Kumar" autocomplete="name" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                 </label>
                 
                 <div class="checkout-contact-grid">
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Email Address *</span>
-                    <input type="email" name="customerEmail" value="${attr(defaultEmail)}" required placeholder="name@designer.com" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                    <input type="email" name="customerEmail" value="${attr(defaultEmail)}" required placeholder="name@designer.com" autocomplete="email" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Phone Number *</span>
-                     <input type="tel" name="customerPhone" required value="${attr(defaultPhone)}" placeholder="+91 83098 97055" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                     <input type="tel" name="customerPhone" required value="${attr(defaultPhone)}" placeholder="+91 83098 97055" autocomplete="tel" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
                 </div>
               </div>
