@@ -1,10 +1,10 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 import { config } from './config.js';
 
-export let supabase = null;
+export let supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
 
-export function initSupabase() {
-  if (!supabase) {
+export function initSupabase(forceRecreate = false) {
+  if (!supabase || forceRecreate) {
     supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
   }
 }

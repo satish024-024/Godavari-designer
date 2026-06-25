@@ -168,7 +168,7 @@ export async function processPendingCartItem() {
 }
 
 export async function initAuth() {
-  initSupabase();
+  initSupabase(true);
   authLoading = true;
   triggerRender();
 
