@@ -788,7 +788,7 @@ function renderProductsModule() {
           <div class="admin-form-group">
             <label class="admin-form-label">Difficulty Level</label>
             <select name="difficultyLevel" class="admin-form-control">
-              <option value="Easy" ${isEdit && p.difficultyLevel === 'Easy' ? 'selected' : ''}>Easy</option>
+              <option value="Beginner" ${isEdit && p.difficultyLevel === 'Beginner' ? 'selected' : ''}>Beginner</option>
               <option value="Intermediate" ${isEdit && p.difficultyLevel === 'Intermediate' ? 'selected' : (!isEdit ? 'selected' : '')}>Intermediate</option>
               <option value="Advanced" ${isEdit && p.difficultyLevel === 'Advanced' ? 'selected' : ''}>Advanced</option>
             </select>
@@ -2965,7 +2965,7 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "adminCategoryForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.id.value;
+      const id = form.elements.id ? form.elements.id.value : '';
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -3023,7 +3023,7 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "adminCollectionForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.id.value;
+      const id = form.elements.id ? form.elements.id.value : '';
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -3081,7 +3081,7 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "orderStatusForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.id.value;
+      const id = form.elements.id ? form.elements.id.value : '';
       const status = form.status.value;
       const paymentStatus = form.paymentStatus.value;
 
@@ -3102,7 +3102,7 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "customRequestQuoteForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.id.value;
+      const id = form.elements.id ? form.elements.id.value : '';
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
         submitBtn.disabled = true;
@@ -3199,7 +3199,7 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "adminTestimonialForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.id.value;
+      const id = form.elements.id ? form.elements.id.value : '';
       const payload = {
         name: form.name.value,
         role: form.role.value,
@@ -3231,7 +3231,7 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "adminFaqForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.id.value;
+      const id = form.elements.id ? form.elements.id.value : '';
       const payload = {
         question: form.question.value,
         answer: form.answer.value,
