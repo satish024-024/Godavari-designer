@@ -3093,9 +3093,9 @@ export function initAdminDashboardDelegates() {
           showToast("Category added!");
         }
         categoriesList = await categoryService.getCategories();
-        saveCategories(categoriesList); // Update local cache & trigger render
         isAddingCategory = false;
         editingCategory = null;
+        saveCategories(categoriesList); // Update local cache & trigger render
       } catch (err) {
         showToast(`Error: ${err.message}`);
       } finally {
@@ -3153,9 +3153,10 @@ export function initAdminDashboardDelegates() {
           showToast("Collection added!");
         }
         site.collections = await collectionService.getCollections();
-        await saveSite(); // Update local cache & trigger render
         isAddingCollection = false;
         editingCollection = null;
+        await saveSite();
+        triggerRender();
       } catch (err) {
         showToast(`Error: ${err.message}`);
       } finally {
