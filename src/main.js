@@ -10,10 +10,10 @@ window.addEventListener("unhandledrejection", (e) => {
   fetch(`/error-log?msg=${encodeURIComponent(errorMsg)}`).catch(() => {});
 });
 
-import { initDB } from "./services/db.js?v=6";
-import { initRouter } from "./services/router.js?v=6";
-import { MediaLibrary } from "./services/media.js?v=6";
-import { loadConfig } from "./services/config.js?v=6";
+import { initDB } from "./services/db.js";
+import { initRouter } from "./services/router.js";
+import { MediaLibrary } from "./services/media.js";
+import { loadConfig } from "./services/config.js";
 import {
   site,
   wishlist,
@@ -50,19 +50,19 @@ import {
   submitCartQuote,
   clearCartQuoteResult,
   submitQuoteModal
-} from "./services/store.js?v=6";
-import { storageService } from "./services/supabase.js?v=6";
-import { clone, escapeHtml, attr, icon, money, isMobileViewport, mediaUrl } from "./utils/helpers.js?v=6";
+} from "./services/store.js";
+import { storageService } from "./services/supabase.js";
+import { clone, escapeHtml, attr, icon, money, isMobileViewport, mediaUrl } from "./utils/helpers.js";
 
 // Components
-import { renderHeader } from "./components/Header.js?v=6";
-import { renderFooter } from "./components/Footer.js?v=6";
-import { renderFloatingActions } from "./components/FloatingActions.js?v=6";
-import { renderSearchOverlay } from "./components/SearchOverlay.js?v=6";
-import { renderCartDrawer } from "./components/CartDrawer.js?v=6";
-import { renderQuoteModal } from "./components/QuoteModal.js?v=6";
-import { renderStoryModal } from "./components/StoryModal.js?v=6";
-import { renderToast } from "./components/Toast.js?v=6";
+import { renderHeader } from "./components/Header.js";
+import { renderFooter } from "./components/Footer.js";
+import { renderFloatingActions } from "./components/FloatingActions.js";
+import { renderSearchOverlay } from "./components/SearchOverlay.js";
+import { renderCartDrawer } from "./components/CartDrawer.js";
+import { renderQuoteModal } from "./components/QuoteModal.js";
+import { renderStoryModal } from "./components/StoryModal.js";
+import { renderToast } from "./components/Toast.js";
 import {
   renderAdminDrawer,
   adminTab,
@@ -73,26 +73,26 @@ import {
   showCreateCategoryForm,
   showEditCategoryForm,
   cancelCategoryForm
-} from "./components/AdminDrawer.js?v=6";
-import { renderQuickViewModal } from "./components/QuickViewModal.js?v=6";
-import { renderBottomNavigation } from "./components/BottomNavigation.js?v=6";
-import { renderMobileDrawer } from "./components/MobileDrawer.js?v=6";
-import { renderMobileShell } from "./components/mobile/MobileShell.js?v=6";
+} from "./components/AdminDrawer.js";
+import { renderQuickViewModal } from "./components/QuickViewModal.js";
+import { renderBottomNavigation } from "./components/BottomNavigation.js";
+import { renderMobileDrawer } from "./components/MobileDrawer.js";
+import { renderMobileShell } from "./components/mobile/MobileShell.js";
 
 
 // Pages
-import { renderHome } from "./pages/Home.js?v=6";
-import { renderCatalog, catalogState } from "./pages/Catalog.js?v=6";
-import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=6";
-import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=6";
-import { renderCart } from "./pages/Cart.js?v=6";
-import { renderWishlist } from "./pages/Wishlist.js?v=6";
-import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=6";
-import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=6";
-import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=6";
-import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=6";
-import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=6";
-import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=6";
+import { renderHome } from "./pages/Home.js";
+import { renderCatalog, catalogState } from "./pages/Catalog.js";
+import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js";
+import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js";
+import { renderCart } from "./pages/Cart.js";
+import { renderWishlist } from "./pages/Wishlist.js";
+import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js";
+import { renderAuth, initAuthDelegates } from "./pages/Auth.js";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js";
+import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js";
+import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js";
+import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js";
 
 // Company & Support Pages
 import {
@@ -101,16 +101,16 @@ import {
   renderWhyGodavari,
   renderReviews,
   renderCareers
-} from "./pages/CompanyPages.js?v=6";
+} from "./pages/CompanyPages.js";
 import {
   renderFAQs,
   renderShippingDelivery,
   renderReturnsRefunds,
   renderTermsService,
   renderPrivacyPolicy
-} from "./pages/SupportPages.js?v=6";
-import { renderServicePage } from "./pages/ServicePages.js?v=6";
-import { renderLocationPage } from "./pages/LocationPages.js?v=6";
+} from "./pages/SupportPages.js";
+import { renderServicePage } from "./pages/ServicePages.js";
+import { renderLocationPage } from "./pages/LocationPages.js";
 
 const app = document.getElementById("app");
 let lastLoadedPage = "";
