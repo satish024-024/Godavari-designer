@@ -240,59 +240,58 @@ export async function initAuth() {
   });
 }
 
-// ==========================================
-// REALTIME SUBSCRIPTION
-// ==========================================
+// Realtime channel and refresh timeout trackers to prevent duplicate listener leaks
+let realtimeChannel = null;
+let refreshTimeout = null;
+
+// Global helper for category/product visibility consistency
+export const isVisible = (item) => item?.visibility !== false;
 
 export function initRealtimeSubscriptions() {
   initSupabase();
-  supabase
-    .channel('schema-db-changes')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
-      console.log("Realtime: products table updated");
-      const prods = await productService.getProducts();
-      site.products = prods;
-      DB.saveProducts(prods);
-      triggerRender();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, async () => {
-      console.log("Realtime: categories table updated");
-      const cats = await categoryService.getCategories();
-      DB.saveCategories(cats);
-      triggerRender();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'collections' }, async () => {
-      console.log("Realtime: collections table updated");
-      const cols = await collectionService.getCollections();
-      site.collections = cols;
-      triggerRender();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, async () => {
-      console.log("Realtime: testimonials table updated");
-      const testimonials = await testimonialService.getTestimonials();
-      if (testimonials && testimonials.length > 0) {
-        site.stories = mapStoriesFromTestimonials(testimonials);
+
+  // 1. Clean up any existing channel to prevent subscription leaks
+  if (realtimeChannel) {
+    console.log("Realtime: Unsubscribing from existing channel to prevent memory leaks");
+    try {
+      supabase.removeChannel(realtimeChannel);
+    } catch (err) {
+      console.warn("Failed to remove channel:", err);
+    }
+    realtimeChannel = null;
+  }
+
+  // 2. Centralized debounced refresh function to sync all storefront data
+  const debouncedRefresh = () => {
+    if (refreshTimeout) {
+      clearTimeout(refreshTimeout);
+    }
+    refreshTimeout = setTimeout(async () => {
+      console.log("Realtime: Executing debounced full site data refresh...");
+      try {
+        await syncFromSupabase();
+        console.log("Realtime: Full site sync complete");
+      } catch (err) {
+        console.error("Realtime: Full site sync failed:", err);
       }
-      triggerRender();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, async () => {
-      console.log("Realtime: faqs table updated");
-      faqs = await faqService.getFaqs();
-      triggerRender();
-    })
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'website_settings' }, async () => {
-      console.log("Realtime: website_settings table updated");
-      const settings = await settingsService.getWebsiteSettings();
-      const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
-      sections.forEach((sec) => {
-        if (settings[sec]) {
-          site[sec] = mergeDefaults(defaultSite[sec], settings[sec]);
-        }
-      });
-      triggerRender();
-    })
-    .subscribe();
+    }, 500); // 500ms debounce window
+  };
+
+  // 3. Create fresh subscription and attach listeners
+  realtimeChannel = supabase
+    .channel('schema-db-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, debouncedRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, debouncedRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'collections' }, debouncedRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, debouncedRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, debouncedRefresh)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'website_settings' }, debouncedRefresh);
+
+  realtimeChannel.subscribe((status) => {
+    console.log(`Realtime: Subscription status is: ${status}`);
+  });
 }
+
 
 // ==========================================
 // STORE ACTIONS & MUTATIONS

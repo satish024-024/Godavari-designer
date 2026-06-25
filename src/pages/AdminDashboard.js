@@ -1007,7 +1007,7 @@ function renderCategoriesModule() {
 
   return `
     <div class="admin-module">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <div>
           <h1 class="admin-module-title">Categories CMS</h1>
           <p class="admin-module-subtitle">Manage storefront catalog categories.</p>
@@ -1130,7 +1130,7 @@ function renderCollectionsModule() {
 
   return `
     <div class="admin-module">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <div>
           <h1 class="admin-module-title">Collections CMS</h1>
           <p class="admin-module-subtitle">Curate homepage featured collections.</p>
@@ -1865,7 +1865,7 @@ function renderTestimonialsModule() {
 
   return `
     <div class="admin-module">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <div>
           <h1 class="admin-module-title">Customer Testimonials</h1>
           <p class="admin-module-subtitle">Manage customer reviews displayed on the home page reviews wall.</p>
@@ -1965,7 +1965,7 @@ function renderFAQsModule() {
 
   return `
     <div class="admin-module">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
         <div>
           <h1 class="admin-module-title">FAQs CMS</h1>
           <p class="admin-module-subtitle">Manage frequently asked questions categorized by section.</p>
@@ -2497,18 +2497,34 @@ export function initAdminDashboardDelegates() {
     if (deleteCatBtn) {
       const id = deleteCatBtn.dataset.id;
       const cat = categoriesList.find(c => c.id === id);
-      if (cat && confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
-        try {
-          await categoryService.deleteCategory(id);
-          showToast("Category deleted successfully!");
-          categoriesList = await categoryService.getCategories();
-          saveCategories(categoriesList); // Update local cache & trigger render
-        } catch (err) {
-          const isForeignKey = err.code === "23503" || (err.message && err.message.includes("foreign key"));
-          if (isForeignKey) {
-            showToast("Cannot delete: This category has associated products. Please reassign or delete them first.");
-          } else {
-            showToast(`Failed to delete category: ${err.message}`);
+      if (cat) {
+        // Pre-check 1: Check for subcategories (strict 2-level hierarchy check)
+        const childCats = categoriesList.filter(c => c.parentCategoryId === id);
+        if (childCats.length > 0) {
+          alert(`Cannot delete: This category has ${childCats.length} subcategories. Please reassign or delete them first.`);
+          return;
+        }
+
+        // Pre-check 2: Check for associated products
+        const associatedProducts = (site.products || []).filter(p => p.categoryId === id);
+        if (associatedProducts.length > 0) {
+          alert(`Cannot delete: This category has ${associatedProducts.length} associated products. Please reassign or delete them first.`);
+          return;
+        }
+
+        if (confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
+          try {
+            await categoryService.deleteCategory(id);
+            showToast("Category deleted successfully!");
+            categoriesList = await categoryService.getCategories();
+            saveCategories(categoriesList); // Update local cache & trigger render
+          } catch (err) {
+            const isForeignKey = err.code === "23503" || (err.message && err.message.includes("foreign key"));
+            if (isForeignKey) {
+              showToast("Cannot delete: This category has associated products or subcategories.");
+            } else {
+              showToast(`Failed to delete category: ${err.message}`);
+            }
           }
         }
       }

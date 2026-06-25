@@ -1,4 +1,4 @@
-import { site, wishlist, getCategories, ui } from "../services/store.js";
+import { site, wishlist, getCategories, ui, isVisible } from "../services/store.js";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 // Page level reactive state
@@ -12,10 +12,10 @@ export const catalogState = {
   maxPrice: 100,
   minStitchCount: 0,
   maxStitchCount: 100000,
+  selectedHoop: "All",
   selectedDifficulty: "All",
   selectedBrand: "All",
   selectedFormat: "All",
-  selectedHoop: "All",
   selectedColors: "All",
   filterFeatured: false,
   filterBestSeller: false,
@@ -28,8 +28,37 @@ let lastCollectionParam = null;
 let lastSearchParam = null;
 
 export function renderCatalog() {
-  const cats = getCategories();
+  const cats = getCategories() || [];
   const query = (catalogState.searchQuery || "").toLowerCase().trim();
+  const dbCollections = site.collections || [];
+
+  // --- Filter State Sanitizer & Hardener ---
+  // Ensures that deleted or hidden items don't lock the UI in a broken state
+  if (catalogState.selectedCategory !== "All") {
+    const activeCatObj = cats.find(c => c.name === catalogState.selectedCategory && !c.parentCategoryId);
+    if (!activeCatObj || !isVisible(activeCatObj)) {
+      console.warn(`Catalog: Selected category "${catalogState.selectedCategory}" is no longer available. Resetting filters.`);
+      catalogState.selectedCategory = "All";
+      catalogState.selectedSubcategory = "All";
+    }
+  }
+
+  if (catalogState.selectedSubcategory !== "All") {
+    const activeSubObj = cats.find(c => c.name === catalogState.selectedSubcategory && c.parentCategoryId);
+    const parentCatObj = cats.find(c => c.name === catalogState.selectedCategory && !c.parentCategoryId);
+    if (!activeSubObj || !isVisible(activeSubObj) || !parentCatObj || activeSubObj.parentCategoryId !== parentCatObj.id) {
+      console.warn(`Catalog: Selected subcategory "${catalogState.selectedSubcategory}" is invalid or does not belong to selected parent. Resetting subcategory.`);
+      catalogState.selectedSubcategory = "All";
+    }
+  }
+
+  if (catalogState.selectedCollection !== "All") {
+    const activeColObj = dbCollections.find(c => c.slug === catalogState.selectedCollection);
+    if (!activeColObj) {
+      console.warn(`Catalog: Selected collection "${catalogState.selectedCollection}" is no longer available. Resetting collection filter.`);
+      catalogState.selectedCollection = "All";
+    }
+  }
 
   // --- Router Parameters Synchronizer ---
   // If the router set category/collection/search parameters in store, apply it
@@ -46,13 +75,13 @@ export function renderCatalog() {
   if (categoryParam !== lastCategoryParam) {
     lastCategoryParam = categoryParam;
     if (categoryParam) {
-      const cat = cats.find(c => c.slug === categoryParam);
+      const cat = cats.find(c => c.slug === categoryParam && isVisible(c));
       if (cat) {
         if (!cat.parentCategoryId) {
           catalogState.selectedCategory = cat.name;
           catalogState.selectedSubcategory = "All";
         } else {
-          const parent = cats.find(p => p.id === cat.parentCategoryId);
+          const parent = cats.find(p => p.id === cat.parentCategoryId && isVisible(p));
           catalogState.selectedCategory = parent ? parent.name : "All";
           catalogState.selectedSubcategory = cat.name;
         }
@@ -66,36 +95,36 @@ export function renderCatalog() {
   if (collectionParam !== lastCollectionParam) {
     lastCollectionParam = collectionParam;
     if (collectionParam) {
-      catalogState.selectedCollection = collectionParam;
+      const matchedCol = dbCollections.find(c => c.slug === collectionParam);
+      catalogState.selectedCollection = matchedCol ? matchedCol.slug : "All";
     } else {
       catalogState.selectedCollection = "All";
     }
   }
 
   // --- Dynamic Category / Subcategory lists ---
-  // Get featured categories for top navigation pills (both parent and subcategories can be featured)
-  const featuredCats = cats.filter(c => c.featured).sort((a, b) => a.displayOrder - b.displayOrder);
-  const pillCategories = ["All", ...featuredCats.map(c => c.name)];
+  // Get all visible parent categories for top navigation pills
+  const parentCats = cats
+    .filter(c => !c.parentCategoryId && isVisible(c))
+    .sort((a, b) => (a.displayOrder || 1) - (b.displayOrder || 1) || a.name.localeCompare(b.name));
+  const pillCategories = ["All", ...parentCats.map(c => c.name)];
   
   // Find parent of selected category (if it is a subcategory) or the selected category itself (if it is a parent)
   let activeParent = null;
-  const selectedCat = cats.find(c => c.name === catalogState.selectedCategory);
+  const selectedCat = cats.find(c => c.name === catalogState.selectedCategory && !c.parentCategoryId);
   if (selectedCat) {
-    if (!selectedCat.parentCategoryId) {
-      activeParent = selectedCat;
-    } else {
-      activeParent = cats.find(c => c.id === selectedCat.parentCategoryId);
-    }
+    activeParent = selectedCat;
   }
 
   // Find subcategories of the active parent
   let subcategories = ["All"];
   if (activeParent) {
-    subcategories = ["All", ...cats.filter(c => c.parentCategoryId === activeParent.id).sort((a, b) => a.displayOrder - b.displayOrder).map(c => c.name)];
+    const childCats = cats
+      .filter(c => c.parentCategoryId === activeParent.id && isVisible(c))
+      .sort((a, b) => (a.displayOrder || 1) - (b.displayOrder || 1) || a.name.localeCompare(b.name));
+    subcategories = ["All", ...childCats.map(c => c.name)];
   }
 
-  // Collections (slugs: bridal, blouses, saree, kids, floral)
-  const collections = ["All", "bridal", "blouses", "saree", "kids", "floral"];
 
   // --- Filters Application ---
   let filtered = site.products.filter((product) => {
@@ -258,7 +287,6 @@ export function renderCatalog() {
             </div>`
           : ""
       }
-
       <!-- Detailed Filters Panel (Toggled on "More Filters" click) -->
       ${
         catalogState.moreFiltersOpen
@@ -268,7 +296,8 @@ export function renderCatalog() {
               <div class="filter-group">
                 <h3>Collections</h3>
                 <select id="filterCollectionSelect" class="sort-select" style="width: 100%; border-radius:4px; padding: 10px;" data-action="filter-collection-select">
-                  ${collections.map(col => `<option value="${attr(col)}" ${catalogState.selectedCollection === col ? "selected" : ""}>${escapeHtml(col === "All" ? "All Collections" : col.toUpperCase())}</option>`).join("")}
+                  <option value="All" ${catalogState.selectedCollection === "All" ? "selected" : ""}>All Collections</option>
+                  ${dbCollections.map(col => `<option value="${attr(col.slug)}" ${catalogState.selectedCollection === col.slug ? "selected" : ""}>${escapeHtml(col.title)}</option>`).join("")}
                 </select>
               </div>
 
