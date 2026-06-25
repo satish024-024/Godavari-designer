@@ -4,10 +4,12 @@ import {
   showToast,
   site,
   getCategories,
+  saveCategories,
   triggerRender,
   saveSite
 } from "../services/store.js";
 import { navigate } from "../services/router.js";
+import { DB } from "../services/db.js";
 import { icon, escapeHtml, attr, mediaUrl } from "../utils/helpers.js";
 import {
   productService,
@@ -2287,6 +2289,90 @@ export function initAdminDashboardDelegates() {
       triggerRender();
     }
     
+    // Category Image File Preview
+    if (e.target.id === "categoryImageFile") {
+      const file = e.target.files[0];
+      if (file) {
+        const card = e.target.closest(".image-upload-card");
+        if (card) {
+          const placeholder = card.querySelector(".upload-placeholder");
+          const preview = card.querySelector(".upload-preview");
+          const img = card.querySelector(".upload-preview img");
+          if (placeholder && preview && img) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              img.src = event.target.result;
+              placeholder.style.display = "none";
+              preview.style.display = "flex";
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    }
+
+    // Collection Image File Preview
+    if (e.target.id === "collectionImageFile") {
+      const file = e.target.files[0];
+      if (file) {
+        const card = e.target.closest(".image-upload-card");
+        if (card) {
+          const placeholder = card.querySelector(".upload-placeholder");
+          const preview = card.querySelector(".upload-preview");
+          const img = card.querySelector(".upload-preview img");
+          if (placeholder && preview && img) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              img.src = event.target.result;
+              placeholder.style.display = "none";
+              preview.style.display = "flex";
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    }
+
+    // Product Image File Preview
+    if (e.target.id === "productImageFile") {
+      const file = e.target.files[0];
+      if (file) {
+        const card = e.target.closest(".image-upload-card");
+        if (card) {
+          const placeholder = card.querySelector(".upload-placeholder");
+          const preview = card.querySelector(".upload-preview");
+          const img = card.querySelector(".upload-preview img");
+          if (placeholder && preview && img) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              img.src = event.target.result;
+              placeholder.style.display = "none";
+              preview.style.display = "flex";
+            };
+            reader.readAsDataURL(file);
+          }
+        }
+      }
+    }
+
+    // Digitized Custom Design File Preview
+    if (e.target.id === "digitizedDesignFile") {
+      const file = e.target.files[0];
+      if (file) {
+        const card = e.target.closest(".image-upload-card");
+        if (card) {
+          const placeholder = card.querySelector(".upload-placeholder");
+          const preview = card.querySelector(".upload-preview");
+          const textSpan = card.querySelector(".upload-preview span");
+          if (placeholder && preview && textSpan) {
+            textSpan.innerText = file.name;
+            placeholder.style.display = "none";
+            preview.style.display = "flex";
+          }
+        }
+      }
+    }
+
     // Settings Restore File Upload
     if (e.target.id === "restoreBackupInput") {
       const file = e.target.files[0];
@@ -2946,6 +3032,7 @@ export function initAdminDashboardDelegates() {
           showToast("Design added successfully!");
         }
         site.products = await productService.getProducts();
+        DB.saveProducts(site.products); // Update local cache
         isAddingProduct = false;
         editingProduct = null;
         triggerRender();
@@ -2965,17 +3052,19 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "adminCategoryForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.elements.id ? form.elements.id.value : '';
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = "Saving Category...";
       }
 
+      const formData = new FormData(form);
+      const id = formData.get("id");
+
       try {
         const fileInput = document.getElementById("categoryImageFile");
         const file = fileInput ? fileInput.files[0] : null;
-        let imageUrl = form.image.value;
+        let imageUrl = formData.get("image") || "";
 
         if (file) {
           if (submitBtn) submitBtn.innerText = "Uploading Image...";
@@ -2988,11 +3077,11 @@ export function initAdminDashboardDelegates() {
         }
 
         const payload = {
-          name: form.name.value,
-          slug: form.slug.value,
-          description: form.description.value,
+          name: formData.get("name"),
+          slug: formData.get("slug"),
+          description: formData.get("description"),
           image: imageUrl,
-          displayOrder: parseInt(form.displayOrder.value || 1),
+          displayOrder: parseInt(formData.get("displayOrder") || 1),
           featured: form.featured.checked
         };
 
@@ -3004,9 +3093,9 @@ export function initAdminDashboardDelegates() {
           showToast("Category added!");
         }
         categoriesList = await categoryService.getCategories();
+        saveCategories(categoriesList); // Update local cache & trigger render
         isAddingCategory = false;
         editingCategory = null;
-        triggerRender();
       } catch (err) {
         showToast(`Error: ${err.message}`);
       } finally {
@@ -3023,17 +3112,19 @@ export function initAdminDashboardDelegates() {
     if (e.target.id === "adminCollectionForm") {
       e.preventDefault();
       const form = e.target;
-      const id = form.elements.id ? form.elements.id.value : '';
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = "Saving Collection...";
       }
 
+      const formData = new FormData(form);
+      const id = formData.get("id");
+
       try {
         const fileInput = document.getElementById("collectionImageFile");
         const file = fileInput ? fileInput.files[0] : null;
-        let imageUrl = form.image.value;
+        let imageUrl = formData.get("image") || "";
 
         if (file) {
           if (submitBtn) submitBtn.innerText = "Uploading Image...";
@@ -3046,11 +3137,11 @@ export function initAdminDashboardDelegates() {
         }
 
         const payload = {
-          title: form.title.value,
-          slug: form.slug.value,
-          description: form.description.value,
+          title: formData.get("title"),
+          slug: formData.get("slug"),
+          description: formData.get("description"),
           image: imageUrl,
-          displayOrder: parseInt(form.displayOrder.value || 1),
+          displayOrder: parseInt(formData.get("displayOrder") || 1),
           featured: form.featured.checked
         };
 
@@ -3062,9 +3153,9 @@ export function initAdminDashboardDelegates() {
           showToast("Collection added!");
         }
         site.collections = await collectionService.getCollections();
+        await saveSite(); // Update local cache & trigger render
         isAddingCollection = false;
         editingCollection = null;
-        triggerRender();
       } catch (err) {
         showToast(`Error: ${err.message}`);
       } finally {

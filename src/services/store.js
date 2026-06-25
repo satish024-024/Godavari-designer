@@ -614,7 +614,9 @@ export async function saveCategories(cats) {
 export async function createCategory(cat) {
   try {
     await categoryService.createCategory(cat);
-    // Local state will refresh via Realtime broadcast
+    const cats = await categoryService.getCategories();
+    DB.saveCategories(cats);
+    triggerRender();
   } catch (error) {
     showToast(`Error: ${error.message}`);
   }
@@ -623,6 +625,9 @@ export async function createCategory(cat) {
 export async function updateCategory(id, updatedCat) {
   try {
     await categoryService.updateCategory(id, updatedCat);
+    const cats = await categoryService.getCategories();
+    DB.saveCategories(cats);
+    triggerRender();
   } catch (error) {
     showToast(`Error: ${error.message}`);
   }
@@ -631,6 +636,9 @@ export async function updateCategory(id, updatedCat) {
 export async function deleteCategory(id) {
   try {
     await categoryService.deleteCategory(id);
+    const cats = await categoryService.getCategories();
+    DB.saveCategories(cats);
+    triggerRender();
   } catch (error) {
     showToast(`Error: ${error.message}`);
   }
