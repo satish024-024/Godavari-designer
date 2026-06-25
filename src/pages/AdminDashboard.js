@@ -2454,6 +2454,7 @@ export function initAdminDashboardDelegates() {
           await productService.deleteProduct(id);
           showToast("Design deleted successfully!");
           site.products = await productService.getProducts();
+          DB.saveProducts(site.products); // Update local cache
           triggerRender();
         } catch (err) {
           console.error("Error deleting product:", err);
@@ -2501,9 +2502,14 @@ export function initAdminDashboardDelegates() {
           await categoryService.deleteCategory(id);
           showToast("Category deleted successfully!");
           categoriesList = await categoryService.getCategories();
-          triggerRender();
+          saveCategories(categoriesList); // Update local cache & trigger render
         } catch (err) {
-          showToast(`Failed to delete category: ${err.message}`);
+          const isForeignKey = err.code === "23503" || (err.message && err.message.includes("foreign key"));
+          if (isForeignKey) {
+            showToast("Cannot delete: This category has associated products. Please reassign or delete them first.");
+          } else {
+            showToast(`Failed to delete category: ${err.message}`);
+          }
         }
       }
       return;
@@ -2547,6 +2553,7 @@ export function initAdminDashboardDelegates() {
           await collectionService.deleteCollection(id);
           showToast("Collection deleted successfully!");
           site.collections = await collectionService.getCollections();
+          DB.save("godavari-designer-site-v1", site); // Update local cache
           triggerRender();
         } catch (err) {
           showToast(`Failed to delete collection: ${err.message}`);

@@ -81,18 +81,18 @@ import { renderMobileShell } from "./components/mobile/MobileShell.js";
 
 
 // Pages
-import { renderHome } from "./pages/Home.js?v=2";
-import { renderCatalog, catalogState } from "./pages/Catalog.js?v=2";
-import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=2";
-import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=2";
-import { renderCart } from "./pages/Cart.js?v=2";
-import { renderWishlist } from "./pages/Wishlist.js?v=2";
-import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=2";
-import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=2";
-import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=2";
-import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=2";
-import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=2";
-import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=2";
+import { renderHome } from "./pages/Home.js?v=3";
+import { renderCatalog, catalogState } from "./pages/Catalog.js?v=3";
+import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=3";
+import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=3";
+import { renderCart } from "./pages/Cart.js?v=3";
+import { renderWishlist } from "./pages/Wishlist.js?v=3";
+import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=3";
+import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=3";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=3";
+import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=3";
+import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=3";
+import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=3";
 
 // Company & Support Pages
 import {
@@ -101,7 +101,7 @@ import {
   renderWhyGodavari,
   renderReviews,
   renderCareers
-} from "./pages/CompanyPages.js?v=2";
+} from "./pages/CompanyPages.js?v=3";
 import {
   renderFAQs,
   renderShippingDelivery,
