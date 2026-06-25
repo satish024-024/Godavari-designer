@@ -2967,6 +2967,7 @@ export function initAdminDashboardDelegates() {
     // ------------------------------------------
     if (e.target.id === "adminProductForm") {
       e.preventDefault();
+      console.log("Admin: Product submit event intercepted successfully.");
       const form = e.target;
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
@@ -2980,12 +2981,14 @@ export function initAdminDashboardDelegates() {
       try {
         const fileInput = document.getElementById("productImageFile");
         const file = fileInput ? fileInput.files[0] : null;
-        let imageUrl = formData.get("image");
+        let imageUrl = formData.get("image") || "";
 
         if (file) {
           if (submitBtn) submitBtn.innerText = "Uploading Image...";
+          console.log("Admin: Uploading design image file:", file.name);
           const cleanName = `prod_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
           imageUrl = await storageService.uploadImage(file, cleanName);
+          console.log("Admin: Image uploaded successfully. URL:", imageUrl);
         }
 
         if (!id && !imageUrl) {
@@ -2999,13 +3002,15 @@ export function initAdminDashboardDelegates() {
         const recommendedFabrics = fabricsStr.split(",").map(t => t.trim()).filter(Boolean);
         
         const price = Number(formData.get("price") || 0);
-        const title = formData.get("title");
+        const title = (formData.get("title") || "").trim();
+        const code = (formData.get("code") || "").trim().toUpperCase();
+        const slug = (formData.get("slug") || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-');
         
         const formatsCheckboxOptions = Array.from(form.querySelectorAll("input[name='formatOption']:checked")).map(el => el.value);
         
         const formats = formatsCheckboxOptions.map(fmt => {
           let existingFormat = null;
-          if (id) {
+          if (id && site.products) {
             const existing = site.products.find(p => p.id === id);
             if (existing && existing.formats) {
               existingFormat = existing.formats.find(f => f.format === fmt);
@@ -3041,22 +3046,28 @@ export function initAdminDashboardDelegates() {
           };
         });
 
+        const backStitchCount = parseInt(formData.get("backStitchCount") || 0, 10) || 0;
+        const handStitchCount = parseInt(formData.get("handStitchCount") || 0, 10) || 0;
+        const totalStitchCount = backStitchCount + handStitchCount;
+        const rpm = parseInt(formData.get("rpm") || 850, 10) || 850;
+        const estimatedEmbroideryTime = Math.round(totalStitchCount / rpm) || 0;
+
         const prodPayload = {
           title,
-          code: formData.get("code"),
-          slug: formData.get("slug"),
+          code,
+          slug,
           price,
           categoryId: formData.get("categoryId"),
           collectionId: formData.get("collectionId") || null,
-          description: formData.get("description"),
-          backStitchCount: parseInt(formData.get("backStitchCount") || 0),
-          handStitchCount: parseInt(formData.get("handStitchCount") || 0),
-          totalStitchCount: parseInt(formData.get("totalStitchCount") || 0),
-          rpm: parseInt(formData.get("rpm") || 850),
-          estimatedEmbroideryTime: parseInt(formData.get("estimatedEmbroideryTime") || 0),
-          threadColors: parseInt(formData.get("threadColors") || 0),
-          width: parseInt(formData.get("width") || 100),
-          height: parseInt(formData.get("height") || 100),
+          description: (formData.get("description") || "").trim() || "Premium embroidery design.",
+          backStitchCount,
+          handStitchCount,
+          totalStitchCount,
+          rpm,
+          estimatedEmbroideryTime,
+          threadColors: parseInt(formData.get("threadColors") || 0, 10) || 0,
+          width: parseInt(formData.get("width") || 100, 10) || 100,
+          height: parseInt(formData.get("height") || 100, 10) || 100,
           image: imageUrl,
           gallery: [imageUrl],
           difficultyLevel: formData.get("difficultyLevel") || "Intermediate",
@@ -3067,6 +3078,8 @@ export function initAdminDashboardDelegates() {
           bestSeller: true
         };
 
+        console.log("Admin: Saving product payload to Supabase:", prodPayload);
+
         if (id) {
           await productService.updateProduct(id, prodPayload);
           recordLocalWrite();
@@ -3076,13 +3089,18 @@ export function initAdminDashboardDelegates() {
           recordLocalWrite();
           showToast("Design added successfully!");
         }
+
+        console.log("Admin: Database write succeeded. Refetching active catalog...");
         site.products = await productService.getProducts();
         DB.saveProducts(site.products); // Update local cache
+        console.log("Admin: Local cache and storefront catalog updated successfully.");
+
         isAddingProduct = false;
         editingProduct = null;
         triggerRender();
       } catch (err) {
-        showToast(`Failed to save: ${err.message}`);
+        console.error("Admin: Product save failed:", err);
+        showToast(`Failed to save: ${err.message || err}`);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -3096,6 +3114,7 @@ export function initAdminDashboardDelegates() {
     // ------------------------------------------
     if (e.target.id === "adminCategoryForm") {
       e.preventDefault();
+      console.log("Admin: Category submit event intercepted successfully.");
       const form = e.target;
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
@@ -3113,8 +3132,10 @@ export function initAdminDashboardDelegates() {
 
         if (file) {
           if (submitBtn) submitBtn.innerText = "Uploading Image...";
+          console.log("Admin: Uploading category image file:", file.name);
           const cleanName = `cat_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
           imageUrl = await storageService.uploadImage(file, cleanName);
+          console.log("Admin: Image uploaded successfully. URL:", imageUrl);
         }
 
         if (!id && !imageUrl) {
@@ -3122,13 +3143,15 @@ export function initAdminDashboardDelegates() {
         }
 
         const payload = {
-          name: formData.get("name"),
-          slug: formData.get("slug"),
-          description: formData.get("description") || "",
+          name: (formData.get("name") || "").trim(),
+          slug: (formData.get("slug") || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-'),
+          description: (formData.get("description") || "").trim() || "Premium embroidery category.",
           image: imageUrl,
-          displayOrder: parseInt(formData.get("displayOrder") || 1),
+          displayOrder: parseInt(formData.get("displayOrder") || 1, 10) || 1,
           featured: !!form.querySelector("#catFeatured")?.checked
         };
+
+        console.log("Admin: Saving category payload to Supabase:", payload);
 
         if (id) {
           await categoryService.updateCategory(id, payload);
@@ -3139,12 +3162,17 @@ export function initAdminDashboardDelegates() {
           recordLocalWrite();
           showToast("Category added!");
         }
+
+        console.log("Admin: Database write succeeded. Refetching active categories...");
         categoriesList = await categoryService.getCategories();
+        console.log("Admin: Local cache and storefront categories updated successfully.");
+
         isAddingCategory = false;
         editingCategory = null;
         saveCategories(categoriesList); // Update local cache & trigger render
       } catch (err) {
-        showToast(`Error: ${err.message}`);
+        console.error("Admin: Category save failed:", err);
+        showToast(`Error: ${err.message || err}`);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
@@ -3158,6 +3186,7 @@ export function initAdminDashboardDelegates() {
     // ------------------------------------------
     if (e.target.id === "adminCollectionForm") {
       e.preventDefault();
+      console.log("Admin: Collection submit event intercepted successfully.");
       const form = e.target;
       const submitBtn = form.querySelector("button[type='submit']");
       if (submitBtn) {
@@ -3175,8 +3204,10 @@ export function initAdminDashboardDelegates() {
 
         if (file) {
           if (submitBtn) submitBtn.innerText = "Uploading Image...";
+          console.log("Admin: Uploading collection image file:", file.name);
           const cleanName = `col_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
           imageUrl = await storageService.uploadImage(file, cleanName);
+          console.log("Admin: Image uploaded successfully. URL:", imageUrl);
         }
 
         if (!id && !imageUrl) {
@@ -3184,13 +3215,15 @@ export function initAdminDashboardDelegates() {
         }
 
         const payload = {
-          title: formData.get("title"),
-          slug: formData.get("slug"),
-          description: formData.get("description") || "",
+          title: (formData.get("title") || "").trim(),
+          slug: (formData.get("slug") || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-'),
+          description: (formData.get("description") || "").trim() || "Premium embroidery collection.",
           image: imageUrl,
-          displayOrder: parseInt(formData.get("displayOrder") || 1),
+          displayOrder: parseInt(formData.get("displayOrder") || 1, 10) || 1,
           featured: !!form.querySelector("#colFeatured")?.checked
         };
+
+        console.log("Admin: Saving collection payload to Supabase:", payload);
 
         if (id) {
           await collectionService.updateCollection(id, payload);
@@ -3201,13 +3234,18 @@ export function initAdminDashboardDelegates() {
           recordLocalWrite();
           showToast("Collection added!");
         }
+
+        console.log("Admin: Database write succeeded. Refetching active collections...");
         site.collections = await collectionService.getCollections();
+        console.log("Admin: Local cache and storefront collections updated successfully.");
+
         isAddingCollection = false;
         editingCollection = null;
         await saveSite();
         triggerRender();
       } catch (err) {
-        showToast(`Error: ${err.message}`);
+        console.error("Admin: Collection save failed:", err);
+        showToast(`Error: ${err.message || err}`);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
