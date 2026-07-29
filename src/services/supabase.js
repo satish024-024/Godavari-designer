@@ -923,23 +923,73 @@ export const orderService = {
 // STORAGE SERVICE
 // ==========================================
 
+export function fileToDataUrl(file, maxWidth = 1400, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+      return;
+    }
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.src = e.target.result;
+    };
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let { width, height } = img;
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => {
+      const reader2 = new FileReader();
+      reader2.onload = (e) => resolve(e.target.result);
+      reader2.onerror = reject;
+      reader2.readAsDataURL(file);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export const storageService = {
   async uploadMedia(file, bucket, path) {
     if (!(file instanceof File)) throw new Error("Choose a file before uploading.");
     if (file.size === 0) throw new Error("The selected file is empty.");
-    if (file.size > 10 * 1024 * 1024) throw new Error("Files must be 10 MB or smaller.");
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type || undefined });
-    if (error) throw error;
+    if (file.size > 25 * 1024 * 1024) throw new Error("Files must be 25 MB or smaller.");
 
-    if (bucket === 'media-library') {
-      const { data: urlData } = supabase.storage
+    try {
+      const { data, error } = await supabase.storage
         .from(bucket)
-        .getPublicUrl(path);
-      return urlData.publicUrl;
+        .upload(path, file, { cacheControl: '3600', upsert: true, contentType: file.type || undefined });
+      
+      if (!error && bucket === 'media-library') {
+        const { data: urlData } = supabase.storage
+          .from(bucket)
+          .getPublicUrl(path);
+        if (urlData && urlData.publicUrl) {
+          return urlData.publicUrl;
+        }
+      }
+      if (!error && data) return data.path;
+      if (error) throw error;
+    } catch (err) {
+      console.warn("Storage service: Remote bucket write failed, engaging client fallback:", err);
+      // Fail-safe: convert image file to high-quality compressed Data URL
+      if (file.type && file.type.startsWith('image/')) {
+        return await fileToDataUrl(file);
+      }
+      throw err;
     }
-    return data.path;
   },
 
   async uploadImage(file, filename) {

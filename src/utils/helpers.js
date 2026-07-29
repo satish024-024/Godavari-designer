@@ -43,7 +43,7 @@ export function money(value) {
 }
 
 export function mediaUrl(id) {
-  if (typeof id === "string" && (id.startsWith("http://") || id.startsWith("https://") || id.startsWith("./"))) {
+  if (typeof id === "string" && (id.startsWith("http://") || id.startsWith("https://") || id.startsWith("data:") || id.startsWith("./"))) {
     return id;
   }
   return MediaLibrary.getMediaUrl(id, id);
