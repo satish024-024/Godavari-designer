@@ -323,6 +323,7 @@ function renderSidebar(activeSection) {
           <div class="admin-user-info">
             <span class="admin-user-name">${currentUser ? currentUser.name : "Admin"}</span>
             <span class="admin-user-email">${currentUser ? currentUser.email : ""}</span>
+            <span style="display:inline-block;margin-top:3px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:0.05em;background:${currentUser && currentUser.role === 'admin' ? 'rgba(200,161,90,0.15)' : 'rgba(220,38,38,0.12)'};color:${currentUser && currentUser.role === 'admin' ? '#C8A15A' : '#dc2626'};">${currentUser ? currentUser.role.toUpperCase() : 'UNKNOWN'}</span>
           </div>
         </a>
         <button class="admin-logout-btn" id="adminLogoutBtn" aria-label="Logout">
@@ -2971,6 +2972,10 @@ export function initAdminDashboardDelegates() {
       console.log("Admin: Product submit event intercepted successfully.");
       const form = e.target;
       const submitBtn = form.querySelector("button[type='submit']");
+      // Clear any previous inline error
+      const existingErr = form.querySelector(".admin-form-inline-error");
+      if (existingErr) existingErr.remove();
+
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerText = "Saving Design...";
@@ -2978,6 +2983,17 @@ export function initAdminDashboardDelegates() {
       
       const formData = new FormData(form);
       const id = formData.get("id");
+
+      // Role guard: block early with a clear message instead of silent RLS failure
+      if (!currentUser || currentUser.role !== 'admin') {
+        const errDiv = document.createElement('div');
+        errDiv.className = 'admin-form-inline-error';
+        errDiv.style.cssText = 'background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#dc2626;font-size:13px;font-weight:500;';
+        errDiv.innerHTML = `<strong>⚠ Permission Denied:</strong> Your account role is "${currentUser ? currentUser.role : 'unknown'}". It must be "admin" to save products. Go to <strong>Supabase Dashboard → SQL Editor</strong> and run:<br><code style="display:block;margin-top:8px;background:#fff;padding:8px;border-radius:4px;font-size:12px;">UPDATE public.profiles SET role = 'admin' WHERE email = '${currentUser ? currentUser.email : 'your@email.com'}';</code>`;
+        form.insertBefore(errDiv, form.firstChild);
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.innerText = 'Save Design'; }
+        return;
+      }
 
       try {
         const fileInput = document.getElementById("productImageFile");
@@ -3101,7 +3117,19 @@ export function initAdminDashboardDelegates() {
         triggerRender();
       } catch (err) {
         console.error("Admin: Product save failed:", err);
-        showToast(`Failed to save: ${err.message || err}`);
+        const errMsg = err.message || String(err);
+        showToast(`Failed to save: ${errMsg}`);
+        // Also show inline so it's not missed
+        const errDivCatch = document.createElement('div');
+        errDivCatch.className = 'admin-form-inline-error';
+        errDivCatch.style.cssText = 'background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#dc2626;font-size:13px;font-weight:500;';
+        errDivCatch.innerHTML = `<strong>⚠ Save Failed:</strong> ${escapeHtml(errMsg)}`;
+        const formEl = document.getElementById('adminProductForm');
+        if (formEl) {
+          const prev = formEl.querySelector('.admin-form-inline-error');
+          if (prev) prev.remove();
+          formEl.insertBefore(errDivCatch, formEl.firstChild);
+        }
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
