@@ -7,7 +7,8 @@ import {
   saveCategories,
   triggerRender,
   saveSite,
-  recordLocalWrite
+  recordLocalWrite,
+  syncFromSupabase
 } from "../services/store.js";
 import { navigate } from "../services/router.js";
 import { DB } from "../services/db.js";
@@ -3241,7 +3242,6 @@ export function initAdminDashboardDelegates() {
 
         isAddingCollection = false;
         editingCollection = null;
-        await saveSite();
         triggerRender();
       } catch (err) {
         console.error("Admin: Collection save failed:", err);
@@ -3365,7 +3365,9 @@ export function initAdminDashboardDelegates() {
         if (submitBtn) submitBtn.disabled = true;
         await saveSite();
       } catch (err) {
-        console.error(err);
+        console.error("Admin: Site-content save failed:", err);
+        showToast(`Failed to publish site content: ${err.message || err}`);
+        await syncFromSupabase();
       } finally {
         const submitBtn = f.querySelector("button[type='submit']");
         if (submitBtn) submitBtn.disabled = false;

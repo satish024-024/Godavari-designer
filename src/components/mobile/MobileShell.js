@@ -8,8 +8,7 @@ import { renderQuoteModal } from "../QuoteModal.js";
 import { renderStoryModal } from "../StoryModal.js";
 import { renderQuickViewModal } from "../QuickViewModal.js";
 import { renderToast } from "../Toast.js";
-import { renderAdminDrawer } from "../AdminDrawer.js";
-import { ui, currentUser } from "../../services/store.js";
+import { ui } from "../../services/store.js";
 
 export function renderMobileShell(pageContent) {
   return `
@@ -25,7 +24,6 @@ export function renderMobileShell(pageContent) {
       ${ui.cartOpen ? renderCartDrawer() : ""}
       ${ui.quoteOpen ? renderQuoteModal() : ""}
       ${ui.storyOpen ? renderStoryModal() : ""}
-      ${ui.adminOpen && currentUser && currentUser.role === "admin" ? renderAdminDrawer() : ""}
       ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
       ${renderToast()}
     </div>

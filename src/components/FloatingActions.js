@@ -6,9 +6,9 @@ export function renderFloatingActions() {
   return `
     <div class="floating-actions">
       ${isAdmin ? `
-        <button type="button" class="admin-fab" data-action="open-admin" aria-label="Customize website">
+        <a href="#/admin-dashboard" class="admin-fab" aria-label="Open admin portal">
           ${icon("sliders-horizontal", 20)}
-        </button>
+        </a>
       ` : ""}
       <button type="button" class="to-top" data-action="scroll-to" data-target="home" aria-label="Back to top">
         ${icon("arrow-up", 20)}

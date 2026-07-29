@@ -1,4 +1,5 @@
 import { DB } from "./db.js";
+import { config } from "./config.js";
 import { defaultSite } from "../data/defaultSite.js";
 import { mergeDefaults, clone, money } from "../utils/helpers.js";
 import {
@@ -209,6 +210,21 @@ export async function initAuth() {
     currentProfile = user;
     DB.setActiveUser(user);
   } catch (e) {
+    console.error("Store: Auth initialization failed:", e);
+    const errMsg = (e.message || "").toLowerCase();
+    // If the error is JWT, token, or claim related, clear the localStorage key to self-heal
+    if (errMsg.includes("jwt") || errMsg.includes("token") || errMsg.includes("claim") || errMsg.includes("unauthorized") || errMsg.includes("invalid")) {
+      try {
+        const projectRef = (config.supabaseUrl || "").replace("https://", "").split(".")[0];
+        if (projectRef) {
+          const storageKey = `sb-${projectRef}-auth-token`;
+          console.warn(`Store: Clearing corrupt session token key: ${storageKey}`);
+          localStorage.removeItem(storageKey);
+        }
+      } catch (err) {
+        console.error("Store: Failed to clear corrupt token:", err);
+      }
+    }
     currentUser = null;
     currentProfile = null;
     DB.setActiveUser(null);
@@ -329,20 +345,18 @@ export function initRealtimeSubscriptions() {
 // ==========================================
 
 export async function saveSite() {
-  DB.save(STORAGE_KEY, site); // local cache
-  
-  // Push site sections to website_settings table on Supabase
-  try {
-    const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
-    for (const sec of sections) {
-      await settingsService.updateWebsiteSettings(sec, site[sec]);
-    }
-    recordLocalWrite();
-    showToast("Settings synchronized with database!");
-  } catch (error) {
-    console.error("Failed to save site settings to Supabase:", error);
-    showToast(`Offline mode: Settings saved locally but failed to sync to cloud (${error.message || error})`);
+  if (!currentUser || currentUser.role !== "admin") {
+    throw new Error("Admin access is required to save website settings.");
   }
+
+  // Supabase is the CMS source of truth. A browser-only save would disappear
+  // for visitors and every other admin, so only cache after cloud persistence.
+  const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
+  await Promise.all(sections.map((section) => settingsService.updateWebsiteSettings(section, site[section])));
+
+  DB.save(STORAGE_KEY, site);
+  recordLocalWrite();
+  showToast("Settings saved and published.");
 }
 
 export function saveCommerce() {

@@ -598,10 +598,13 @@ export const settingsService = {
   },
 
   async updateWebsiteSettings(key, value) {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('website_settings')
-      .upsert({ key, value, updated_at: new Date().toISOString() });
+      .upsert({ key, value, updated_at: new Date().toISOString() })
+      .select('key')
+      .single();
     if (error) throw error;
+    if (!data) throw new Error(`Website setting '${key}' was not saved.`);
   }
 };
 
@@ -920,9 +923,12 @@ export const orderService = {
 
 export const storageService = {
   async uploadMedia(file, bucket, path) {
+    if (!(file instanceof File)) throw new Error("Choose a file before uploading.");
+    if (file.size === 0) throw new Error("The selected file is empty.");
+    if (file.size > 10 * 1024 * 1024) throw new Error("Files must be 10 MB or smaller.");
     const { data, error } = await supabase.storage
       .from(bucket)
-      .upload(path, file, { cacheControl: '3600', upsert: true });
+      .upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type || undefined });
     if (error) throw error;
 
     if (bucket === 'media-library') {

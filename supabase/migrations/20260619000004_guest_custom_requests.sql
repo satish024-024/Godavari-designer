@@ -24,6 +24,7 @@ ALTER TABLE public.custom_requests ADD CONSTRAINT custom_requests_status_check
 
 -- Replace RLS insert policy on custom_requests to allow anonymous/guest submissions
 DROP POLICY IF EXISTS "Allow users to create custom requests" ON public.custom_requests;
+DROP POLICY IF EXISTS "Allow public insert custom requests" ON public.custom_requests;
 
 CREATE POLICY "Allow public insert custom requests" ON public.custom_requests
   FOR INSERT TO public WITH CHECK (true);

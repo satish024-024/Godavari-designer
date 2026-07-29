@@ -63,17 +63,6 @@ import { renderCartDrawer } from "./components/CartDrawer.js";
 import { renderQuoteModal } from "./components/QuoteModal.js";
 import { renderStoryModal } from "./components/StoryModal.js";
 import { renderToast } from "./components/Toast.js";
-import {
-  renderAdminDrawer,
-  adminTab,
-  editingCategoryId,
-  isCreating,
-  targetParentId,
-  setAdminTab,
-  showCreateCategoryForm,
-  showEditCategoryForm,
-  cancelCategoryForm
-} from "./components/AdminDrawer.js";
 import { renderQuickViewModal } from "./components/QuickViewModal.js";
 import { renderBottomNavigation } from "./components/BottomNavigation.js";
 import { renderMobileDrawer } from "./components/MobileDrawer.js";
@@ -254,7 +243,6 @@ function render() {
         ${ui.cartOpen ? renderCartDrawer() : ""}
         ${ui.quoteOpen ? renderQuoteModal() : ""}
         ${ui.storyOpen ? renderStoryModal() : ""}
-        ${ui.adminOpen && currentUser && currentUser.role === "admin" ? renderAdminDrawer() : ""}
         ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
         ${renderToast()}
       </div>
