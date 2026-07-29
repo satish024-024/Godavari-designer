@@ -90,6 +90,12 @@ export function initRouter() {
 // ==========================================
 
 export function handleRouting() {
+  // Clean up form GET submission query pollution from window.location.search if present
+  if (window.location.search && (window.location.search.includes('title=') || window.location.search.includes('price=') || window.location.search.includes('code=') || window.location.search.includes('categoryId='))) {
+    const cleanUrl = window.location.pathname + (window.location.hash || '#/');
+    window.history.replaceState(null, '', cleanUrl);
+  }
+
   const hash = window.location.hash;
 
   // Parse OAuth parameters from hash if present

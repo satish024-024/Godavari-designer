@@ -527,7 +527,7 @@ function renderBulkImportForm() {
         </button>
       </div>
 
-      <form id="adminBulkImportForm" class="admin-form" action="javascript:void(0);" method="POST">
+      <form id="adminBulkImportForm" class="admin-form" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); return false;">
         <div style="grid-column: span 2;">
           <h2 class="admin-form-title">Bulk Upload & Import Designs</h2>
           <p style="font-size: 13px; color: rgba(17,29,66,0.5); margin: 0;">Upload multiple images at once. All designs will inherit the shared details entered below, and their codes will auto-increment.</p>
@@ -665,7 +665,7 @@ function renderProductsModule() {
           </button>
         </div>
 
-        <form id="adminProductForm" class="admin-form" action="javascript:void(0);" method="POST">
+        <form id="adminProductForm" class="admin-form" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); return false;">
           <input type="hidden" name="id" value="${p.id || ''}">
           
           <div style="grid-column: span 2;">
@@ -951,7 +951,7 @@ function renderCategoriesModule() {
           </button>
         </div>
 
-        <form id="adminCategoryForm" class="admin-form" action="javascript:void(0);" method="POST">
+        <form id="adminCategoryForm" class="admin-form" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); return false;">
           <input type="hidden" name="id" value="${c.id || ''}">
           <div>
             <h2 class="admin-form-title">${isEdit ? 'Edit Category' : 'Add New Category'}</h2>
@@ -1074,7 +1074,7 @@ function renderCollectionsModule() {
           </button>
         </div>
 
-        <form id="adminCollectionForm" class="admin-form" action="javascript:void(0);" method="POST">
+        <form id="adminCollectionForm" class="admin-form" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); return false;">
           <input type="hidden" name="id" value="${col.id || ''}">
           <div>
             <h2 class="admin-form-title">${isEdit ? 'Edit Collection' : 'Add New Collection'}</h2>
@@ -1833,7 +1833,7 @@ function renderTestimonialsModule() {
           </button>
         </div>
 
-        <form id="adminTestimonialForm" class="admin-form" action="javascript:void(0);" method="POST">
+        <form id="adminTestimonialForm" class="admin-form" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); return false;">
           <input type="hidden" name="id" value="${t.id || ''}">
           <div>
             <h2 class="admin-form-title">${isEdit ? 'Edit Testimonial' : 'Add New Testimonial'}</h2>
@@ -1938,7 +1938,7 @@ function renderFAQsModule() {
           </button>
         </div>
 
-        <form id="adminFaqForm" class="admin-form" action="javascript:void(0);" method="POST">
+        <form id="adminFaqForm" class="admin-form" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); return false;">
           <input type="hidden" name="id" value="${f.id || ''}">
           <div>
             <h2 class="admin-form-title">${isEdit ? 'Edit FAQ' : 'Add New FAQ'}</h2>
