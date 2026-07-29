@@ -3055,8 +3055,17 @@ export function initAdminDashboardDelegates() {
         
         const price = Number(formData.get("price") || 0);
         const title = (formData.get("title") || "").trim();
-        const code = (formData.get("code") || "").trim().toUpperCase();
-        const slug = (formData.get("slug") || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+        if (!title) {
+          throw new Error("Please enter a Design Title.");
+        }
+        let code = (formData.get("code") || "").trim().toUpperCase();
+        if (!code) {
+          code = `GD-${Math.floor(1000 + Math.random() * 9000)}`;
+        }
+        let slug = (formData.get("slug") || "").trim().toLowerCase().replace(/[^a-z0-9-]+/g, '-');
+        if (!slug) {
+          slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${code.toLowerCase()}`;
+        }
         
         const formatsCheckboxOptions = Array.from(form.querySelectorAll("input[name='formatOption']:checked")).map(el => el.value);
         
@@ -3109,7 +3118,7 @@ export function initAdminDashboardDelegates() {
           code,
           slug,
           price,
-          categoryId: formData.get("categoryId"),
+          categoryId: formData.get("categoryId") || null,
           collectionId: formData.get("collectionId") || null,
           description: (formData.get("description") || "").trim() || "Premium embroidery design.",
           backStitchCount,
