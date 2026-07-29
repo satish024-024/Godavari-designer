@@ -1090,6 +1090,13 @@ function renderCollectionsModule() {
             <input type="text" id="colSlug" name="slug" value="${isEdit ? escapeHtml(col.slug) : ''}" required class="admin-form-control" placeholder="e.g. bridal">
           </div>
 
+          <div class="admin-form-group">
+            <label class="admin-form-label" for="colCategoryId">Linked Category <span style="font-size:11px;color:var(--ink-soft);font-weight:400;">(used to filter collections in product form)</span></label>
+            <select id="colCategoryId" name="categoryId" class="admin-form-control">
+              <option value="">— No specific category (universal) —</option>
+              ${getCategories().map(c => `<option value="${c.id}" ${isEdit && col.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+            </select>
+          </div>
           <div class="admin-form-group" style="grid-column: span 2;">
             <label class="admin-form-label" for="colDescription">Description</label>
             <textarea id="colDescription" name="description" rows="3" class="admin-form-control" placeholder="Description...">${isEdit ? escapeHtml(col.description || "") : ''}</textarea>
@@ -3277,7 +3284,8 @@ export function initAdminDashboardDelegates() {
           description: (formData.get("description") || "").trim() || "Premium embroidery collection.",
           image: imageUrl,
           displayOrder: parseInt(formData.get("displayOrder") || 1, 10) || 1,
-          featured: !!form.querySelector("#colFeatured")?.checked
+          featured: !!form.querySelector("#colFeatured")?.checked,
+          categoryId: formData.get("categoryId") || null
         };
 
         console.log("Admin: Saving collection payload to Supabase:", payload);
