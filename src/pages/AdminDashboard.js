@@ -675,27 +675,27 @@ function renderProductsModule() {
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodTitle">Design Title</label>
-            <input type="text" id="prodTitle" name="title" value="${isEdit ? escapeHtml(p.title) : ''}" required class="admin-form-control" placeholder="e.g. Royal Peony Floral">
+            <input type="text" id="prodTitle" name="title" value="${isEdit ? escapeHtml(p.title) : ''}" class="admin-form-control" placeholder="e.g. Royal Peony Floral">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodCode">Design Code</label>
-            <input type="text" id="prodCode" name="code" value="${isEdit ? escapeHtml(p.code) : ''}" required class="admin-form-control" placeholder="e.g. JC-1028">
+            <input type="text" id="prodCode" name="code" value="${isEdit ? escapeHtml(p.code) : ''}" class="admin-form-control" placeholder="e.g. JC-1028">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodSlug">URL Slug</label>
-            <input type="text" id="prodSlug" name="slug" value="${isEdit ? escapeHtml(p.slug) : ''}" required class="admin-form-control" placeholder="e.g. royal-peony-floral">
+            <input type="text" id="prodSlug" name="slug" value="${isEdit ? escapeHtml(p.slug) : ''}" class="admin-form-control" placeholder="e.g. royal-peony-floral">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodPrice">Price ($)</label>
-            <input type="number" id="prodPrice" name="price" value="${isEdit ? p.price : ''}" required class="admin-form-control" placeholder="e.g. 45">
+            <input type="number" id="prodPrice" name="price" value="${isEdit ? p.price : ''}" class="admin-form-control" placeholder="e.g. 45">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodCategoryId">Category</label>
-            <select id="prodCategoryId" name="categoryId" required class="admin-form-control" data-filters-collection="prodCollectionId">
+            <select id="prodCategoryId" name="categoryId" class="admin-form-control" data-filters-collection="prodCollectionId">
               <option value="">Select Category</option>
               ${cats.map(c => `<option value="${c.id}" ${isEdit && p.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
             </select>
@@ -741,12 +741,12 @@ function renderProductsModule() {
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="formBackStitches">Back Stitch Count</label>
-            <input type="number" id="formBackStitches" name="backStitchCount" value="${isEdit ? (p.backStitchCount || 0) : 0}" required class="admin-form-control">
+            <input type="number" id="formBackStitches" name="backStitchCount" value="${isEdit ? (p.backStitchCount || 0) : 0}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="formHandsStitches">Hands Stitch Count</label>
-            <input type="number" id="formHandsStitches" name="handStitchCount" value="${isEdit ? (p.handStitchCount || 0) : 0}" required class="admin-form-control">
+            <input type="number" id="formHandsStitches" name="handStitchCount" value="${isEdit ? (p.handStitchCount || 0) : 0}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
@@ -756,12 +756,12 @@ function renderProductsModule() {
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="formRpm">Default Running Speed (RPM)</label>
-            <input type="number" id="formRpm" name="rpm" value="${isEdit ? (p.rpm || 850) : 850}" required class="admin-form-control">
+            <input type="number" id="formRpm" name="rpm" value="${isEdit ? (p.rpm || 850) : 850}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="formColors">Thread Colors Count</label>
-            <input type="number" id="formColors" name="threadColors" value="${isEdit ? (p.threadColors || 0) : 0}" required class="admin-form-control">
+            <input type="number" id="formColors" name="threadColors" value="${isEdit ? (p.threadColors || 0) : 0}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
@@ -801,12 +801,12 @@ function renderProductsModule() {
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodWidth">Width (mm)</label>
-            <input type="number" id="prodWidth" name="width" value="${isEdit ? (p.width || 100) : 100}" required class="admin-form-control">
+            <input type="number" id="prodWidth" name="width" value="${isEdit ? (p.width || 100) : 100}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodHeight">Height (mm)</label>
-            <input type="number" id="prodHeight" name="height" value="${isEdit ? (p.height || 100) : 100}" required class="admin-form-control">
+            <input type="number" id="prodHeight" name="height" value="${isEdit ? (p.height || 100) : 100}" class="admin-form-control">
           </div>
 
           <div class="admin-form-group">
@@ -3019,8 +3019,18 @@ export function initAdminDashboardDelegates() {
       const formData = new FormData(form);
       const id = formData.get("id");
 
+      let activeAdmin = currentUser && currentUser.role === 'admin';
+      if (!activeAdmin) {
+        try {
+          const liveUser = await authService.getCurrentUser();
+          if (liveUser && liveUser.role === 'admin') {
+            activeAdmin = true;
+          }
+        } catch(e) {}
+      }
+
       // Role guard: block early with a clear message instead of silent RLS failure
-      if (!currentUser || currentUser.role !== 'admin') {
+      if (!activeAdmin) {
         const errDiv = document.createElement('div');
         errDiv.className = 'admin-form-inline-error';
         errDiv.style.cssText = 'background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#dc2626;font-size:13px;font-weight:500;';
