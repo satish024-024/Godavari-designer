@@ -68,6 +68,7 @@ function mapCollectionFromDB(c) {
     bannerImage: c.banner_image,
     featured: c.featured,
     displayOrder: c.display_order,
+    categoryId: c.category_id || null,
     seoTitle: c.seo_title,
     seoDescription: c.seo_description,
     createdAt: c.created_at,
@@ -84,6 +85,7 @@ function mapCollectionToDB(c) {
     banner_image: c.bannerImage || c.image || null,
     featured: !!c.featured,
     display_order: parseInt(c.displayOrder || 1),
+    category_id: c.categoryId || null,
     seo_title: c.seoTitle || null,
     seo_description: c.seoDescription || null
   };

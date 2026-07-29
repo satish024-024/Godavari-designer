@@ -504,7 +504,7 @@ function renderBulkImportForm() {
   const cats = getCategories();
   const collections = site.collections || [];
   const categoryOptions = cats.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join("");
-  const collectionOptions = `<option value="">None</option>` + collections.map(col => `<option value="${col.id}">${escapeHtml(col.name)}</option>`).join("");
+  const collectionOptions = `<option value="">None</option>` + collections.map(col => `<option value="${col.id}" data-category-id="${col.categoryId || ''}">${escapeHtml(col.title || col.name || '')}</option>`).join("");
   
   // Find highest existing code number in site.products
   let highestCodeNumber = 2000;
@@ -540,7 +540,7 @@ function renderBulkImportForm() {
 
         <div class="admin-form-group">
           <label class="admin-form-label" for="bulkCategoryId">Category</label>
-          <select id="bulkCategoryId" name="categoryId" required class="admin-form-control">
+          <select id="bulkCategoryId" name="categoryId" required class="admin-form-control" data-filters-collection="bulkCollectionId">
             ${categoryOptions}
           </select>
         </div>
@@ -695,7 +695,7 @@ function renderProductsModule() {
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodCategoryId">Category</label>
-            <select id="prodCategoryId" name="categoryId" required class="admin-form-control">
+            <select id="prodCategoryId" name="categoryId" required class="admin-form-control" data-filters-collection="prodCollectionId">
               <option value="">Select Category</option>
               ${cats.map(c => `<option value="${c.id}" ${isEdit && p.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
             </select>
@@ -705,7 +705,7 @@ function renderProductsModule() {
             <label class="admin-form-label" for="prodCollectionId">Collection (Optional)</label>
             <select id="prodCollectionId" name="collectionId" class="admin-form-control">
               <option value="">None</option>
-              ${site.collections.map(col => `<option value="${col.id}" ${isEdit && p.collectionId === col.id ? 'selected' : ''}>${escapeHtml(col.title)}</option>`).join('')}
+              ${site.collections.map(col => `<option value="${col.id}" data-category-id="${col.categoryId || ''}" ${isEdit && p.collectionId === col.id ? 'selected' : ''}>${escapeHtml(col.title || '')}</option>`).join('')}
             </select>
           </div>
 
@@ -2291,7 +2291,35 @@ export function initAdminDashboardDelegates() {
       productFilterCategory = e.target.value;
       triggerRender();
     }
-    
+
+    // Dynamic collection filtering: when category select changes, filter collection dropdown
+    if (e.target.dataset.filtersCollection) {
+      const collectionSelectId = e.target.dataset.filtersCollection;
+      const collectionSelect = document.getElementById(collectionSelectId);
+      const selectedCategoryId = e.target.value;
+      if (collectionSelect) {
+        Array.from(collectionSelect.options).forEach(opt => {
+          if (!opt.value) {
+            // Always show the "None" option
+            opt.style.display = "";
+            return;
+          }
+          const optCatId = opt.dataset.categoryId || "";
+          // Show if no categoryId set on collection (unlinked = universal) OR matches selected category
+          opt.style.display = (!optCatId || optCatId === selectedCategoryId || !selectedCategoryId) ? "" : "none";
+        });
+        // Reset to "None" if currently selected collection doesn't match new category
+        const currentOpt = collectionSelect.options[collectionSelect.selectedIndex];
+        if (currentOpt && currentOpt.value) {
+          const currentCatId = currentOpt.dataset.categoryId || "";
+          if (currentCatId && currentCatId !== selectedCategoryId) {
+            collectionSelect.value = "";
+          }
+        }
+      }
+    }
+
+
     // Category Image File Preview
     if (e.target.id === "categoryImageFile") {
       const file = e.target.files[0];
