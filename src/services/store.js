@@ -199,6 +199,63 @@ export async function processPendingCartItem() {
   }
 }
 
+export async function processPendingBuyNow() {
+  try {
+    const pendingJson = sessionStorage.getItem("godavari_pending_buy_now");
+    if (pendingJson) {
+      const data = JSON.parse(pendingJson);
+      sessionStorage.removeItem("godavari_pending_buy_now");
+      if (data && data.productId) {
+        setTimeout(async () => {
+          const { openPreCheckout } = await import("./paymentService.js");
+          const p = site.products.find(x => x.id === data.productId);
+          if (p) {
+            openPreCheckout(p);
+          }
+        }, 300);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to process pending buy now:", e);
+  }
+}
+
+export function getPostAuthRedirect(user) {
+  if (user && user.role === 'admin') {
+    return '#/admin-dashboard';
+  }
+  const pendingBuyNow = sessionStorage.getItem("godavari_pending_buy_now");
+  if (pendingBuyNow) {
+    try {
+      const data = JSON.parse(pendingBuyNow);
+      sessionStorage.removeItem("godavari_pending_buy_now");
+      if (data.returnUrl && data.returnUrl !== '#/auth') {
+        if (data.productId) {
+          setTimeout(async () => {
+            const { openPreCheckout } = await import("./paymentService.js");
+            const p = site.products.find(x => x.id === data.productId);
+            if (p) openPreCheckout(p);
+          }, 350);
+        }
+        return data.returnUrl;
+      }
+    } catch (_) {}
+  }
+
+  const pendingCheckout = sessionStorage.getItem("godavari_pending_checkout");
+  if (pendingCheckout) {
+    sessionStorage.removeItem("godavari_pending_checkout");
+    return '#/checkout';
+  }
+
+  const pendingCart = sessionStorage.getItem("godavari_pending_cart_item");
+  if (pendingCart) {
+    return '#/cart';
+  }
+
+  return '#/account';
+}
+
 export async function initAuth() {
   initSupabase(true);
   authLoading = true;
@@ -256,7 +313,7 @@ export async function initAuth() {
                                currentHash.includes('error_description');
           if (isOnAuthPage && user) {
             setTimeout(() => {
-              window.location.hash = user.role === 'admin' ? '#/admin-dashboard' : '#/account';
+              window.location.hash = getPostAuthRedirect(user);
             }, 100);
           }
         }
@@ -552,7 +609,7 @@ export async function loginWithPhoneOtp(phone, otp) {
     showToast(`Welcome, ${user.name}!`);
     await processPendingCartItem();
     triggerRender();
-    window.location.hash = '#/account';
+    window.location.hash = getPostAuthRedirect(user);
     return true;
   } catch (err) {
     showToast(err.message || "Invalid OTP verification code");
@@ -569,12 +626,7 @@ export async function login(email, password) {
     showToast(`Welcome back, ${user.name}`);
     await processPendingCartItem();
     triggerRender();
-    // Role-based redirect
-    if (user.role === 'admin') {
-      window.location.hash = '#/admin-dashboard';
-    } else {
-      window.location.hash = '#/account';
-    }
+    window.location.hash = getPostAuthRedirect(user);
     return true;
   } catch (error) {
     // Check if the user exists but is registered with Google OAuth
@@ -611,12 +663,7 @@ export async function register(email, password, name, phone, addressFields = {})
     showToast(`Account created! Welcome, ${user.name}`);
     await processPendingCartItem();
     triggerRender();
-    // Role-based redirect
-    if (user.role === 'admin') {
-      window.location.hash = '#/admin-dashboard';
-    } else {
-      window.location.hash = '#/account';
-    }
+    window.location.hash = getPostAuthRedirect(user);
     return true;
   } catch (error) {
     // Check if the user exists but is registered with Google OAuth

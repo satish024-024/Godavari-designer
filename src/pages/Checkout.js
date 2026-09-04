@@ -150,6 +150,31 @@ Please confirm my order.`;
     `;
   }
 
+  // Require authentication to checkout
+  if (!currentUser && !submissionResult) {
+    sessionStorage.setItem("godavari_pending_checkout", "true");
+    return `
+      <section class="content-section checkout-auth-section" style="padding: 100px 24px; text-align: center; background: var(--ivory); min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+        <div style="max-width: 480px; width: 100%; margin: 0 auto; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 40px 32px; box-shadow: var(--shadow-card); display: grid; gap: 16px; justify-items: center;">
+          <div style="width: 72px; height: 72px; border-radius: 50%; background: rgba(17,29,66,0.06); display: flex; align-items: center; justify-content: center; color: var(--navy);">
+            ${icon("user-check", 32)}
+          </div>
+          <h1 style="font-family: var(--font-serif); font-size: 26px; color: var(--navy); font-weight: 700; margin: 0;">Sign In Required to Checkout</h1>
+          <p style="color: var(--ink-soft); font-size: 14px; line-height: 1.6; margin: 0;">
+            To ensure your digitized machine files (.DST & .PES) are permanently saved to your account with lifetime download access, please sign in or register before completing your order.
+          </p>
+          <a href="#/auth" class="button button-primary" style="margin-top: 8px; width: 100%; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;">
+            <span>Sign In / Create Account</span>
+            ${icon("arrow-right", 18)}
+          </a>
+          <a href="#/cart" class="button button-secondary" style="width: 100%; min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px;">
+            ${icon("arrow-left", 14)} Back to Cart
+          </a>
+        </div>
+      </section>
+    `;
+  }
+
   // Redirect if cart is empty
   if (!cart || cart.length === 0) {
     return `
@@ -340,6 +365,14 @@ export function initCheckoutEvents() {
   document.addEventListener("submit", async (e) => {
     if (e.target.id === "checkoutSubmitForm") {
       e.preventDefault();
+
+      if (!currentUser) {
+        showToast("Please sign in or register to place your order.");
+        sessionStorage.setItem("godavari_pending_checkout", "true");
+        window.location.hash = "#/auth";
+        return;
+      }
+
       const formData = new FormData(e.target);
       
       const submitBtn = e.target.querySelector("button[type='submit']");

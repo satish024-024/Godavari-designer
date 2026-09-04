@@ -658,12 +658,8 @@ export function initAuthDelegates() {
           isSubmitting = false;
           if (success) {
             showToast("Welcome to Godavari Designers!");
-            const hasPending = sessionStorage.getItem("godavari_pending_cart_item");
-            if (hasPending) {
-              window.location.hash = "#/cart";
-            } else {
-              window.location.hash = "#/account";
-            }
+            const { currentUser, getPostAuthRedirect } = await import("../services/store.js");
+            window.location.hash = getPostAuthRedirect(currentUser);
           } else {
             authError = "Invalid verification code. Please enter 123456 or request a new code.";
             triggerRender();
@@ -694,19 +690,8 @@ export function initAuthDelegates() {
       isSubmitting = false;
 
       if (success) {
-        // Redirect: If Admin -> admin portal, else customer account
-        const { currentUser } = await import("../services/store.js");
-        if (currentUser && currentUser.role === "admin") {
-          window.location.hash = "#/admin-dashboard";
-        } else {
-          // Redirect straight to cart page if they signed in to check out a pending item
-          const hasPending = sessionStorage.getItem("godavari_pending_cart_item");
-          if (hasPending) {
-            window.location.hash = "#/cart";
-          } else {
-            window.location.hash = "#/account";
-          }
-        }
+        const { currentUser, getPostAuthRedirect } = await import("../services/store.js");
+        window.location.hash = getPostAuthRedirect(currentUser);
       } else {
         authError = "Invalid email or password. New user? Please click 'Create Account' below to sign up first.";
         triggerRender();
@@ -748,13 +733,8 @@ export function initAuthDelegates() {
       isSubmitting = false;
 
       if (success) {
-        // Redirect back to the website homepage or cart page on first time signup
-        const hasPending = sessionStorage.getItem("godavari_pending_cart_item");
-        if (hasPending) {
-          window.location.hash = "#/cart";
-        } else {
-          window.location.hash = "#/";
-        }
+        const { currentUser, getPostAuthRedirect } = await import("../services/store.js");
+        window.location.hash = getPostAuthRedirect(currentUser);
       } else {
         authError = "Registration failed. Email might already be registered.";
         triggerRender();

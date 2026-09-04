@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Godavari Designers - Production Payment Service
  * Manages Razorpay Standard Checkout, lifecycle states, and server verification.
  */
@@ -79,6 +79,15 @@ export function loadRazorpayScript() {
  */
 export function openPreCheckout(product) {
   if (!product) return;
+  if (!currentUser) {
+    sessionStorage.setItem("godavari_pending_buy_now", JSON.stringify({
+      productId: product.id,
+      returnUrl: window.location.hash || ""
+    }));
+    showToast("Please sign in or register to purchase designs.");
+    window.location.hash = "#/auth";
+    return;
+  }
   paymentContext.product = product;
   paymentContext.productId = product.id;
   paymentContext.amount = Number(product.price);
@@ -129,6 +138,16 @@ function getGuestSessionId() {
 export async function initiatePayment(productId) {
   if (!productId) {
     showToast("Invalid design selection");
+    return;
+  }
+
+  if (!currentUser) {
+    sessionStorage.setItem("godavari_pending_buy_now", JSON.stringify({
+      productId,
+      returnUrl: window.location.hash || ""
+    }));
+    showToast("Please sign in or register to purchase designs.");
+    window.location.hash = "#/auth";
     return;
   }
 

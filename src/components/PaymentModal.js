@@ -5,7 +5,7 @@
  */
 
 import { paymentContext, PaymentState, initiatePayment, closePreCheckout, openPreCheckout } from "../services/paymentService.js";
-import { site } from "../services/store.js";
+import { site, currentUser, showToast } from "../services/store.js";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 export function renderPaymentModal() {
@@ -77,6 +77,17 @@ export function renderPaymentModal() {
             </div>
           </div>
 
+          <!-- Logged-in Account Banner -->
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(17,29,66,0.04); border: 1px solid var(--border, #e6ded1); border-radius: 8px; padding: 8px 12px; font-size: 11.5px; color: var(--navy, #111d42);">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              ${icon("user-check", 14)}
+              <span>Purchasing as:</span>
+            </span>
+            <strong style="font-weight: 700; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              ${escapeHtml(currentUser?.email || currentUser?.phone || currentUser?.name || "Godavari Member")}
+            </strong>
+          </div>
+
           <!-- Razorpay Security Badge -->
           <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 11.5px; color: var(--ink-soft, rgba(17,29,66,0.72));">
             ${icon("shield-check", 16)}
@@ -141,6 +152,18 @@ export function initPaymentModalDelegates() {
  */
 export function openPaymentModal(options = {}) {
   if (!options) return;
+
+  if (!currentUser) {
+    const firstId = options.productId || (options.items && options.items[0]?.productId) || (options.items && options.items[0]?.id);
+    sessionStorage.setItem("godavari_pending_buy_now", JSON.stringify({
+      productId: firstId,
+      returnUrl: window.location.hash || ""
+    }));
+    showToast("Please sign in or register to complete your purchase.");
+    window.location.hash = "#/auth";
+    return;
+  }
+
   let product = null;
   if (options.productId) {
     product = site.products?.find(p => p.id === options.productId);

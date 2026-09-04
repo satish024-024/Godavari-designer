@@ -1027,10 +1027,21 @@ document.addEventListener("click", (event) => {
     window.open(whatsappUrl, "_blank");
   }
 
-  // Buy Now via Razorpay Standard Architecture
+  // Buy Now via Razorpay Standard Architecture (Requires Authentication)
   if (action === "buy-now") {
     const id = trigger.dataset.id;
     const p = site.products.find(x => x.id === id);
+
+    if (!currentUser) {
+      sessionStorage.setItem("godavari_pending_buy_now", JSON.stringify({
+        productId: id,
+        returnUrl: window.location.hash || ""
+      }));
+      showToast("Please sign in or register to purchase designs.");
+      window.location.hash = "#/auth";
+      return;
+    }
+
     if (p) {
       openPreCheckout(p);
     } else if (id) {
@@ -1039,8 +1050,14 @@ document.addEventListener("click", (event) => {
     return;
   }
 
-  // 1-Click Cart Instant Pay via PhonePe / UPI
+  // 1-Click Cart Instant Pay via Razorpay (Requires Authentication)
   if (action === "cart-instant-pay") {
+    if (!currentUser) {
+      sessionStorage.setItem("godavari_pending_checkout", "true");
+      showToast("Please sign in or register to complete your purchase.");
+      window.location.hash = "#/auth";
+      return;
+    }
     if (!cart || cart.length === 0) {
       showToast("Your cart is empty");
       return;
