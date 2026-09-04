@@ -1,5 +1,5 @@
-import { consumeDownloadGrant } from "../lib/crypto.js";
-import { getProductById, atomicIncrementDownloadCount, checkActiveEntitlement } from "../lib/supabase.js";
+import { consumeDownloadGrant } from "../.../lib/crypto.js";
+import { getProductById, atomicIncrementDownloadCount, checkActiveEntitlement } from "../.../lib/supabase.js";
 
 function generateDstFileBuffer(product) {
   const code = (product.code || "GD-DESIGN").replace(/[^a-zA-Z0-9_-]/g, "");

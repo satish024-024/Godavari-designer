@@ -1,6 +1,6 @@
-import { config, assertProductionSafety } from "../lib/config.js";
-import { verifyRazorpayWebhookSignature } from "../lib/razorpay.js";
-import { getPurchaseByOrderId, updatePurchase, activatePurchaseEntitlement, recordWebhookEvent } from "../lib/supabase.js";
+import { config, assertProductionSafety } from "../../lib/config.js";
+import { verifyRazorpayWebhookSignature } from "../../lib/razorpay.js";
+import { getPurchaseByOrderId, updatePurchase, activatePurchaseEntitlement, recordWebhookEvent } from "../../lib/supabase.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {

@@ -1,5 +1,5 @@
-﻿import { getPurchaseById, getPurchaseByOrderId, getProductById } from "../lib/supabase.js";
-import { config } from "../lib/config.js";
+import { getPurchaseById, getPurchaseByOrderId, getProductById } from "../../lib/supabase.js";
+import { config } from "../../lib/config.js";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");

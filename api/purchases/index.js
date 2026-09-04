@@ -1,5 +1,5 @@
-import { getUserFromAuthHeader } from "../lib/supabase.js";
-import { config } from "../lib/config.js";
+import { getUserFromAuthHeader } from "../../lib/supabase.js";
+import { config } from "../../lib/config.js";
 
 const baseUrl = config.supabase.url.replace(/\/$/, "");
 const authHeaderKey = config.supabase.serviceRoleKey || config.supabase.anonKey;

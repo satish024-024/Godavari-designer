@@ -1,6 +1,6 @@
-﻿import { getUserFromAuthHeader, updatePurchase } from "../lib/supabase.js";
-import { hashGuestToken } from "../lib/crypto.js";
-import { config } from "../lib/config.js";
+import { getUserFromAuthHeader, updatePurchase } from "../../lib/supabase.js";
+import { hashGuestToken } from "../../lib/crypto.js";
+import { config } from "../../lib/config.js";
 
 const baseUrl = config.supabase.url.replace(/\/$/, "");
 const authHeaderKey = config.supabase.serviceRoleKey || config.supabase.anonKey;

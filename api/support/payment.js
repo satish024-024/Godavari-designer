@@ -1,6 +1,6 @@
-import { getPurchaseByOrderId, getPurchaseById, activatePurchaseEntitlement, getUserFromAuthHeader } from "../lib/supabase.js";
-import { fetchRazorpayPayment, fetchRazorpayOrder } from "../lib/razorpay.js";
-import { config } from "../lib/config.js";
+import { getPurchaseByOrderId, getPurchaseById, activatePurchaseEntitlement, getUserFromAuthHeader } from "../../lib/supabase.js";
+import { fetchRazorpayPayment, fetchRazorpayOrder } from "../../lib/razorpay.js";
+import { config } from "../../lib/config.js";
 
 const baseUrl = config.supabase.url.replace(/\/$/, "");
 const authHeaderKey = config.supabase.serviceRoleKey || config.supabase.anonKey;

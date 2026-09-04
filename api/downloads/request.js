@@ -1,5 +1,5 @@
-﻿import { checkActiveEntitlement, getUserFromAuthHeader, getProductById } from "../lib/supabase.js";
-import { hashGuestToken, createDownloadGrant } from "../lib/crypto.js";
+import { checkActiveEntitlement, getUserFromAuthHeader, getProductById } from "../../lib/supabase.js";
+import { hashGuestToken, createDownloadGrant } from "../../lib/crypto.js";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");

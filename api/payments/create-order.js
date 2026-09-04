@@ -1,6 +1,6 @@
-import { config, isRazorpayConfigured, assertProductionSafety } from "../lib/config.js";
-import { getProductById, getRecentPendingPurchase, createPurchase, checkActiveEntitlement, getUserFromAuthHeader } from "../lib/supabase.js";
-import { createRazorpayOrder } from "../lib/razorpay.js";
+import { config, isRazorpayConfigured, assertProductionSafety } from "../../lib/config.js";
+import { getProductById, getRecentPendingPurchase, createPurchase, checkActiveEntitlement, getUserFromAuthHeader } from "../../lib/supabase.js";
+import { createRazorpayOrder } from "../../lib/razorpay.js";
 
 export default async function handler(req, res) {
   // Allow CORS

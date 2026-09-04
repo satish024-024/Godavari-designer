@@ -1,7 +1,7 @@
-import { config, assertProductionSafety } from "../lib/config.js";
-import { getPurchaseByOrderId, getPurchaseById, activatePurchaseEntitlement, updatePurchase, getUserFromAuthHeader } from "../lib/supabase.js";
-import { fetchRazorpayPayment, fetchRazorpayOrder, verifyRazorpaySignature } from "../lib/razorpay.js";
-import { generateGuestToken, hashGuestToken } from "../lib/crypto.js";
+import { config, assertProductionSafety } from "../../lib/config.js";
+import { getPurchaseByOrderId, getPurchaseById, activatePurchaseEntitlement, updatePurchase, getUserFromAuthHeader } from "../../lib/supabase.js";
+import { fetchRazorpayPayment, fetchRazorpayOrder, verifyRazorpaySignature } from "../../lib/razorpay.js";
+import { generateGuestToken, hashGuestToken } from "../../lib/crypto.js";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
