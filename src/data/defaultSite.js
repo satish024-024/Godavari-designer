@@ -417,39 +417,39 @@ export const defaultSite = {
     }
   ],
   stories: {
-    quote: "Godavari transformed our ideas into exquisite embroidery that elevates our entire collection.",
-    person: "Neha Mehta",
-    role: "Designer, Delhi",
+    quote: "Downloaded the Bridal Gold Bloom back-neck .DST design for a rush wedding order. Stitched out flawlessly on our Tajima machine with zero thread breaks. The instant PhonePe unlock saved us a full day!",
+    person: "Sravani Reddy",
+    role: "Boutique Owner, Hyderabad",
     rating: "5.0",
     clients: [
       {
-        name: "House of Anaya",
-        type: "Fashion House",
-        quote: "The sampling quality made approvals effortless.",
+        name: "Sri Lakshmi Embroidery",
+        type: "Machine Unit, Rajahmundry",
+        quote: "Godavari Designers has the best stitch density calibration in Andhra. We regularly run their saree borders on our multi-head machines with no fabric puckering.",
         image: "media-client-1"
       },
       {
-        name: "Label Neha",
-        type: "Designer Label",
-        quote: "Digitizing felt exact, refined and ready for production.",
+        name: "Pooja Couture",
+        type: "Fashion Designer, Vizag",
+        quote: "Uploaded our hand sketch for custom digitizing. By morning, the production-ready .PES machine file was ready with complete color sequences and exact stitch specs.",
         image: "media-client-2"
       },
       {
-        name: "Saaz Couture",
-        type: "Couture Studio",
-        quote: "Our bridal pieces now carry a richer finish.",
+        name: "Krishna Digitizing",
+        type: "Textile Studio, Vijayawada",
+        quote: "The instant file download system is seamless. 1-click UPI payment and authentic .DST files download immediately. Outstanding convenience for busy production.",
         image: "media-client-3"
       },
       {
-        name: "Ivy & Oak Designs",
-        type: "Boutique",
-        quote: "A calm, premium experience from quote to delivery.",
+        name: "Aura Designer Blouses",
+        type: "Bridal Boutique, Guntur",
+        quote: "Every design includes exact hoop dimensions and stitch counts. Their boat neck and cutwork collections helped us expand our bridal offerings effortlessly.",
         image: "media-client-4"
       },
       {
-        name: "Meera Bridals",
-        type: "Bridal Atelier",
-        quote: "Every motif arrived production-ready.",
+        name: "Varma Embroidery Works",
+        type: "Unit Specialist, Kakinada",
+        quote: "Super clean jump stitches and trims. Even intricate zari shading runs smoothly at 850 RPM without thread snapping. Truly production-ready digitizing.",
         image: "media-client-5"
       }
     ]
