@@ -331,23 +331,20 @@ select:focus-visible {
   display: flex;
   min-height: 100svh;
   overflow: hidden;
-  background: var(--ivory);
+  background: #0c1120;
   z-index: 1;
 }
 
-.hero-media,
-.hero-media img,
-.hero-media video,
-.hero-veil {
+.hero-media {
   position: absolute;
   inset: 0;
-}
-
-.hero-media {
-  z-index: -3;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   transform:
-    scale(1.06)
-    translate3d(calc(var(--mouse-x) * -18px), calc(var(--mouse-y) * -16px), 0);
+    scale(1.04)
+    translate3d(calc(var(--mouse-x) * -14px), calc(var(--mouse-y) * -12px), 0);
   transition: transform 600ms ease;
 }
 
@@ -356,31 +353,37 @@ select:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-.hero-video {
-  z-index: 2;
-}
-
-.hero-video-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  z-index: 3;
-  pointer-events: none;
+  object-position: right center;
 }
 
 .hero-poster {
-  filter: saturate(0.94) contrast(1.04);
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  filter: saturate(0.95) contrast(1.05);
+}
+
+.hero-video {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
 }
 
 .hero-veil {
   position: absolute;
   inset: 0;
-  z-index: -2;
+  z-index: 3;
   background: linear-gradient(
     90deg,
-    rgba(12, 17, 32, 0.86) 0%,
+    rgba(12, 17, 32, 0.88) 0%,
     rgba(12, 17, 32, 0.72) 36%,
     rgba(12, 17, 32, 0.35) 65%,
     rgba(12, 17, 32, 0.08) 100%
@@ -395,12 +398,12 @@ select:focus-visible {
   height: 120px;
   background: linear-gradient(180deg, rgba(12, 17, 32, 0) 0%, var(--ivory) 100%);
   pointer-events: none;
-  z-index: 2;
+  z-index: 4;
 }
 
 .hero-inner {
   position: relative;
-  z-index: 3;
+  z-index: 6;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -5965,10 +5968,14 @@ main:has(.admin-shell) {
     }
   }
 
-  /* Soft luminous veil on mobile */
+  /* Directional/vertical overlay for mobile: text clearly readable while embroidery video plays */
   .hero-veil {
-    background: 
-      linear-gradient(180deg, rgba(248, 246, 242, 0.92) 0%, rgba(248, 246, 242, 0.70) 50%, rgba(248, 246, 242, 0.94) 100%) !important;
+    background: linear-gradient(
+      180deg,
+      rgba(12, 17, 32, 0.88) 0%,
+      rgba(12, 17, 32, 0.65) 45%,
+      rgba(12, 17, 32, 0.92) 100%
+    ) !important;
   }
 
   .hero-inner {
@@ -5976,117 +5983,69 @@ main:has(.admin-shell) {
     flex-direction: column !important;
     justify-content: center !important;
     align-items: center !important;
-    padding: calc(var(--header-height) + 16px) 14px 36px !important;
+    padding: calc(var(--header-height) + 16px) 18px 40px !important;
     min-height: 100svh !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
 
-  .hero-copy {
-    text-align: center !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    transform: none !important;
-  }
-
-  .hero-card-atelier {
-    padding: 22px 16px !important;
-    border-radius: 20px !important;
-    background: rgba(255, 255, 255, 0.94) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-    box-shadow: 0 16px 40px rgba(17, 29, 66, 0.1) !important;
-  }
-
-  .hero-badge-pill {
-    margin: 0 auto 14px !important;
-    font-size: 10px !important;
-    padding: 5px 12px !important;
-  }
-
-  .hero-brand-lockup {
-    flex-direction: column !important;
-    text-align: center !important;
-    gap: 10px !important;
-    margin-bottom: 12px !important;
-  }
-
-  .hero-emblem {
-    width: 50px !important;
-    height: 50px !important;
-    margin: 0 auto !important;
-  }
-
-  .hero-title-group {
+  .hero-content {
     align-items: center !important;
     text-align: center !important;
-  }
-
-  .hero-eyebrow {
-    font-size: 10px !important;
-    margin-bottom: 4px !important;
-  }
-
-  .hero-title,
-  .hero h1 {
-    font-size: clamp(26px, 7.5vw, 36px) !important;
-    line-height: 1.18 !important;
-    text-align: center !important;
-    color: var(--navy) !important;
-  }
-
-  .hero-subtitle {
-    display: block !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #1a2238 !important;
-    line-height: 1.5 !important;
-    margin: 0 auto 10px !important;
-    text-align: center !important;
+    width: 100% !important;
     max-width: 100% !important;
   }
 
-  .hero-lead {
-    font-size: 12.5px !important;
-    color: #4b5563 !important;
+  .hero-eyebrow-pill {
+    margin: 0 auto 16px !important;
+    padding: 5px 14px !important;
+  }
+
+  .hero-brand-mark {
+    font-size: 13.5px !important;
+  }
+
+  .hero-pill-text {
+    font-size: 10px !important;
+  }
+
+  .hero-headline {
+    font-size: clamp(34px, 8.8vw, 46px) !important;
+    line-height: 1.12 !important;
+    text-align: center !important;
+    margin-bottom: 14px !important;
+    color: #ffffff !important;
+  }
+
+  .hero-description {
+    font-size: 14.5px !important;
     line-height: 1.55 !important;
-    margin: 0 auto 14px !important;
+    color: rgba(255, 255, 255, 0.88) !important;
     text-align: center !important;
-  }
-
-  .hero-formats-wrap {
-    justify-content: center !important;
-    padding: 6px 10px !important;
-    margin-bottom: 16px !important;
-    gap: 6px !important;
+    margin: 0 auto 24px !important;
+    max-width: 480px !important;
   }
 
   .hero-actions {
     flex-direction: column !important;
-    gap: 10px !important;
     width: 100% !important;
-    margin-bottom: 16px !important;
+    gap: 12px !important;
+    margin-bottom: 24px !important;
   }
 
   .hero-btn-primary,
-  .hero-btn-secondary,
-  .hero-btn-whatsapp {
+  .hero-btn-secondary {
     width: 100% !important;
     min-height: 48px !important;
-    font-size: 14px !important;
+    font-size: 14.5px !important;
     justify-content: center !important;
   }
 
-  .hero-meta-refined {
+  .hero-trust-bar {
     justify-content: center !important;
     gap: 8px !important;
-    font-size: 11px !important;
-    padding-top: 12px !important;
+    font-size: 11.5px !important;
+    color: rgba(255, 255, 255, 0.85) !important;
   }
 
   .scroll-cue {

@@ -1,0 +1,116 @@
+/* ============================================================
+   21st.dev Luxury Payment Architecture & Animation System
+   Adapted for Godavari Designers Design System
+   ============================================================ */
+
+.success-checkmark-wrapper {
+  display: inline-block;
+}
+
+.checkmark-svg {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3;
+  stroke: #52c41a;
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px #52c41a;
+  animation: checkmark-fill 0.4s ease-in-out 0.4s forwards, checkmark-scale 0.3s ease-in-out 0.9s both;
+}
+
+.checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3;
+  stroke-miterlimit: 10;
+  stroke: #52c41a;
+  fill: none;
+  animation: checkmark-stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkmark-stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+}
+
+@keyframes checkmark-stroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes checkmark-scale {
+  0%, 100% {
+    transform: none;
+  }
+  50% {
+    transform: scale3d(1.08, 1.08, 1);
+  }
+}
+
+@keyframes checkmark-fill {
+  100% {
+    box-shadow: inset 0px 0px 0px 36px rgba(82, 196, 26, 0.12);
+  }
+}
+
+.luxury-spinner {
+  width: 48px;
+  height: 48px;
+  margin: auto;
+  border: 3px solid var(--border, #e6ded1);
+  border-top-color: var(--gold, #c8a15a);
+  border-right-color: var(--navy, #111d42);
+  border-radius: 50%;
+  animation: spin-pulse 0.9s linear infinite;
+}
+
+@keyframes spin-pulse {
+  to { transform: rotate(360deg); }
+}
+
+.btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin-pulse 0.7s linear infinite;
+  vertical-align: middle;
+}
+
+.shimmer-skeleton {
+  background: linear-gradient(90deg, #f0ede6 25%, #f8f6f2 50%, #f0ede6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkmark-svg,
+  .checkmark-circle,
+  .checkmark-check,
+  .luxury-spinner,
+  .shimmer-skeleton,
+  .payment-modal-card {
+    animation: none !important;
+    transition: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+  .checkmark-svg {
+    box-shadow: inset 0px 0px 0px 36px rgba(82, 196, 26, 0.12) !important;
+  }
+}

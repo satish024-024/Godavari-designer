@@ -54,7 +54,7 @@ import {
   isProductUnlocked
 } from "./services/store.js";
 import { storageService } from "./services/supabase.js";
-import { clone, escapeHtml, attr, icon, money, isMobileViewport, mediaUrl } from "./utils/helpers.js";
+import { clone, escapeHtml, attr, icon, money, isMobileViewport, mediaUrl, triggerAds } from "./utils/helpers.js";
 
 // Components
 import { renderHeader } from "./components/Header.js";
@@ -69,7 +69,26 @@ import { renderQuickViewModal } from "./components/QuickViewModal.js";
 import { renderBottomNavigation } from "./components/BottomNavigation.js";
 import { renderMobileDrawer } from "./components/MobileDrawer.js";
 import { renderMobileShell } from "./components/mobile/MobileShell.js";
-import { renderPaymentModal, openPaymentModal, closePaymentModal, initPaymentModalDelegates } from "./components/PaymentModal.js";
+import { renderPaymentModal, initPaymentModalDelegates } from "./components/PaymentModal.js";
+import { 
+  renderPaymentProcessing, 
+  renderPaymentSuccess, 
+  renderPaymentPending, 
+  renderPaymentFailed, 
+  renderPaymentCancelled, 
+  renderPaymentSupport,
+  initPaymentPagesDelegates 
+} from "./pages/PaymentPages.js";
+import { 
+  renderPurchasesHistory, 
+  renderPurchaseDetail, 
+  initPurchasesDelegates 
+} from "./pages/Purchases.js";
+import { 
+  openPreCheckout, 
+  downloadDesignFile, 
+  initiatePayment 
+} from "./services/paymentService.js";
 
 
 // Pages
@@ -211,6 +230,30 @@ function render() {
       break;
     case "location-detail":
       pageContent = renderLocationPage(ui.pageParams.location);
+      break;
+    case "payment-processing":
+      pageContent = renderPaymentProcessing(ui.queryParams);
+      break;
+    case "payment-success":
+      pageContent = renderPaymentSuccess(ui.queryParams);
+      break;
+    case "payment-pending":
+      pageContent = renderPaymentPending(ui.queryParams);
+      break;
+    case "payment-failed":
+      pageContent = renderPaymentFailed(ui.queryParams);
+      break;
+    case "payment-cancelled":
+      pageContent = renderPaymentCancelled(ui.queryParams);
+      break;
+    case "payment-support":
+      pageContent = renderPaymentSupport(ui.queryParams);
+      break;
+    case "purchases":
+      pageContent = renderPurchasesHistory();
+      break;
+    case "purchase-detail":
+      pageContent = renderPurchaseDetail(ui.queryParams, ui.pageParams);
       break;
     case "404":
       pageContent = renderNotFound();
@@ -419,9 +462,13 @@ function afterRender() {
     window.lucide.createIcons();
   }
 
-  // Initialize Home page events and autoscrolling
+  // Initialize Home page events, autoscrolling, and hero video playback
   if (ui.page === "home" || !ui.page) {
     initCollectionAutoscroll();
+    const heroVideo = document.querySelector(".hero-video");
+    if (heroVideo && heroVideo.paused) {
+      heroVideo.play().catch(() => {});
+    }
   } else {
     stopCollectionAutoscroll();
   }
@@ -503,6 +550,9 @@ function afterRender() {
   document.querySelectorAll(".reveal").forEach((element) => {
     revealObserver.observe(element);
   });
+
+  // Trigger Google AdSense blocks on route change
+  triggerAds();
 
   updateHeaderState();
 }
@@ -977,18 +1027,15 @@ document.addEventListener("click", (event) => {
     window.open(whatsappUrl, "_blank");
   }
 
-  // 1-Click Amazon-Style Buy Now
+  // Buy Now via Razorpay Standard Architecture
   if (action === "buy-now") {
     const id = trigger.dataset.id;
-    const format = trigger.dataset.format || "DST";
-    const price = parseFloat(trigger.dataset.price || "45");
-    const title = trigger.dataset.title || "Embroidery Design";
-    const code = trigger.dataset.code || "GD-DESIGN";
-    openPaymentModal({
-      items: [{ productId: id, format, price, title, code }],
-      total: price,
-      orderRef: `GD-BUY-${Date.now().toString().slice(-6)}`
-    });
+    const p = site.products.find(x => x.id === id);
+    if (p) {
+      openPreCheckout(p);
+    } else if (id) {
+      initiatePayment(id);
+    }
     return;
   }
 
@@ -998,34 +1045,20 @@ document.addEventListener("click", (event) => {
       showToast("Your cart is empty");
       return;
     }
-    let subtotal = 0;
-    const items = cart.map(item => {
-      const p = site.products.find(x => x.id === item.id) || {};
-      const formatObj = p.formats ? p.formats.find(f => f.format === item.format) : null;
-      const price = formatObj ? formatObj.price : (p.price || 45);
-      subtotal += price * item.qty;
-      return {
-        productId: item.id,
-        format: item.format,
-        price: price,
-        title: p.title,
-        code: p.code
-      };
-    });
-    closePanels();
-    openPaymentModal({
-      items,
-      total: subtotal,
-      orderRef: `GD-CART-${Date.now().toString().slice(-6)}`
-    });
+    const firstItem = cart[0];
+    const p = site.products.find(x => x.id === firstItem.id);
+    if (p) {
+      closePanels();
+      openPreCheckout(p);
+    }
     return;
   }
 
   // Secure Machine File Download (Protected by Entitlement & Payment Verification)
   if (action === "download-production-file" || action === "download-machine-file") {
     const id = trigger.dataset.id;
-    const format = trigger.dataset.format || "DST";
-    downloadMachineFile(id, format);
+    const format = (trigger.dataset.format || "DST").toUpperCase();
+    downloadDesignFile(id, format);
     return;
   }
 
@@ -1703,6 +1736,8 @@ window.addEventListener("resize", () => {
 async function bootstrap() {
   initDB();
   initPaymentModalDelegates();
+  initPaymentPagesDelegates();
+  initPurchasesDelegates();
   onStateChange(render);
   initRouter();
   

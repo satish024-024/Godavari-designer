@@ -1,5 +1,5 @@
 import { site, wishlist, getCategories, ui, isVisible, isProductUnlocked, downloadMachineFile } from "../services/store.js";
-import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
+import { escapeHtml, attr, icon, money, mediaUrl, renderAdBlock } from "../utils/helpers.js";
 
 export const SHEET2_CATEGORIES = [
   { id: "All", label: "All Designs" },
@@ -323,6 +323,8 @@ export function renderCatalog() {
           <i data-lucide="sparkles" style="position: absolute; right: 20px; color: var(--gold); cursor:pointer;"></i>
         </div>
       </div>
+
+      ${renderAdBlock('catalog-top', 'horizontal')}
 
       <!-- Categories Navigation Bar (Sheet 2 Pills) -->
       <div class="category-pills-row" style="max-width: 1540px; margin: 0 auto 16px; padding: 0 clamp(16px, 4vw, 40px); display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
@@ -703,33 +705,7 @@ export function renderCatalog() {
         </div>
 
       </div>
-
-      <!-- Trust Badges row (Direct QA Match) -->
-      <div class="trust-badges-wrapper">
-        <div class="trust-badges-grid">
-          <div class="trust-badge-card">
-            ${icon("gem", 28)}
-            <h3>10,000+</h3>
-            <p>Embroidery Designs<br />Premium & Exclusive</p>
-          </div>
-          <div class="trust-badge-card">
-            ${icon("crown", 28)}
-            <h3>2,500+</h3>
-            <p>Fashion Brands<br />Worldwide Trust</p>
-          </div>
-          <div class="trust-badge-card">
-            ${icon("star", 28)}
-            <h3>98%</h3>
-            <p>Client Satisfaction<br />Quality You Can Trust</p>
-          </div>
-          <div class="trust-badge-card">
-            ${icon("clock", 28)}
-            <h3>24 Hours</h3>
-            <p>Quote Delivery<br />Fast & Reliable</p>
-          </div>
-        </div>
-      </div>
-
+      ${renderAdBlock('catalog-bottom', 'horizontal')}
     </section>
   `;
 }

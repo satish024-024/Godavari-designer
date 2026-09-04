@@ -51,9 +51,9 @@ Please confirm my order.`;
             ${icon("check", 32)}
           </div>
           
-          <h1 style="font-family: var(--font-serif); font-size: 32px; color: var(--navy); margin: 0; font-weight: 700;">Order Placed Successfully</h1>
+          <h1 style="font-family: var(--font-serif); font-size: 32px; color: var(--navy); margin: 0; font-weight: 700;">Order Created Successfully</h1>
           <p style="color: var(--ink-soft); font-size: 14px; max-width: 500px; margin: 0;">
-            Thank you for shopping with Godavari Designer! To complete your payment verification, please click below to send confirmation via WhatsApp.
+            Thank you for choosing Godavari Designers! Complete your payment securely online via Razorpay to instantly unlock your digital embroidery machine files (.DST & .PES).
           </p>
 
           <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 24px; width: 100%; text-align: left; display: grid; gap: 10px; margin-top: 10px;">
@@ -119,7 +119,7 @@ Please confirm my order.`;
             <!-- Primary Instant Online Payment CTA -->
             <button type="button" class="button button-primary" data-action="reopen-checkout-payment" style="width: 100%; min-height: 48px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; background: var(--navy); color: #fff; border-radius: 6px; border: none; cursor: pointer; box-shadow: var(--shadow-deep);">
               ${icon("zap", 18)}
-              <span>Pay ${money(submissionResult.total)} & Unlock Files (PhonePe / UPI)</span>
+              <span>Pay ${money(submissionResult.total)} & Unlock Machine Files (Razorpay / UPI / Cards)</span>
             </button>
 
             <!-- Secondary WhatsApp CTA -->

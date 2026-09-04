@@ -1,0 +1,16 @@
+﻿{
+  "name": "godavari-designers",
+  "version": "1.0.0",
+  "description": "Godavari Designers - Luxury Embroidery Digitizing & Commercial Machine Files Marketplace",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test/payment-suite.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {}
+}

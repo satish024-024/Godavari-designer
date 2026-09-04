@@ -1,5 +1,5 @@
 import { site, wishlist, isProductUnlocked, downloadMachineFile } from "../services/store.js";
-import { escapeHtml, attr, icon, money, mediaUrl, isMobileViewport } from "../utils/helpers.js";
+import { escapeHtml, attr, icon, money, mediaUrl, isMobileViewport, renderAdBlock } from "../utils/helpers.js";
 import { renderThreads } from "../components/ThreadLayer.js";
 
 
@@ -43,37 +43,64 @@ function renderHero() {
         <img class="hero-poster" src="${attr(posterSrc)}" alt="" />
         ${
           videoSrc
-            ? `<video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="${attr(posterSrc)}">
+            ? `<video class="hero-video" autoplay muted loop playsinline preload="auto" poster="${attr(posterSrc)}">
                 <source src="${attr(videoSrc)}" type="video/mp4" />
               </video>`
             : ""
         }
-        <div class="hero-video-overlay"></div>
       </div>
       <div class="hero-veil" aria-hidden="true"></div>
       ${renderThreads()}
       <div class="hero-inner">
-        <div class="hero-content reveal" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+        <div class="hero-content reveal">
           
-          <!-- Brand Logo Emblem -->
-          <div style="margin-bottom: 20px;">
-            <img src="/logo.jpeg" alt="Godavari Designers Emblem" style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 2.5px solid var(--gold); box-shadow: 0 8px 30px rgba(0,0,0,0.35);" />
+          <!-- Eyebrow with gold accent / brand identity -->
+          <div class="hero-eyebrow-pill">
+            <span class="hero-brand-mark">Godavari Designers</span>
+            <span class="hero-pill-dot"></span>
+            <span class="hero-pill-text">Premier Digitizing Atelier</span>
           </div>
 
-          <!-- Atelier Eyebrow -->
-          <p class="section-kicker" style="margin: 0 0 8px; color: var(--gold); font-size: 12px; letter-spacing: 0.2em; font-weight: 700; text-transform: uppercase;">
-            Premier Digitizing Atelier & Digital Marketplace
-          </p>
-
-          <!-- Clean Brand Name -->
-          <h1 style="font-family: var(--font-serif); font-size: clamp(38px, 6vw, 68px); font-weight: 700; line-height: 1.1; margin: 0 0 16px; color: #ffffff; letter-spacing: -0.01em; text-shadow: 0 4px 24px rgba(0,0,0,0.4);">
-            Godavari Designers
+          <!-- Large editorial headline -->
+          <h1 class="hero-headline">
+            Precision in <br />
+            <span class="hero-headline-accent">Every Stitch.</span>
           </h1>
 
-          <!-- Concise Description -->
-          <p style="font-size: clamp(15px, 2vw, 19px); line-height: 1.6; color: rgba(255, 255, 255, 0.92); max-width: 680px; margin: 0 auto; text-shadow: 0 2px 12px rgba(0,0,0,0.35); font-weight: 500;">
-            Download machine-ready embroidery files (.DST, .PES, .JEF, .EXP) and custom digitizing crafted for flawless commercial production.
+          <!-- Concise description (2 lines maximum) -->
+          <p class="hero-description">
+            Master-crafted digital embroidery files (.DST, .PES, .JEF, .EXP) and custom couture digitizing engineered for flawless commercial production.
           </p>
+
+          <!-- Two focused CTAs -->
+          <div class="hero-actions">
+            <a href="#/catalog" class="hero-btn-primary" style="text-decoration:none;">
+              <span>Explore Design Library</span>
+              ${icon("arrow-right", 18)}
+            </a>
+            <a href="#/custom-order" class="hero-btn-secondary" style="text-decoration:none;">
+              ${icon("sparkles", 18)}
+              <span>Start a Custom Order</span>
+            </a>
+          </div>
+
+          <!-- Integrated Trust Indicators -->
+          <div class="hero-trust-bar">
+            <div class="hero-trust-item">
+              <span class="trust-icon-gold">✓</span>
+              <span>Machine-Ready Files</span>
+            </div>
+            <span class="trust-dot"></span>
+            <div class="hero-trust-item">
+              <span class="trust-icon-gold">⚡</span>
+              <span>24–48h Turnaround</span>
+            </div>
+            <span class="trust-dot"></span>
+            <div class="hero-trust-item">
+              <span class="trust-icon-gold">★</span>
+              <span>Premium Quality</span>
+            </div>
+          </div>
 
         </div>
       </div>
@@ -696,11 +723,14 @@ function renderAboutSection() {
 export function renderHome() {
   return `
     ${renderHero()}
+    ${renderAdBlock('home-top', 'horizontal')}
     ${renderNewArrivals()}
     ${renderWhatsAppCustomBanner()}
     ${renderCollections()}
+    ${renderAdBlock('home-middle', 'horizontal')}
     ${renderProcess()}
     ${renderBestSellers()}
+    ${renderAdBlock('home-bottom', 'horizontal')}
     ${renderAboutSection()}
     ${renderStories()}
     ${renderCta()}

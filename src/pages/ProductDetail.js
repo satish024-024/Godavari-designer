@@ -269,10 +269,16 @@ export function renderProductDetail() {
 
             <!-- Purchase Actions: Unlocked Mode -->
             <div style="display: grid; gap: 10px; margin-bottom: 24px;">
-              <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; width: 100%; min-height: 48px; background: #237804; color: #fff; font-size: 14px;">
-                ${icon("download", 18)}
-                <span>Download .${escapeHtml(activeFormatCode)} Stitch File</span>
-              </button>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="DST" style="display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; min-height: 46px; background: #237804; color: #fff; font-size: 13px;">
+                  ${icon("download", 16)}
+                  <span>Download .DST</span>
+                </button>
+                <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="PES" style="display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; min-height: 46px; background: #237804; color: #fff; font-size: 13px;">
+                  ${icon("download", 16)}
+                  <span>Download .PES</span>
+                </button>
+              </div>
 
               <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
                 <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; height: 44px; font-size: 12px;">
@@ -289,13 +295,13 @@ export function renderProductDetail() {
             <div style="background: #faf8f5; border: 1px dashed var(--gold); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
               <span style="color: var(--gold);">${icon("lock", 20)}</span>
               <span style="font-size: 12px; color: var(--navy); line-height: 1.4;">
-                <strong>Machine File Protected:</strong> Pay <strong>${money(displayPrice)}</strong> to instantly unlock official commercial <strong>.${escapeHtml(activeFormatCode)}</strong> stitch file.
+                <strong>Machine File Protected:</strong> Pay <strong>${money(displayPrice)}</strong> to instantly unlock commercial <strong>.DST & .PES</strong> files.
               </span>
             </div>
 
-            <!-- Purchase Actions: Amazon-Style E-Commerce Flow -->
+            <!-- Purchase Actions: Razorpay Flow -->
             <div style="display: grid; gap: 10px; margin-bottom: 24px;">
-              <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; width: 100%; min-height: 48px; font-size: 14.5px; background: var(--navy); color: #fff;">
+              <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; width: 100%; min-height: 48px; font-size: 14.5px; background: var(--navy); color: #fff;">
                 ${icon("zap", 18)}
                 <span>Buy Now & Unlock (${money(displayPrice)})</span>
               </button>
@@ -425,12 +431,17 @@ export function renderProductDetail() {
             </p>
             <div style="display: grid; gap: 8px;">
               ${isUnlocked ? `
-                <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; height: 40px; padding: 0; width: 100%; background: #237804; color: #fff; font-weight: 700;">
-                  ${icon("download", 14)} Download .${escapeHtml(activeFormatCode)} Production File
-                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="DST" style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 12px; height: 40px; padding: 0; background: #237804; color: #fff; font-weight: 700;">
+                    ${icon("download", 14)} .DST File
+                  </button>
+                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="PES" style="display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 12px; height: 40px; padding: 0; background: #237804; color: #fff; font-weight: 700;">
+                    ${icon("download", 14)} .PES File
+                  </button>
+                </div>
               ` : `
-                <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; height: 40px; padding: 0; width: 100%; background: var(--navy); color: #fff; font-weight: 700;">
-                  ${icon("lock", 14)} Pay ${money(displayPrice)} to Unlock Machine File
+                <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; height: 40px; padding: 0; width: 100%; background: var(--navy); color: #fff; font-weight: 700;">
+                  ${icon("lock", 14)} Pay ${money(displayPrice)} to Unlock Machine Files
                 </button>
               `}
               <button type="button" class="button button-secondary" data-action="download-spec-sheet" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0; width: 100%;">
@@ -679,12 +690,15 @@ export function renderProductDetail() {
               </p>
               <div style="display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
                 ${isUnlocked ? `
-                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px; background: #237804; color: #fff; font-weight: 700;">
-                    ${icon("download", 14)} Download .${escapeHtml(activeFormatCode)}
+                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="DST" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px; background: #237804; color: #fff; font-weight: 700;">
+                    ${icon("download", 14)} Download .DST
+                  </button>
+                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="PES" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px; background: #237804; color: #fff; font-weight: 700;">
+                    ${icon("download", 14)} Download .PES
                   </button>
                 ` : `
-                  <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px; background: var(--navy); color: #fff; font-weight: 700;">
-                    ${icon("lock", 14)} Unlock .${escapeHtml(activeFormatCode)} (${money(displayPrice)})
+                  <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px; background: var(--navy); color: #fff; font-weight: 700;">
+                    ${icon("lock", 14)} Unlock .DST & .PES (${money(displayPrice)})
                   </button>
                 `}
                 <button type="button" class="button button-secondary" data-action="download-spec-sheet" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
@@ -871,24 +885,30 @@ export function renderProductDetail() {
               <div style="background: #f6ffed; border: 1.5px solid #b7eb8f; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px;">
                 <span style="color: #52c41a; font-size: 28px; font-weight: 800; line-height: 1;">✓</span>
                 <div>
-                  <strong style="color: #237804; font-size: 15px; display: block;">Machine Stitch File Unlocked (Owned)</strong>
-                  <span style="font-size: 13px; color: var(--ink-soft);">You have purchased the commercial license. 1-tap download is active below.</span>
+                  <strong style="color: #237804; font-size: 15px; display: block;">Commercial Machine Files Unlocked (Owned)</strong>
+                  <span style="font-size: 13px; color: var(--ink-soft);">You have purchased the commercial license. Dual machine downloads active below.</span>
                 </div>
               </div>
 
               <!-- Desktop Actions: Unlocked Mode -->
               <div class="detail-actions-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
-                <button type="button" class="button button-primary detail-actions-full" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; height: 50px; font-size: 15px; background: #237804; color: #fff;">
-                  ${icon("download", 20)}
-                  <span>Download .${escapeHtml(activeFormatCode)} File Now</span>
-                </button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; grid-column: 1 / -1;">
+                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="DST" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 50px; font-size: 14.5px; background: #237804; color: #fff;">
+                    ${icon("download", 18)}
+                    <span>Download .DST File</span>
+                  </button>
+                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="PES" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 50px; font-size: 14.5px; background: #237804; color: #fff;">
+                    ${icon("download", 18)}
+                    <span>Download .PES File</span>
+                  </button>
+                </div>
 
-                <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 50px;">
+                <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 46px;">
                   <span>Save to Wishlist</span>
                   ${icon("heart", 18)}
                 </button>
 
-                <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 44px; font-size: 13px;">
+                <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 46px; font-size: 13px;">
                   <span>Request Custom Modification</span>
                   ${icon("sliders", 16)}
                 </a>
@@ -898,13 +918,13 @@ export function renderProductDetail() {
               <div style="background: #faf8f5; border: 1px dashed var(--gold); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
                 <span style="color: var(--gold);">${icon("lock", 24)}</span>
                 <span style="font-size: 13px; color: var(--navy); line-height: 1.45;">
-                  <strong>Machine Stitch File Protected:</strong> Pay <strong>${money(displayPrice)}</strong> to unlock authentic commercial <strong>.${escapeHtml(activeFormatCode)}</strong> production file with lifetime access.
+                  <strong>Commercial Files Protected:</strong> Pay <strong>${money(displayPrice)}</strong> to unlock authentic commercial <strong>.DST & .PES</strong> production files with lifetime access.
                 </span>
               </div>
 
               <!-- Desktop Actions: Amazon-Style Purchase Flow -->
               <div class="detail-actions-grid">
-                <button type="button" class="button button-primary detail-actions-full" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; min-height: 52px; font-size: 16px; background: var(--navy); color: #fff;">
+                <button type="button" class="button button-primary detail-actions-full" data-action="buy-now" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; min-height: 52px; font-size: 16px; background: var(--navy); color: #fff;">
                   ${icon("zap", 20)}
                   <span>Buy Now & Unlock Instantly (${money(displayPrice)})</span>
                 </button>

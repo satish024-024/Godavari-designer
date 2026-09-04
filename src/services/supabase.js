@@ -920,6 +920,42 @@ export const orderService = {
 };
 
 // ==========================================
+// PAYMENT ADMIN SERVICE
+// ==========================================
+
+export const paymentAdminService = {
+  async getPurchases() {
+    initSupabase();
+    try {
+      const { data, error } = await supabase
+        .from('purchases')
+        .select('*, products(id, code, title, price, image), entitlements(id, status, download_count, last_downloaded_at)')
+        .order('created_at', { ascending: false });
+
+      if (!error && Array.isArray(data)) {
+        return data;
+      }
+    } catch (err) {
+      console.warn("Supabase SDK purchases query failed, attempting REST API fallback:", err);
+    }
+
+    try {
+      const session = (await supabase.auth.getSession())?.data?.session;
+      const headers = session?.access_token ? { "Authorization": `Bearer ${session.access_token}` } : {};
+      const res = await fetch('/api/purchases?scope=admin', { headers });
+      if (res.ok) {
+        const json = await res.json();
+        return json.purchases || [];
+      }
+    } catch (e) {
+      console.error("REST API fallback failed:", e);
+    }
+
+    return [];
+  }
+};
+
+// ==========================================
 // STORAGE SERVICE
 // ==========================================
 

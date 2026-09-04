@@ -53,3 +53,26 @@ export function isMobileViewport() {
   return window.innerWidth <= 768;
 }
 
+export function renderAdBlock(slotId = "0000000000", format = "auto") {
+  return `
+    <div class="ad-container" style="margin: 20px 0; text-align: center; overflow: hidden; min-height: 90px;">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-4534760311767422"
+           data-ad-slot="${slotId}"
+           data-ad-format="${format}"
+           data-full-width-responsive="true"></ins>
+    </div>
+  `;
+}
+
+export function triggerAds() {
+  try {
+    const ads = document.querySelectorAll('.adsbygoogle:not([data-adsbygoogle-status="done"])');
+    ads.forEach(() => {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    });
+  } catch (e) {
+    console.error("AdSense error:", e);
+  }
+}

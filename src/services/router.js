@@ -22,7 +22,17 @@ const routes = {
   "/checkout": { page: "checkout", title: "Checkout | Godavari Designer", noindex: true },
   "/track-order": { page: "track-order", title: "Track Your Order | Godavari", noindex: true },
   "/account": { page: "account", title: "Customer Dashboard | Godavari", requiresAuth: true, noindex: true },
+  "/account/purchases": { page: "purchases", title: "My Purchases | Godavari", requiresAuth: true, noindex: true },
+  "/account/purchases/:purchaseId": { page: "purchase-detail", title: "Purchase Receipt | Godavari", noindex: true },
   "/auth": { page: "auth", title: "Sign In / Register | Godavari", noindex: true },
+
+  // Payment Lifecycle Routes
+  "/payment/processing": { page: "payment-processing", title: "Verifying Payment | Godavari", noindex: true },
+  "/payment/success": { page: "payment-success", title: "Payment Successful | Godavari", noindex: true },
+  "/payment/pending": { page: "payment-pending", title: "Payment Pending | Godavari", noindex: true },
+  "/payment/failed": { page: "payment-failed", title: "Payment Incomplete | Godavari", noindex: true },
+  "/payment/cancelled": { page: "payment-cancelled", title: "Payment Cancelled | Godavari", noindex: true },
+  "/support/payment": { page: "payment-support", title: "Payment & License Support | Godavari" },
   
   // Company pages
   "/about-us": { page: "about-us", title: "About Us | Godavari Designer" },
@@ -47,6 +57,7 @@ const routes = {
   "/admin/products": { page: "admin-dashboard", title: "Products | Admin Portal", requiresAdmin: true },
   "/admin/categories": { page: "admin-dashboard", title: "Categories | Admin Portal", requiresAdmin: true },
   "/admin/collections": { page: "admin-dashboard", title: "Collections | Admin Portal", requiresAdmin: true },
+  "/admin/payments": { page: "admin-dashboard", title: "Payments & Licenses | Admin Portal", requiresAdmin: true },
   "/admin/orders": { page: "admin-dashboard", title: "Orders | Admin Portal", requiresAdmin: true },
   "/admin/custom-requests": { page: "admin-dashboard", title: "Custom Requests | Admin Portal", requiresAdmin: true },
   "/admin/customers": { page: "admin-dashboard", title: "Customers | Admin Portal", requiresAdmin: true },

@@ -8,7 +8,6 @@ let uploadedAttachments = {}; // Mapping from zoneId to { name, url }
 let uploadStates = {}; // Mapping from zoneId to null | 'uploading' | 'success'
 let selectedUrgency = "Standard";
 let selectedFormat = "DST";
-let selectedFabric = "Silk";
 let selectedApplication = "Bridal";
 let submissionResult = null; // null | { referenceNumber, name, email, phone, projectType, notes, status, createdAt }
 
@@ -35,7 +34,6 @@ export function renderCustomOrder() {
     uploadStates = {};
     selectedUrgency = "Standard";
     selectedFormat = "DST";
-    selectedFabric = "Silk";
     selectedApplication = "Bridal";
     submissionResult = null;
 
@@ -384,7 +382,7 @@ export function renderCustomOrder() {
                 <span style="color:var(--gold);">${icon("cpu", 20)}</span>
                 <span>Embroidery Machine Specifications</span>
               </div>
-              <div class="form-step-desc">Target format and fabric optimizations for your embroidery machines.</div>
+              <div class="form-step-desc">Target format and use case optimizations for your embroidery machines.</div>
 
               <div style="display: grid; gap: 20px;">
                 
@@ -397,22 +395,6 @@ export function renderCustomOrder() {
                         (fmt) => `
                           <div class="spec-option-card ${selectedFormat === fmt ? "active" : ""}" data-action="set-format" data-format="${attr(fmt)}">
                             ${escapeHtml(fmt)}
-                          </div>
-                        `
-                      )
-                      .join("")}
-                  </div>
-                </div>
-
-                <!-- Fabric Select cards -->
-                <div>
-                  <div style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 10px;">Target Fabric Type</div>
-                  <div class="spec-cards-grid">
-                    ${["Silk", "Net", "Cotton", "Organza", "Georgette", "Velvet"]
-                      .map(
-                        (fab) => `
-                          <div class="spec-option-card ${selectedFabric === fab ? "active" : ""}" data-action="set-fabric" data-fabric="${attr(fab)}">
-                            ${escapeHtml(fab)}
                           </div>
                         `
                       )
@@ -633,11 +615,6 @@ export function initCustomOrderEvents() {
       triggerRender();
     }
 
-    if (action === "set-fabric") {
-      selectedFabric = target.dataset.fabric;
-      triggerRender();
-    }
-
     if (action === "remove-upload") {
       const zoneId = target.dataset.zone;
       delete uploadedAttachments[zoneId];
@@ -652,7 +629,6 @@ export function initCustomOrderEvents() {
       uploadStates = {};
       selectedUrgency = "Standard";
       selectedFormat = "DST";
-      selectedFabric = "Silk";
       selectedApplication = "Bridal";
       prefilledProductId = null;
       prefilledProductSlug = null;
@@ -693,7 +669,6 @@ export function initCustomOrderEvents() {
           quantity: parseInt(formData.get("quantity") || 1),
           urgency: selectedUrgency,
           machine_format: selectedFormat,
-          fabric_type: selectedFabric,
           application_type: selectedApplication,
           prefilled_product_id: prefilledProductId,
           prefilled_product_slug: prefilledProductSlug,
@@ -748,7 +723,6 @@ Phone: ${result.phone}
 Project Type: ${result.projectType}
 Urgency: ${selectedUrgency}
 Machine Format: ${selectedFormat}
-Fabric: ${selectedFabric}
 Description: ${formData.get("projectDescription")}
 Attachments: ${commaSeparatedUrls || "None"}`;
 

@@ -18,6 +18,7 @@ import {
   categoryService,
   collectionService,
   orderService,
+  paymentAdminService,
   customRequestService,
   testimonialService,
   faqService,
@@ -50,6 +51,7 @@ const adminNav = [
     group: "Commerce",
     items: [
       { id: "orders", label: "Orders", icon: "shopping-bag", path: "/admin/orders" },
+      { id: "payments", label: "Payments & Licenses", icon: "credit-card", path: "/admin/payments" },
       { id: "custom-requests", label: "Custom Requests", icon: "pencil-ruler", path: "/admin/custom-requests" },
       { id: "customers", label: "Customers", icon: "users", path: "/admin/customers" }
     ]
@@ -77,6 +79,7 @@ const adminNav = [
 
 let stats = { orders: 0, requests: 0, products: 0, customers: 0 };
 let ordersList = [];
+let paymentsList = [];
 let requestsList = [];
 let customersList = [];
 let categoriesList = [];
@@ -86,6 +89,7 @@ let mediaList = [];
 
 let loadingStats = false;
 let loadingOrders = false;
+let loadingPayments = false;
 let loadingRequests = false;
 let loadingCustomers = false;
 let loadingCategories = false;
@@ -96,6 +100,7 @@ let loadingMedia = false;
 let dataLoaded = {
   stats: false,
   orders: false,
+  payments: false,
   requests: false,
   customers: false,
   categories: false,
@@ -108,6 +113,9 @@ let dataLoaded = {
 let productSearchQuery = "";
 let productFilterCategory = "";
 let orderSearchQuery = "";
+let paymentSearchQuery = "";
+let paymentFilterStatus = "ALL";
+let selectedPayment = null;
 let requestSearchQuery = "";
 let customerSearchQuery = "";
 
@@ -171,6 +179,19 @@ function triggerDataLoad(section) {
     }).catch(err => {
       console.error(err);
       loadingOrders = false;
+    });
+  }
+
+  if (section === "payments" && !dataLoaded.payments && !loadingPayments) {
+    loadingPayments = true;
+    paymentAdminService.getPurchases().then(data => {
+      paymentsList = data || [];
+      dataLoaded.payments = true;
+      loadingPayments = false;
+      triggerRender();
+    }).catch(err => {
+      console.error("Error loading purchases in admin:", err);
+      loadingPayments = false;
     });
   }
 
@@ -259,6 +280,7 @@ function resetLoadedState() {
   dataLoaded = {
     stats: false,
     orders: false,
+    payments: false,
     requests: false,
     customers: false,
     categories: false,
@@ -1350,6 +1372,314 @@ function renderOrdersModule() {
   `;
 }
 
+function renderPaymentsModule() {
+  if (selectedPayment) {
+    const p = selectedPayment;
+    const prod = p.products || {};
+    const ent = Array.isArray(p.entitlements) ? (p.entitlements[0] || {}) : (p.entitlements || {});
+    const date = p.created_at ? new Date(p.created_at).toLocaleString() : "N/A";
+    const paidDate = p.paid_at ? new Date(p.paid_at).toLocaleString() : "Unpaid";
+
+    return `
+      <div class="admin-module">
+        <div style="margin-bottom: 24px;">
+          <button class="admin-btn admin-btn-secondary close-payment-details-btn">
+            ${icon("arrow-left", 16)} Back to Payments & Licenses
+          </button>
+        </div>
+
+        <div class="admin-grid-2-1">
+          <div class="admin-form" style="padding: 24px;">
+            <h2 class="admin-form-title">Payment & License Audit Record</h2>
+            <div style="font-size: 13px; color:rgba(17,29,66,0.5); border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
+              Purchase UUID: <strong style="font-family:monospace; color:var(--navy);">${escapeHtml(p.id)}</strong><br>
+              Created: ${date}
+            </div>
+
+            <div style="display: grid; gap: 20px;">
+              <div>
+                <h3 style="font-size:14px; margin: 0 0 8px; font-weight:700;">Customer Identity</h3>
+                <p style="margin: 0; font-size:13.5px; line-height:1.7;">
+                  Checkout Type: <strong>${p.user_id ? "Registered Account" : "Guest Checkout"}</strong><br>
+                  User ID: <code style="font-size:12px; background:#f4f4f5; padding:2px 6px; border-radius:4px;">${escapeHtml(p.user_id || "None (Guest)")}</code><br>
+                  Email: <strong>${escapeHtml(p.customer_email || "N/A")}</strong><br>
+                  Phone: <strong>${escapeHtml(p.customer_phone || "N/A")}</strong><br>
+                  ${p.guest_token_hash ? `Guest Token Hash: <code style="font-size:11px; background:#f4f4f5; padding:2px 6px; border-radius:4px;">${escapeHtml(p.guest_token_hash.slice(0, 20))}...</code>` : ""}
+                </p>
+              </div>
+
+              <div style="border-top:1px solid var(--border); padding-top:16px;">
+                <h3 style="font-size:14px; margin: 0 0 12px; font-weight:700;">Entitled Product & License Scope</h3>
+                <div style="display: flex; gap: 14px; align-items: center; background: var(--ivory); padding: 14px; border-radius: 8px;">
+                  ${prod.image ? `<img src="${attr(mediaUrl(prod.image))}" style="width: 56px; height: 56px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border);" />` : ""}
+                  <div style="flex: 1;">
+                    <div style="font-weight:700; font-size:14px; color:var(--navy);">${escapeHtml(prod.title || "Embroidery Design")}</div>
+                    <div style="font-size:11.5px; color:var(--gold); font-weight:600;">Code: ${escapeHtml(prod.code || "N/A")}</div>
+                    <div style="font-size:12px; color:rgba(17,29,66,0.6); margin-top:2px;">Entitlement Model A: <strong>All Machine Formats (.DST + .PES)</strong></div>
+                  </div>
+                  <div style="text-align: right;">
+                    <div style="font-size: 11px; color: rgba(17,29,66,0.5);">Authoritative Price</div>
+                    <div style="font-size: 16px; font-weight: 800; color: var(--navy);">₹${p.amount || 0}</div>
+                  </div>
+                </div>
+
+                <div style="margin-top: 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+                  <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--navy); margin-bottom: 8px;">Commercial Machine Entitlement</div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+                    <div>License Status: <span class="admin-pill ${ent.status === 'ACTIVE' || p.status === 'PAID' ? 'admin-pill-success' : 'admin-pill-gold'}">${ent.status || (p.status === 'PAID' ? 'ACTIVE' : 'INACTIVE')}</span></div>
+                    <div>Download Count: <strong>${ent.download_count || 0} times</strong></div>
+                    <div>Last Downloaded: <span>${ent.last_downloaded_at ? new Date(ent.last_downloaded_at).toLocaleString() : "Never"}</span></div>
+                    <div>Delivery Security: <strong>60s Single-Use Proxy Grant</strong></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Razorpay Technical Verification Card -->
+          <div class="admin-form" style="padding:24px;">
+            <h3 style="font-family:var(--font-serif); font-size:18px; margin: 0 0 16px;">Razorpay Gateway Verification</h3>
+            
+            <div style="display: grid; gap: 14px; font-size: 13px;">
+              <div>
+                <label style="font-size:11px; font-weight:700; color:rgba(17,29,66,0.5); text-transform:uppercase; display:block; margin-bottom:4px;">Purchase Status</label>
+                <span class="admin-pill ${p.status === 'PAID' ? 'admin-pill-success' : (p.status === 'FAILED' ? 'admin-pill-danger' : 'admin-pill-gold')}" style="font-size:12px; padding:4px 10px;">
+                  ${p.status}
+                </span>
+              </div>
+
+              <div>
+                <label style="font-size:11px; font-weight:700; color:rgba(17,29,66,0.5); text-transform:uppercase; display:block; margin-bottom:4px;">Razorpay Order ID</label>
+                <code style="display:block; font-size:12px; background:#f4f4f5; padding:6px 10px; border-radius:4px; word-break:break-all;">${escapeHtml(p.razorpay_order_id || "N/A")}</code>
+              </div>
+
+              <div>
+                <label style="font-size:11px; font-weight:700; color:rgba(17,29,66,0.5); text-transform:uppercase; display:block; margin-bottom:4px;">Razorpay Payment ID</label>
+                <code style="display:block; font-size:12px; background:#f4f4f5; padding:6px 10px; border-radius:4px; word-break:break-all;">${escapeHtml(p.razorpay_payment_id || "None (Incomplete / Unpaid)")}</code>
+              </div>
+
+              <div>
+                <label style="font-size:11px; font-weight:700; color:rgba(17,29,66,0.5); text-transform:uppercase; display:block; margin-bottom:4px;">Payment Method</label>
+                <strong>${escapeHtml(p.payment_method || "Online Payment (Razorpay)")}</strong>
+              </div>
+
+              <div>
+                <label style="font-size:11px; font-weight:700; color:rgba(17,29,66,0.5); text-transform:uppercase; display:block; margin-bottom:4px;">Paid Timestamp</label>
+                <span>${paidDate}</span>
+              </div>
+
+              ${p.razorpay_signature ? `
+                <div>
+                  <label style="font-size:11px; font-weight:700; color:rgba(17,29,66,0.5); text-transform:uppercase; display:block; margin-bottom:4px;">HMAC-SHA256 Signature Verification</label>
+                  <div style="font-size:11.5px; color:#237804; font-weight:700; display:flex; align-items:center; gap:6px;">
+                    ${icon("check-circle", 14)} Cryptographically Verified by Server
+                  </div>
+                  <code style="display:block; font-size:10px; background:#f4f4f5; padding:6px; border-radius:4px; word-break:break-all; margin-top:4px; max-height:50px; overflow:hidden;">${escapeHtml(p.razorpay_signature)}</code>
+                </div>
+              ` : `
+                <div style="font-size:12px; color:rgba(17,29,66,0.5); font-style:italic;">
+                  Awaiting Razorpay capture or customer payment completion.
+                </div>
+              `}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Summary Metrics
+  const totalPaidRevenue = paymentsList
+    .filter(p => p.status === 'PAID')
+    .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+  const paidCount = paymentsList.filter(p => p.status === 'PAID').length;
+  const pendingCount = paymentsList.filter(p => p.status === 'CREATED' || p.status === 'AUTHORIZED').length;
+  const failedCount = paymentsList.filter(p => p.status === 'FAILED' || p.status === 'CANCELLED').length;
+  const refundedCount = paymentsList.filter(p => p.status === 'REFUNDED').length;
+
+  // Filtered List
+  const filtered = paymentsList.filter(p => {
+    if (paymentFilterStatus === 'PAID' && p.status !== 'PAID') return false;
+    if (paymentFilterStatus === 'PENDING' && p.status !== 'CREATED' && p.status !== 'AUTHORIZED') return false;
+    if (paymentFilterStatus === 'FAILED' && (p.status !== 'FAILED' && p.status !== 'CANCELLED')) return false;
+    if (paymentFilterStatus === 'REFUNDED' && p.status !== 'REFUNDED') return false;
+
+    if (!paymentSearchQuery) return true;
+    const q = paymentSearchQuery.toLowerCase();
+    const orderId = (p.razorpay_order_id || "").toLowerCase();
+    const paymentId = (p.razorpay_payment_id || "").toLowerCase();
+    const email = (p.customer_email || "").toLowerCase();
+    const phone = (p.customer_phone || "").toLowerCase();
+    const id = (p.id || "").toLowerCase();
+    const title = ((p.products && p.products.title) || "").toLowerCase();
+    const code = ((p.products && p.products.code) || "").toLowerCase();
+
+    return orderId.includes(q) || paymentId.includes(q) || email.includes(q) || phone.includes(q) || id.includes(q) || title.includes(q) || code.includes(q);
+  });
+
+  return `
+    <div class="admin-module">
+      <div class="admin-module-header" style="margin-bottom: 24px;">
+        <h1 class="admin-module-title">Payments & Commercial Licenses</h1>
+        <p class="admin-module-subtitle">Authoritative Razorpay transactions, customer entitlements, and machine file delivery audit logs.</p>
+      </div>
+
+      <!-- Metric Cards -->
+      <div class="admin-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background: rgba(35, 120, 4, 0.1); color: #237804;">
+            ${icon("dollar-sign", 22)}
+          </div>
+          <div class="admin-stat-body">
+            <span class="admin-stat-label">Total Verified Revenue</span>
+            <span class="admin-stat-value">₹${totalPaidRevenue.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background: rgba(82, 196, 26, 0.1); color: #52c41a;">
+            ${icon("check-circle", 22)}
+          </div>
+          <div class="admin-stat-body">
+            <span class="admin-stat-label">Paid Licenses</span>
+            <span class="admin-stat-value">${paidCount}</span>
+          </div>
+        </div>
+
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background: rgba(200, 161, 90, 0.1); color: var(--gold);">
+            ${icon("clock", 22)}
+          </div>
+          <div class="admin-stat-body">
+            <span class="admin-stat-label">Pending / In-Flight</span>
+            <span class="admin-stat-value">${pendingCount}</span>
+          </div>
+        </div>
+
+        <div class="admin-stat-card">
+          <div class="admin-stat-icon" style="background: rgba(207, 19, 34, 0.1); color: #cf1322;">
+            ${icon("alert-triangle", 22)}
+          </div>
+          <div class="admin-stat-body">
+            <span class="admin-stat-label">Failed / Refunded</span>
+            <span class="admin-stat-value">${failedCount + refundedCount}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Bar -->
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="admin-btn ${paymentFilterStatus === 'ALL' ? 'admin-btn-primary' : 'admin-btn-secondary'} payment-filter-btn" data-status="ALL">
+            All (${paymentsList.length})
+          </button>
+          <button type="button" class="admin-btn ${paymentFilterStatus === 'PAID' ? 'admin-btn-primary' : 'admin-btn-secondary'} payment-filter-btn" data-status="PAID">
+            Paid (${paidCount})
+          </button>
+          <button type="button" class="admin-btn ${paymentFilterStatus === 'PENDING' ? 'admin-btn-primary' : 'admin-btn-secondary'} payment-filter-btn" data-status="PENDING">
+            Pending (${pendingCount})
+          </button>
+          <button type="button" class="admin-btn ${paymentFilterStatus === 'FAILED' ? 'admin-btn-primary' : 'admin-btn-secondary'} payment-filter-btn" data-status="FAILED">
+            Failed (${failedCount})
+          </button>
+          <button type="button" class="admin-btn ${paymentFilterStatus === 'REFUNDED' ? 'admin-btn-primary' : 'admin-btn-secondary'} payment-filter-btn" data-status="REFUNDED">
+            Refunded (${refundedCount})
+          </button>
+        </div>
+
+        <div style="flex: 1; max-width: 400px; min-width: 240px;">
+          <input 
+            type="text" 
+            id="adminPaymentSearch" 
+            value="${escapeHtml(paymentSearchQuery)}" 
+            placeholder="Search by order ID, payment ID, customer email..." 
+            class="admin-form-control"
+            style="width: 100%;"
+          >
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div class="admin-table-wrapper">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Customer</th>
+              <th>Product</th>
+              <th>Razorpay Order / Payment</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Downloads</th>
+              <th style="text-align: center;">Audit</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.length === 0 ? `
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: rgba(17,29,66,0.5);">
+                  ${loadingPayments ? "Loading verified payment records..." : "No payment records found matching your filter criteria."}
+                </td>
+              </tr>
+            ` : filtered.map(p => {
+              const prod = p.products || {};
+              const ent = Array.isArray(p.entitlements) ? (p.entitlements[0] || {}) : (p.entitlements || {});
+              const dateStr = p.created_at ? new Date(p.created_at).toLocaleDateString() : "-";
+              let pillClass = "admin-pill";
+              if (p.status === "PAID") pillClass = "admin-pill admin-pill-success";
+              else if (p.status === "CREATED" || p.status === "AUTHORIZED") pillClass = "admin-pill admin-pill-gold";
+              else if (p.status === "FAILED" || p.status === "CANCELLED") pillClass = "admin-pill admin-pill-danger";
+
+              return `
+                <tr>
+                  <td style="font-size: 12px; color: rgba(17,29,66,0.6); white-space: nowrap;">
+                    ${dateStr}
+                  </td>
+                  <td>
+                    <div style="font-weight: 600; font-size: 13px;">${escapeHtml(p.customer_email || (p.user_id ? "Registered User" : "Guest Customer"))}</div>
+                    ${p.customer_phone ? `<div style="font-size: 11px; color: rgba(17,29,66,0.5);">${escapeHtml(p.customer_phone)}</div>` : ""}
+                  </td>
+                  <td>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      ${prod.image ? `<img src="${attr(mediaUrl(prod.image))}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;" />` : ""}
+                      <div>
+                        <div style="font-weight: 600; font-size: 13px;">${escapeHtml(prod.title || "Embroidery Design")}</div>
+                        <div style="font-size: 11px; color: var(--gold); font-weight: 600;">${escapeHtml(prod.code || "")}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="font-family: monospace; font-size: 11px;">
+                    <div>${escapeHtml(p.razorpay_order_id || "-")}</div>
+                    ${p.razorpay_payment_id ? `<div style="color: #237804; font-weight: 600;">${escapeHtml(p.razorpay_payment_id)}</div>` : `<div style="color: rgba(17,29,66,0.4);">Awaiting payment</div>`}
+                  </td>
+                  <td>
+                    <strong>₹${p.amount || 0}</strong>
+                  </td>
+                  <td>
+                    <span class="${pillClass}">${p.status}</span>
+                  </td>
+                  <td style="font-size: 12.5px;">
+                    ${p.status === 'PAID' ? `
+                      <span style="display: inline-flex; align-items: center; gap: 4px; color: #237804; font-weight: 600;">
+                        ${icon("download", 13)} ${ent.download_count || 0}
+                      </span>
+                    ` : `<span style="color: rgba(17,29,66,0.4);">-</span>`}
+                  </td>
+                  <td style="text-align: center;">
+                    <button type="button" class="admin-btn admin-btn-secondary view-payment-details-btn" data-id="${attr(p.id)}" style="padding: 6px 12px; font-size: 12px;">
+                      View
+                    </button>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
 function renderCustomRequestsModule() {
   if (selectedRequest) {
     const r = selectedRequest;
@@ -2133,6 +2463,7 @@ function renderModule(section) {
     "categories": () => renderCategoriesModule(),
     "collections": () => renderCollectionsModule(),
     "orders": () => renderOrdersModule(),
+    "payments": () => renderPaymentsModule(),
     "custom-requests": () => renderCustomRequestsModule(),
     "customers": () => renderCustomersModule(),
     "content": () => renderContentModule(),
@@ -2248,6 +2579,16 @@ export function initAdminDashboardDelegates() {
       orderSearchQuery = e.target.value;
       triggerRender();
       const input = document.getElementById("adminOrderSearch");
+      if (input) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      }
+    }
+
+    if (e.target.id === "adminPaymentSearch") {
+      paymentSearchQuery = e.target.value;
+      triggerRender();
+      const input = document.getElementById("adminPaymentSearch");
       if (input) {
         input.focus();
         input.setSelectionRange(input.value.length, input.value.length);
@@ -2648,6 +2989,33 @@ export function initAdminDashboardDelegates() {
 
     if (e.target.closest(".close-order-details-btn")) {
       selectedOrder = null;
+      triggerRender();
+      return;
+    }
+
+    // ------------------------------------------
+    // Payment & License Actions
+    // ------------------------------------------
+    const filterBtn = e.target.closest(".payment-filter-btn");
+    if (filterBtn) {
+      paymentFilterStatus = filterBtn.dataset.status;
+      triggerRender();
+      return;
+    }
+
+    const viewPayBtn = e.target.closest(".view-payment-details-btn");
+    if (viewPayBtn) {
+      const id = viewPayBtn.dataset.id;
+      const payment = paymentsList.find(p => p.id === id);
+      if (payment) {
+        selectedPayment = payment;
+        triggerRender();
+      }
+      return;
+    }
+
+    if (e.target.closest(".close-payment-details-btn")) {
+      selectedPayment = null;
       triggerRender();
       return;
     }
