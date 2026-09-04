@@ -17,3 +17,6 @@ node_modules/
 Thumbs.db
 
 .vercel
+scratch/
+.agents/
+skills-lock.json

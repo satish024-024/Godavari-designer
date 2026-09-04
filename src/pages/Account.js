@@ -544,6 +544,14 @@ function renderSavedTab() {
 
 // 5. Profile Settings Tab
 function renderProfileTab() {
+  let machineBrand = "tajima";
+  let prefFormat = "DST";
+  try {
+    const savedPrefs = JSON.parse(localStorage.getItem("godavari_machine_preferences") || "{}");
+    if (savedPrefs.machineBrand) machineBrand = savedPrefs.machineBrand;
+    if (savedPrefs.preferredFormat) prefFormat = savedPrefs.preferredFormat;
+  } catch (e) {}
+
   const alertHtml = profileFormMsg ? `
     <div style="
       background: ${profileFormMsgType === 'success' ? '#f6ffed' : '#fff2e8'}; 
@@ -572,9 +580,40 @@ function renderProfileTab() {
           </label>
 
           <label class="account-form-label">
-            <span>Phone Number</span>
+            <span>Phone Number / WhatsApp</span>
             <input type="text" name="phone" class="account-form-input" value="${escapeHtml(currentUser.phone || '')}" placeholder="+91 99999 99999" autocomplete="tel" />
           </label>
+        </div>
+
+        <!-- Machine Brand & Preferred Format for Boutiques (Sheet 4 & 5) -->
+        <div style="border-top: 1px dashed var(--border); padding-top: 20px; display: grid; gap: 16px;">
+          <h3 style="font-size: 14px; text-transform: uppercase; color: var(--navy); font-weight: 700; margin: 0; letter-spacing: 0.05em;">Boutique & Machine Setup</h3>
+          <div class="account-form-row">
+            <label class="account-form-label">
+              <span>Embroidery Machine Brand</span>
+              <select name="machineBrand" class="account-form-input" style="height: 44px;">
+                <option value="tajima" ${machineBrand === "tajima" ? "selected" : ""}>Tajima (Industry Standard)</option>
+                <option value="brother" ${machineBrand === "brother" ? "selected" : ""}>Brother / Babylock</option>
+                <option value="janome" ${machineBrand === "janome" ? "selected" : ""}>Janome / Elna</option>
+                <option value="bernina" ${machineBrand === "bernina" ? "selected" : ""}>Bernina / Melco</option>
+                <option value="singer" ${machineBrand === "singer" ? "selected" : ""}>Singer / Husqvarna Viking</option>
+                <option value="ricoma" ${machineBrand === "ricoma" ? "selected" : ""}>Ricoma / Barudan</option>
+                <option value="other" ${machineBrand === "other" ? "selected" : ""}>Other Multi-Needle Machine</option>
+              </select>
+            </label>
+
+            <label class="account-form-label">
+              <span>Default Download Format</span>
+              <select name="preferredFormat" class="account-form-input" style="height: 44px; font-weight: 700;">
+                <option value="DST" ${prefFormat === "DST" ? "selected" : ""}>.DST (Tajima / Universal)</option>
+                <option value="PES" ${prefFormat === "PES" ? "selected" : ""}>.PES (Brother / Babylock)</option>
+                <option value="JEF" ${prefFormat === "JEF" ? "selected" : ""}>.JEF (Janome)</option>
+                <option value="EXP" ${prefFormat === "EXP" ? "selected" : ""}>.EXP (Bernina / Melco)</option>
+                <option value="EMB" ${prefFormat === "EMB" ? "selected" : ""}>.EMB (Wilcom Working File)</option>
+                <option value="XXX" ${prefFormat === "XXX" ? "selected" : ""}>.XXX (Singer)</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         <div style="border-top: 1px dashed var(--border); padding-top: 20px; display: grid; gap: 18px;">
@@ -684,11 +723,20 @@ export function initAccountDelegates() {
         postalCode: formData.get("postalCode")
       };
 
+      const machineBrand = formData.get("machineBrand");
+      const preferredFormat = formData.get("preferredFormat");
+      if (machineBrand || preferredFormat) {
+        localStorage.setItem("godavari_machine_preferences", JSON.stringify({
+          machineBrand: machineBrand || "tajima",
+          preferredFormat: preferredFormat || "DST"
+        }));
+      }
+
       try {
         const { updateUserProfile } = await import("../services/store.js");
         const success = await updateUserProfile(name, phone, addressFields);
         if (success) {
-          profileFormMsg = "Profile information updated successfully.";
+          profileFormMsg = "Profile and machine preferences updated successfully.";
           profileFormMsgType = "success";
         } else {
           profileFormMsg = "Failed to update profile settings.";

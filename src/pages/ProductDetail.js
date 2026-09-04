@@ -1,4 +1,4 @@
-import { site, wishlist, ui, addToCart, toggleWishlist, currentUser, showToast, triggerRender, getCategories } from "../services/store.js";
+import { site, wishlist, ui, addToCart, toggleWishlist, currentUser, showToast, triggerRender, getCategories, isProductUnlocked, downloadMachineFile } from "../services/store.js";
 import { customRequestService } from "../services/supabase.js";
 import { escapeHtml, attr, icon, money, mediaUrl, isMobileViewport } from "../utils/helpers.js";
 
@@ -87,6 +87,7 @@ export function renderProductDetail() {
   currentProduct = product;
 
   const isSaved = wishlist.has(product.id);
+  const isUnlocked = isProductUnlocked(product.id);
   const selectedFormat = product.formats.find(f => f.format === activeFormatCode) || product.formats[0];
   const displayPrice = selectedFormat ? selectedFormat.price : product.price;
 
@@ -256,27 +257,70 @@ export function renderProductDetail() {
             </div>
           </div>
 
-          <!-- Purchase Actions -->
-          <div style="display: grid; gap: 10px; margin-bottom: 24px;">
-            <button type="button" class="button button-primary" data-action="add-cart" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; width: 100%; min-height: 48px;">
-              <span>Add to Studio Cart</span>
-              ${icon("shopping-bag", 18)}
-            </button>
-
-            <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
-              <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; color: #fff; border: none; text-decoration: none; font-weight: 700; border-radius: 4px; height: 48px; font-size: 13px; padding: 0; min-height:48px;">
-                ${icon("phone", 16)} WhatsApp Inquiry
-              </a>
-              <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0; min-height:48px;">
-                ${icon("heart", 18)}
-              </button>
+          <!-- Samsung-Style Lock & Entitlement Status Card -->
+          ${isUnlocked ? `
+            <div style="background: #f6ffed; border: 1.5px solid #b7eb8f; border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+              <span style="color: #52c41a; font-size: 24px; font-weight: 800; line-height: 1;">✓</span>
+              <div>
+                <strong style="color: #237804; font-size: 13.5px; display: block;">Machine Stitch File Unlocked (Owned)</strong>
+                <span style="font-size: 11.5px; color: var(--ink-soft);">Ready for commercial production on your embroidery machine.</span>
+              </div>
             </div>
 
-            <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; width: 100%; min-height: 48px;">
-              <span>Request Custom Version</span>
-              ${icon("sliders", 18)}
-            </a>
-          </div>
+            <!-- Purchase Actions: Unlocked Mode -->
+            <div style="display: grid; gap: 10px; margin-bottom: 24px;">
+              <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; width: 100%; min-height: 48px; background: #237804; color: #fff; font-size: 14px;">
+                ${icon("download", 18)}
+                <span>Download .${escapeHtml(activeFormatCode)} Stitch File</span>
+              </button>
+
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+                <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; height: 44px; font-size: 12px;">
+                  <span>Custom Modification</span>
+                  ${icon("sliders", 15)}
+                </a>
+                <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0;">
+                  ${icon("heart", 18)}
+                </button>
+              </div>
+            </div>
+          ` : `
+            <!-- Protected Machine File Banner -->
+            <div style="background: #faf8f5; border: 1px dashed var(--gold); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px;">
+              <span style="color: var(--gold);">${icon("lock", 20)}</span>
+              <span style="font-size: 12px; color: var(--navy); line-height: 1.4;">
+                <strong>Machine File Protected:</strong> Pay <strong>${money(displayPrice)}</strong> to instantly unlock official commercial <strong>.${escapeHtml(activeFormatCode)}</strong> stitch file.
+              </span>
+            </div>
+
+            <!-- Purchase Actions: Amazon-Style E-Commerce Flow -->
+            <div style="display: grid; gap: 10px; margin-bottom: 24px;">
+              <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; width: 100%; min-height: 48px; font-size: 14.5px; background: var(--navy); color: #fff;">
+                ${icon("zap", 18)}
+                <span>Buy Now & Unlock (${money(displayPrice)})</span>
+              </button>
+
+              <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px;">
+                <button type="button" class="button button-secondary" data-action="add-cart" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; height: 44px; font-size: 12.5px;">
+                  ${icon("shopping-bag", 16)}
+                  <span>Add to Studio Cart</span>
+                </button>
+                <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0;">
+                  ${icon("heart", 18)}
+                </button>
+              </div>
+
+              <div style="display: flex; gap: 8px;">
+                <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: #25d366; color: #fff; border: none; text-decoration: none; font-weight: 700; border-radius: 6px; height: 38px; font-size: 11.5px; padding: 0;">
+                  ${icon("message-circle", 14)} WhatsApp Help
+                </a>
+                <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="flex: 1.2; text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700; height: 38px; font-size: 11.5px; padding: 0; border-radius: 6px;">
+                  <span>Custom Size</span>
+                  ${icon("sliders", 14)}
+                </a>
+              </div>
+            </div>
+          `}
 
           <!-- Product Technical Specs Table -->
           <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 16px; margin-bottom: 20px;">
@@ -366,19 +410,31 @@ export function renderProductDetail() {
               : ""
           }
 
-          <!-- Design Download Center Preview -->
+          <!-- Design Download Center (Samsung-Style Protected) -->
           <div class="download-section" style="border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: #fff; margin-bottom: 24px;">
-            <h3 style="font-family: var(--font-serif); font-size: 16px; margin-bottom: 6px; color: var(--navy);">Design Download Center</h3>
-            <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 12px;">Download production embroidery files, spec sheet PDFs, and design preview images.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <h3 style="font-family: var(--font-serif); font-size: 16px; margin: 0; color: var(--navy);">Design Download Center</h3>
+              ${isUnlocked ? `
+                <span style="font-size: 10px; font-weight: 700; color: #389e0d; background: #f6ffed; border: 1px solid #b7eb8f; padding: 2px 6px; border-radius: 4px;">Unlocked ✓</span>
+              ` : `
+                <span style="font-size: 10px; font-weight: 700; color: #cf1322; background: #fff1f0; border: 1px solid #ffa39e; padding: 2px 6px; border-radius: 4px;">🔒 Locked</span>
+              `}
+            </div>
+            <p style="font-size: 12px; color: var(--ink-soft); margin-bottom: 12px;">
+              ${isUnlocked ? "Your license is active. Download verified commercial stitch files below." : "Commercial production files (.DST/.PES) unlock automatically after payment."}
+            </p>
             <div style="display: grid; gap: 8px;">
-              <button type="button" class="button button-secondary" data-action="download-production-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0; width: 100%;">
-                ${icon("download", 14)} Production File
-              </button>
+              ${isUnlocked ? `
+                <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; height: 40px; padding: 0; width: 100%; background: #237804; color: #fff; font-weight: 700;">
+                  ${icon("download", 14)} Download .${escapeHtml(activeFormatCode)} Production File
+                </button>
+              ` : `
+                <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12.5px; height: 40px; padding: 0; width: 100%; background: var(--navy); color: #fff; font-weight: 700;">
+                  ${icon("lock", 14)} Pay ${money(displayPrice)} to Unlock Machine File
+                </button>
+              `}
               <button type="button" class="button button-secondary" data-action="download-spec-sheet" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0; width: 100%;">
                 ${icon("file-text", 14)} Spec Sheet (PDF)
-              </button>
-              <button type="button" class="button button-secondary" data-action="download-fabric-mockup" data-id="${attr(product.id)}" data-image="${attr(activeImageSrc)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; height: 38px; padding: 0; width: 100%;">
-                ${icon("image", 14)} Download Image
               </button>
             </div>
           </div>
@@ -608,19 +664,31 @@ export function renderProductDetail() {
                 ${icon("maximize-2", 14)} Full Screen
               </button>
             </div>
-            <!-- Future-Proof Download Center Preview -->
+            <!-- Design Download Center (Samsung-Style Protected Desktop) -->
             <div class="download-section" style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; background: #fff; margin-top: 24px;">
-              <h3 style="font-family: var(--font-serif); font-size: 18px; margin-bottom: 8px; color: var(--navy);">Design Download Center</h3>
-              <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">Download production embroidery files, spec sheet PDFs, and design preview images.</p>
-              <div style="display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
-                <button type="button" class="button button-secondary" data-action="download-production-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
-                  ${icon("download", 14)} Production File
-                </button>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h3 style="font-family: var(--font-serif); font-size: 18px; margin: 0; color: var(--navy);">Design Download Center</h3>
+                ${isUnlocked ? `
+                  <span style="font-size: 11px; font-weight: 700; color: #389e0d; background: #f6ffed; border: 1px solid #b7eb8f; padding: 3px 8px; border-radius: 4px;">Unlocked ✓</span>
+                ` : `
+                  <span style="font-size: 11px; font-weight: 700; color: #cf1322; background: #fff1f0; border: 1px solid #ffa39e; padding: 3px 8px; border-radius: 4px;">🔒 Locked</span>
+                `}
+              </div>
+              <p style="font-size: 13px; color: var(--ink-soft); margin-bottom: 16px;">
+                ${isUnlocked ? "Your commercial production license is active. Download verified stitch files below." : "Commercial machine files (.DST, .PES, .EXP) unlock immediately upon payment."}
+              </p>
+              <div style="display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                ${isUnlocked ? `
+                  <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px; background: #237804; color: #fff; font-weight: 700;">
+                    ${icon("download", 14)} Download .${escapeHtml(activeFormatCode)}
+                  </button>
+                ` : `
+                  <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px; background: var(--navy); color: #fff; font-weight: 700;">
+                    ${icon("lock", 14)} Unlock .${escapeHtml(activeFormatCode)} (${money(displayPrice)})
+                  </button>
+                `}
                 <button type="button" class="button button-secondary" data-action="download-spec-sheet" data-id="${attr(product.id)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
                   ${icon("file-text", 14)} Spec Sheet (PDF)
-                </button>
-                <button type="button" class="button button-secondary" data-action="download-fabric-mockup" data-id="${attr(product.id)}" data-image="${attr(activeImageSrc)}" style="display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 13px; padding: 10px;">
-                  ${icon("image", 14)} Download Image
                 </button>
               </div>
             </div>
@@ -798,29 +866,71 @@ export function renderProductDetail() {
                 .join("")}
             </div>
 
-            <!-- Purchase Actions -->
-            <div class="detail-actions-grid">
-              <button type="button" class="button button-primary" data-action="add-cart" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;">
-                <span>Add to Studio Cart</span>
-                ${icon("shopping-bag", 18)}
-              </button>
+            <!-- Samsung-Style Lock & Entitlement Status Card (Desktop) -->
+            ${isUnlocked ? `
+              <div style="background: #f6ffed; border: 1.5px solid #b7eb8f; border-radius: 10px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px;">
+                <span style="color: #52c41a; font-size: 28px; font-weight: 800; line-height: 1;">✓</span>
+                <div>
+                  <strong style="color: #237804; font-size: 15px; display: block;">Machine Stitch File Unlocked (Owned)</strong>
+                  <span style="font-size: 13px; color: var(--ink-soft);">You have purchased the commercial license. 1-tap download is active below.</span>
+                </div>
+              </div>
 
-              <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;">
-                <span>Save to Wishlist</span>
-                ${icon("heart", 18)}
-              </button>
+              <!-- Desktop Actions: Unlocked Mode -->
+              <div class="detail-actions-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                <button type="button" class="button button-primary detail-actions-full" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; height: 50px; font-size: 15px; background: #237804; color: #fff;">
+                  ${icon("download", 20)}
+                  <span>Download .${escapeHtml(activeFormatCode)} File Now</span>
+                </button>
 
-              <!-- Prefilled WhatsApp Inquiry CTA -->
-              <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button detail-actions-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; color: #fff; border: none; text-decoration: none; font-weight: 700; border-radius: 4px; padding: 12px; margin-top: 6px;">
-                ${icon("phone", 18)} WhatsApp Inquiry
-              </a>
+                <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 50px;">
+                  <span>Save to Wishlist</span>
+                  ${icon("heart", 18)}
+                </button>
 
-              <!-- Custom Version Link pointing to Custom Order Page with Query Params -->
-              <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary detail-actions-full" style="text-decoration:none; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;">
-                <span>Request Custom Version</span>
-                ${icon("sliders", 18)}
-              </a>
-            </div>
+                <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 44px; font-size: 13px;">
+                  <span>Request Custom Modification</span>
+                  ${icon("sliders", 16)}
+                </a>
+              </div>
+            ` : `
+              <!-- Protected Machine File Notice -->
+              <div style="background: #faf8f5; border: 1px dashed var(--gold); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                <span style="color: var(--gold);">${icon("lock", 24)}</span>
+                <span style="font-size: 13px; color: var(--navy); line-height: 1.45;">
+                  <strong>Machine Stitch File Protected:</strong> Pay <strong>${money(displayPrice)}</strong> to unlock authentic commercial <strong>.${escapeHtml(activeFormatCode)}</strong> production file with lifetime access.
+                </span>
+              </div>
+
+              <!-- Desktop Actions: Amazon-Style Purchase Flow -->
+              <div class="detail-actions-grid">
+                <button type="button" class="button button-primary detail-actions-full" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" data-price="${attr(displayPrice)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; min-height: 52px; font-size: 16px; background: var(--navy); color: #fff;">
+                  ${icon("zap", 20)}
+                  <span>Buy Now & Unlock Instantly (${money(displayPrice)})</span>
+                </button>
+
+                <button type="button" class="button button-secondary" data-action="add-cart" data-id="${attr(product.id)}" data-format="${attr(activeFormatCode)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 48px;">
+                  <span>Add to Studio Cart</span>
+                  ${icon("shopping-bag", 18)}
+                </button>
+
+                <button type="button" class="button button-secondary heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; height: 48px;">
+                  <span>Save to Wishlist</span>
+                  ${icon("heart", 18)}
+                </button>
+
+                <!-- Help & Custom Version Links -->
+                <div class="detail-actions-full" style="display: flex; gap: 10px; margin-top: 6px;">
+                  <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; background: #25d366; color: #fff; border: none; text-decoration: none; font-weight: 700; border-radius: 6px; padding: 10px; font-size: 13px;">
+                    ${icon("message-circle", 16)} WhatsApp Inquiry
+                  </a>
+                  <a href="#/custom-order?product_id=${attr(product.id)}&product_slug=${attr(product.slug)}&product_name=${attr(encodeURIComponent(product.title))}&format=${attr(activeFormatCode)}" class="button button-secondary" style="flex: 1.2; text-decoration:none; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; border-radius: 6px; padding: 10px; font-size: 13px;">
+                    <span>Request Custom Size</span>
+                    ${icon("sliders", 16)}
+                  </a>
+                </div>
+              </div>
+            `}
 
             <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 24px; margin-top: 20px;">
               <h3 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0 0 16px;">Product Description</h3>

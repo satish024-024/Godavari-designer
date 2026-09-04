@@ -523,6 +523,37 @@ select:focus-visible {
   opacity: 0.95;
 }
 
+/* Anti-Theft Image Shield & Machine Embroidery Asset Protection */
+.image-shield {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+.product-media,
+.product-card,
+.catalog-grid-zedge {
+  -webkit-touch-callout: none !important;
+}
+
+.product-media img,
+.product-card img {
+  -webkit-user-drag: none !important;
+  -webkit-touch-callout: none !important;
+  user-select: none !important;
+}
+
+@media (max-width: 640px) {
+  .catalog-grid-zedge {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
 .hero-meta {
   display: flex;
   flex-wrap: wrap;
@@ -7043,6 +7074,34 @@ main:has(.admin-shell) {
 
   .admin-module-subtitle {
     font-size: 12px !important;
+  }
+}
+
+/* ==========================================================================
+   Payment Modal & DRM Unlock System
+   ========================================================================== */
+.payment-modal-overlay {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1000 !important;
+}
+
+.payment-modal-card {
+  position: relative;
+  z-index: 1001;
+  animation: paymentModalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes paymentModalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 

@@ -1,5 +1,45 @@
-import { site, wishlist, getCategories, ui, isVisible } from "../services/store.js";
+import { site, wishlist, getCategories, ui, isVisible, isProductUnlocked, downloadMachineFile } from "../services/store.js";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
+
+export const SHEET2_CATEGORIES = [
+  { id: "All", label: "All Designs" },
+  { id: "new-arrivals", label: "New Arrivals" },
+  { id: "beads", label: "Beads Design" },
+  { id: "bridal", label: "Bridal" },
+  { id: "blouses", label: "Blouse Designs" },
+  { id: "saree", label: "Saree Borders" },
+  { id: "kids", label: "Kids Wear" },
+  { id: "cutwork", label: "Cutwork" },
+  { id: "zari", label: "Zari Work" }
+];
+
+export const PATTERN_TAGS = [
+  "Boat Neck",
+  "Cross Stitch",
+  "Cut Work",
+  "Dress",
+  "Figure",
+  "Flowers",
+  "God",
+  "Instruments",
+  "Kids",
+  "Kutch Work",
+  "Mango",
+  "Marriage / Baby Showers",
+  "Mirror Work",
+  "Net Designs",
+  "One Side",
+  "Saree Pallu",
+  "Peacock",
+  "Photo Embroidery",
+  "Pot Neck",
+  "Simple",
+  "Square Neck",
+  "Unique Neck",
+  "V Neck",
+  "Painting",
+  "DTF Designs"
+];
 
 // Page level reactive state
 export const catalogState = {
@@ -7,6 +47,7 @@ export const catalogState = {
   selectedCategory: "All",
   selectedSubcategory: "All",
   selectedCollection: "All",
+  selectedTag: "All",
   sortBy: "default",
   minPrice: 0,
   maxPrice: 100,
@@ -131,17 +172,52 @@ export function renderCatalog() {
   let filtered = site.products.filter((product) => {
     // 1. Search Query Match
     if (query) {
-      const matchText = `${product.title} ${product.code} ${product.category} ${product.collection} ${product.stitchType} ${product.tags.join(" ")}`.toLowerCase();
+      const matchText = `${product.title} ${product.code} ${product.category} ${product.collection} ${product.stitchType} ${(product.tags || []).join(" ")}`.toLowerCase();
       if (!matchText.includes(query)) return false;
     }
 
-    // 2. Parent Category Match (Strict UUID checks via active category hierarchy)
+    // Pattern Tag Match (from Sheet 2)
+    if (catalogState.selectedTag && catalogState.selectedTag !== "All") {
+      const tagLower = catalogState.selectedTag.toLowerCase();
+      const productTags = (product.tags || []).map(t => t.toLowerCase());
+      const textCorpus = `${product.title || ""} ${product.description || ""} ${product.category || ""} ${product.collection || ""}`.toLowerCase();
+      const matchesTag = productTags.some(t => t.includes(tagLower) || tagLower.includes(t)) || textCorpus.includes(tagLower);
+      if (!matchesTag) return false;
+    }
+
+    // 2. Parent Category Match (Sheet 2 categories + database dynamic categories)
     if (catalogState.selectedCategory !== "All") {
-      const parentCat = cats.find(c => c.slug === catalogState.selectedCategory && !c.parentCategoryId);
-      if (parentCat) {
-        const childCatIds = cats.filter(c => c.parentCategoryId === parentCat.id).map(c => c.id);
-        const isChild = childCatIds.includes(product.categoryId) || product.categoryId === parentCat.id;
-        if (!isChild) return false;
+      const selCat = catalogState.selectedCategory.toLowerCase();
+      if (selCat === "new-arrivals") {
+        if (!product.bestSeller && !product.featured) return false;
+      } else if (selCat === "beads") {
+        const text = `${product.title} ${product.description} ${(product.tags || []).join(" ")}`.toLowerCase();
+        if (!text.includes("bead")) return false;
+      } else if (selCat === "cutwork") {
+        const text = `${product.title} ${product.description} ${(product.tags || []).join(" ")}`.toLowerCase();
+        if (!text.includes("cutwork") && !text.includes("cut work")) return false;
+      } else if (selCat === "zari") {
+        const text = `${product.title} ${product.description} ${(product.tags || []).join(" ")}`.toLowerCase();
+        if (!text.includes("zari") && !text.includes("gold")) return false;
+      } else if (selCat === "bridal") {
+        const text = `${product.title} ${product.category} ${product.collection} ${(product.tags || []).join(" ")}`.toLowerCase();
+        if (!text.includes("bridal") && !text.includes("wedding")) return false;
+      } else if (selCat === "blouses") {
+        const text = `${product.title} ${product.category} ${product.collection} ${(product.tags || []).join(" ")}`.toLowerCase();
+        if (!text.includes("blouse")) return false;
+      } else if (selCat === "saree") {
+        const text = `${product.title} ${product.category} ${product.collection} ${(product.tags || []).join(" ")}`.toLowerCase();
+        if (!text.includes("saree") && !text.includes("border")) return false;
+      } else if (selCat === "kids") {
+        const text = `${product.title} ${product.category} ${product.collection} ${(product.tags || []).join(" ")}`.toLowerCase();
+        if (!text.includes("kid")) return false;
+      } else {
+        const parentCat = cats.find(c => c.slug === catalogState.selectedCategory && !c.parentCategoryId);
+        if (parentCat) {
+          const childCatIds = cats.filter(c => c.parentCategoryId === parentCat.id).map(c => c.id);
+          const isChild = childCatIds.includes(product.categoryId) || product.categoryId === parentCat.id;
+          if (!isChild) return false;
+        }
       }
     }
 
@@ -231,34 +307,33 @@ export function renderCatalog() {
         <a href="#/" style="color: inherit; text-decoration: none;">Home</a> &nbsp;&gt;&nbsp; <span style="color: var(--gold);">Design Library</span>
       </nav>
 
-      <!-- Editorial Hero Header -->
-      <div class="catalog-header-copy" style="max-width: 900px; margin: 0 auto 36px; text-align: center; padding: 0 24px;">
-        <h1 style="font-family: var(--font-serif); font-size: clamp(38px, 5vw, 68px); color: var(--navy); line-height: 1.05; font-weight:700; margin-bottom: 12px;">
-          Explore Luxury<br />Embroidery Designs
+      <!-- Editorial Hero Header & Search Bar -->
+      <div class="catalog-header-copy" style="max-width: 900px; margin: 0 auto 28px; text-align: center; padding: 0 24px;">
+        <h1 style="font-family: var(--font-serif); font-size: clamp(34px, 5vw, 60px); color: var(--navy); line-height: 1.05; font-weight:700; margin-bottom: 10px;">
+          Embroidery Design Library
         </h1>
-        <p style="color: var(--ink-soft); font-size: 15px; max-width: 600px; margin: 0 auto 28px;">
-          Discover machine-ready embroidery collections crafted for designers, boutiques, and fashion brands.
+        <p style="color: var(--ink-soft); font-size: 14.5px; max-width: 600px; margin: 0 auto 24px;">
+          Browse machine-ready embroidery stitch files (.DST, .PES, .JEF, .EXP) tested for commercial machines.
         </p>
 
-        <!-- Centered Search Bar -->
-        <div class="catalog-search-field" style="max-width: 620px; margin: 0 auto;">
+        <!-- Sticky / Prominent Search Bar (Sheet 2) -->
+        <div class="catalog-search-field" style="max-width: 650px; margin: 0 auto; position: relative;">
           ${icon("search", 20)}
-          <input id="catalogSearchInput" value="${attr(catalogState.searchQuery)}" placeholder="Search by design code, pattern, category or embroidery style..." style="font-weight: 500; font-size: 14px;" />
+          <input id="catalogSearchInput" value="${attr(catalogState.searchQuery)}" placeholder="🔍 Search by design code, pattern, catalog..." style="font-weight: 500; font-size: 14.5px; padding-right: 40px;" />
           <i data-lucide="sparkles" style="position: absolute; right: 20px; color: var(--gold); cursor:pointer;"></i>
         </div>
       </div>
 
-      <!-- Categories Navigation Bar (Pills) -->
-      <div class="category-pills-row" style="max-width: 1540px; margin: 0 auto 28px; padding: 0 clamp(22px, 5vw, 78px); display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;">
-        ${pillCategories
+      <!-- Categories Navigation Bar (Sheet 2 Pills) -->
+      <div class="category-pills-row" style="max-width: 1540px; margin: 0 auto 16px; padding: 0 clamp(16px, 4vw, 40px); display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
+        ${SHEET2_CATEGORIES
           .map(
             (c) => {
-              const isAll = c === "All";
-              const value = isAll ? "All" : c.slug;
-              const label = isAll ? "All Designs" : c.name;
-              const isActive = catalogState.selectedCategory === value;
+              const value = c.id;
+              const label = c.label;
+              const isActive = catalogState.selectedCategory.toLowerCase() === value.toLowerCase();
               return `
-                <button type="button" class="filter-pill ${isActive ? "active" : ""}" data-action="filter-category" data-value="${attr(value)}" style="border-radius: 99px; font-weight:700; padding: 10px 22px;">
+                <button type="button" class="filter-pill ${isActive ? "active" : ""}" data-action="filter-category" data-value="${attr(value)}" style="border-radius: 99px; font-weight:700; padding: 8px 18px; font-size: 13px;">
                   ${escapeHtml(label)}
                 </button>
               `;
@@ -267,9 +342,30 @@ export function renderCatalog() {
           .join("")}
         
         <!-- More Filters Toggle Button -->
-        <button type="button" class="filter-pill ${catalogState.moreFiltersOpen ? "active" : ""}" data-action="toggle-more-filters" style="border-radius: 99px; font-weight:700; padding: 10px 22px; display: inline-flex; align-items: center; gap: 8px;">
-          ${icon("sliders-horizontal", 16)} More Filters
+        <button type="button" class="filter-pill ${catalogState.moreFiltersOpen ? "active" : ""}" data-action="toggle-more-filters" style="border-radius: 99px; font-weight:700; padding: 8px 18px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+          ${icon("sliders-horizontal", 15)} More Filters
         </button>
+      </div>
+
+      <!-- Extended Pattern Tags Cloud (Sheet 2) -->
+      <div class="pattern-tags-cloud-wrap" style="max-width: 1540px; margin: 0 auto 24px; padding: 0 clamp(16px, 4vw, 40px);">
+        <div style="display: flex; gap: 6px; overflow-x: auto; padding: 6px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; align-items: center;">
+          <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--gold); letter-spacing: 0.08em; flex-shrink: 0; padding-right: 4px;">Patterns:</span>
+          ${catalogState.selectedTag !== "All" ? `
+            <button type="button" class="tag-pill active" data-action="filter-tag" data-value="All" style="flex-shrink: 0; font-size: 11.5px; font-weight: 700; padding: 4px 12px; border-radius: 99px; border: 1px solid var(--gold); background: var(--navy); color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <span>Tag: ${escapeHtml(catalogState.selectedTag)}</span>
+              ${icon("x", 12)}
+            </button>
+          ` : ""}
+          ${PATTERN_TAGS.map(tag => {
+            const isActive = catalogState.selectedTag === tag;
+            return `
+              <button type="button" class="tag-pill ${isActive ? "active" : ""}" data-action="filter-tag" data-value="${attr(tag)}" style="flex-shrink: 0; font-size: 11.5px; font-weight: 600; padding: 4px 12px; border-radius: 99px; border: 1px solid ${isActive ? 'var(--gold)' : 'rgba(200, 161, 90, 0.28)'}; background: ${isActive ? 'var(--navy)' : '#fff'}; color: ${isActive ? '#fff' : 'var(--navy)'}; cursor: pointer; white-space: nowrap; transition: all 0.2s ease;">
+                ${escapeHtml(tag)}
+              </button>
+            `;
+          }).join("")}
+        </div>
       </div>
 
       <!-- Subcategories pills (if parent category is active) -->
@@ -470,31 +566,42 @@ export function renderCatalog() {
           </div>
         </div>
 
-        <!-- Product Cards Grid -->
+        <!-- Product Cards Grid (Zedge / Pinterest 2-col mobile style) -->
         ${
           paginated.length > 0
-            ? `<div class="product-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px;">
+            ? `<div class="product-grid catalog-grid-zedge" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
                 ${paginated
                   .map(
                     (product, index) => {
                       const isSaved = wishlist.has(product.id);
-                      return `
-                        <article class="product-card reveal is-visible" style="--delay:${index * 40}ms; border-radius: 8px; border: 1px solid var(--border); background:#fff; overflow:hidden; box-shadow: var(--shadow); transition: all 360ms ease;">
+                      const defaultFormat = (product.formats && product.formats[0]) ? product.formats[0].format : "DST";
+                      const isUnlocked = isProductUnlocked(product.id);
+                      const productCardHtml = `
+                        <article class="product-card reveal is-visible" style="--delay:${index * 40}ms; border-radius: 10px; border: 1px solid var(--border); background:#fff; overflow:hidden; box-shadow: var(--shadow); transition: all 360ms ease;">
                           <div class="product-media" style="position:relative; aspect-ratio: 1 / 1; background: #faf8f5; overflow:hidden; display:grid; place-items:center;">
-                            <a href="#/product/${product.slug}" style="display:block; width:100%; height:100%;">
-                              <img src="${attr(mediaUrl(product.image))}" alt="${attr(product.title)}" loading="lazy" style="width:100%; height:100%; object-fit:cover; transition: transform 600ms ease;" />
+                            <a href="#/product/${product.slug}" style="display:block; width:100%; height:100%; -webkit-touch-callout: none;">
+                              <img src="${attr(mediaUrl(product.image))}" alt="${attr(product.title)}" loading="lazy" class="image-shield" style="width:100%; height:100%; object-fit:cover; pointer-events:none; -webkit-user-select:none; user-select:none; transition: transform 600ms ease;" oncontextmenu="return false;" />
                             </a>
                             
-                            <!-- New badge — subtle gold pill at bottom of image -->
-                            ${product.bestSeller ? `
-                              <span style="position:absolute; bottom:10px; left:12px; z-index:2; display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.88); backdrop-filter:blur(8px); border:1px solid rgba(200,161,90,0.4); border-radius:99px; padding:4px 10px 4px 7px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--navy);">
+                            <!-- Entitlement badge / New badge -->
+                            ${isUnlocked ? `
+                              <span style="position:absolute; bottom:10px; left:10px; z-index:2; display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.96); backdrop-filter:blur(8px); border:1px solid #b7eb8f; border-radius:99px; padding:3px 8px; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#389e0d;">
+                                <span style="color:#52c41a;">✓</span>
+                                Unlocked
+                              </span>
+                            ` : product.bestSeller ? `
+                              <span style="position:absolute; bottom:10px; left:10px; z-index:2; display:inline-flex; align-items:center; gap:5px; background:rgba(255,255,255,0.92); backdrop-filter:blur(8px); border:1px solid rgba(200,161,90,0.4); border-radius:99px; padding:3px 8px; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--navy);">
                                 <span style="width:6px; height:6px; border-radius:50%; background:var(--gold); flex-shrink:0;"></span>
                                 New
                               </span>
-                            ` : ""}
+                            ` : `
+                              <span style="position:absolute; bottom:10px; left:10px; z-index:2; display:inline-flex; align-items:center; gap:4px; background:rgba(17,29,66,0.75); backdrop-filter:blur(8px); border-radius:99px; padding:3px 8px; font-size:9.5px; font-weight:700; color:#fff;">
+                                ${icon("lock", 10)} Protected
+                              </span>
+                            `}
                             
                             <!-- Wishlist Toggle -->
-                            <button type="button" class="heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" aria-label="Save ${attr(product.title)}" style="position:absolute; top:12px; right:12px; z-index:2; width:34px; height:34px; border-radius:50%; border:1px solid rgba(230,222,209,0.5); background:rgba(255,255,255,0.85); display:grid; place-items:center; color: var(--navy); cursor:pointer;">
+                            <button type="button" class="heart-button ${isSaved ? "active" : ""}" data-action="toggle-wishlist" data-id="${attr(product.id)}" aria-label="Save ${attr(product.title)}" style="position:absolute; top:10px; right:10px; z-index:2; width:34px; height:34px; border-radius:50%; border:1px solid rgba(230,222,209,0.6); background:rgba(255,255,255,0.9); display:grid; place-items:center; color: var(--navy); cursor:pointer;">
                               ${icon("heart", 16)}
                             </button>
 
@@ -503,74 +610,79 @@ export function renderCatalog() {
                                Quick View
                              </button>
 
-                             <!-- Watermark Overlay -->
+                             <!-- Watermark Overlay (Anti-theft asset stamp) -->
                              <div class="watermark-overlay">
                                <img src="/logo.jpeg" class="watermark-logo" alt="logo" />
                                <span class="watermark-text">GD • ${escapeHtml(product.code)}</span>
                              </div>
                            </div>
                           
-                          <div class="product-info" style="padding: 14px 16px 16px;">
+                          <div class="product-info" style="padding: 12px 14px 14px;">
 
-                            <!-- Code tag + Title -->
-                            <a href="#/product/${product.slug}" style="text-decoration:none; color:inherit; display:block; margin-bottom: 8px;">
-                              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; gap:8px;">
-                                <span style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; color:var(--gold); background:rgba(200,161,90,0.1); border:1px solid rgba(200,161,90,0.25); border-radius:4px; padding:2px 6px; flex-shrink:0;">${escapeHtml(product.code)}</span>
+                            <!-- Code tag + Price -->
+                            <a href="#/product/${product.slug}" style="text-decoration:none; color:inherit; display:block; margin-bottom: 6px;">
+                              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; gap:6px;">
+                                <span style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); background:rgba(200,161,90,0.1); border:1px solid rgba(200,161,90,0.25); border-radius:4px; padding:2px 6px; flex-shrink:0;">${escapeHtml(product.code)}</span>
                                 <span style="font-size:15px; font-weight:800; color:var(--gold); white-space:nowrap;">${money(product.price)}</span>
                               </div>
-                              <h3 style="font-family:var(--font-serif); font-size:16px; font-weight:700; margin:0; color:var(--navy); line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:43px;">${escapeHtml(product.title)}</h3>
+                              <h3 style="font-family:var(--font-serif); font-size:15.5px; font-weight:700; margin:0; color:var(--navy); line-height:1.3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(product.title)}</h3>
                             </a>
 
                             <!-- Specs row -->
-                            <div style="display:flex; flex-direction:column; gap:4px; padding-top:10px; border-top:1px solid rgba(230,222,209,0.7); margin-bottom:8px;">
-                              <div style="display:flex; align-items:center; gap:6px;">
-                                ${icon("activity", 11)}
-                                <span style="font-size:11px; font-weight:600; color:rgba(17,29,66,0.55); letter-spacing:0.02em;">${product.totalStitchCount.toLocaleString()} stitches</span>
-                              </div>
-                              <div style="display:flex; align-items:center; gap:6px; min-width:0;">
-                                ${icon("cpu", 11)}
-                                <span style="font-size:11px; font-weight:600; color:rgba(17,29,66,0.55); letter-spacing:0.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
-                                  ${(() => {
-                                    const brands = product.formats.map(f => f.machineBrand).filter((v,i,a) => a.indexOf(v)===i);
-                                    return brands.length > 2
-                                      ? `${escapeHtml(brands.slice(0,2).join(" · "))} <span style="color:var(--gold);">+${brands.length-2}</span>`
-                                      : escapeHtml(brands.join(" · "));
-                                  })()}
-                                </span>
-                              </div>
+                            <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--ink-soft); margin-bottom:8px; padding-bottom:6px; border-bottom:1px dashed var(--border);">
+                              <span>${product.totalStitchCount ? product.totalStitchCount.toLocaleString() : "30,000"} stitches</span>
+                              <span>${escapeHtml(product.dimensions || "200x200mm")}</span>
                             </div>
 
                             <!-- Available Formats badges row -->
-                            <div style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px; padding-top:8px; border-top:1px dashed rgba(230,222,209,0.5);">
-                              ${(product.machineFormats || []).map(f => `
-                                <span style="font-size:9.5px; font-weight:700; color:var(--navy); background:#fcfbfa; border:1px solid rgba(200, 161, 90, 0.2); border-radius:4px; padding:1px 5px;">${escapeHtml(f)}</span>
+                            <div style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:10px;">
+                              ${(product.machineFormats || ["DST", "PES", "JEF"]).map(f => `
+                                <span style="font-size:9px; font-weight:700; color:var(--navy); background:#fcfbfa; border:1px solid rgba(200, 161, 90, 0.25); border-radius:4px; padding:1px 5px;">${escapeHtml(f)}</span>
                               `).join("")}
                             </div>
 
-                            <!-- Bottom details & CTA row -->
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:12px;">
-                              <span style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:rgba(17,29,66,0.38); border:1px solid rgba(17,29,66,0.12); border-radius:99px; padding:3px 9px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:70%;">${escapeHtml(product.category)}</span>
-                              <button type="button" class="quick-view-text-btn" data-action="quick-view" data-id="${attr(product.id)}" style="border:none; background:transparent; font-size:11px; font-weight:700; color:var(--navy); letter-spacing:0.04em; cursor:pointer; white-space:nowrap; flex-shrink:0; padding:0; text-transform:uppercase; opacity:0.65; transition:opacity 180ms;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.65'">
-                                Quick View
-                              </button>
-                            </div>
-
-                            <!-- Direct Actions Group -->
-                            <div style="display:flex; gap:8px; margin-top:12px; border-top:1px solid rgba(230,222,209,0.7); padding-top:12px;">
-                              <a href="#/product/${product.slug}" class="button button-secondary" style="flex:1; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; text-decoration:none; font-weight:700; border-radius:6px;">
-                                Details
-                              </a>
-                              <button type="button" class="button button-whatsapp" data-action="buy-whatsapp" data-id="${attr(product.id)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" data-price="${attr(product.price)}" data-formats="${attr((product.machineFormats || []).join(', '))}" style="flex:1.3; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; gap:6px; font-weight:700; border-radius:6px; cursor:pointer;">
-                                ${icon("message-circle", 12)} Buy via WA
-                              </button>
+                            <!-- Action buttons: Samsung Lock & Amazon-Style Buy Now -->
+                            <div style="display:flex; gap:6px; margin-top:8px;">
+                              ${isUnlocked ? `
+                                <button type="button" class="button button-primary" data-action="download-machine-file" data-id="${attr(product.id)}" data-format="${attr(defaultFormat)}" style="flex:1; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; gap:5px; font-weight:700; border-radius:6px; border:none; cursor:pointer; background:#237804; color:#fff;">
+                                  ${icon("download", 13)} Download .${escapeHtml(defaultFormat)}
+                                </button>
+                                <a href="#/product/${product.slug}" class="button button-secondary" style="flex:0.6; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; text-decoration:none; font-weight:700; border-radius:6px;">
+                                  View
+                                </a>
+                              ` : `
+                                <button type="button" class="button button-secondary" data-action="add-cart" data-id="${attr(product.id)}" data-format="${attr(defaultFormat)}" style="flex:1; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; gap:5px; font-weight:700; border-radius:6px; cursor:pointer;">
+                                  ${icon("shopping-bag", 13)} Cart
+                                </button>
+                                <button type="button" class="button button-primary" data-action="buy-now" data-id="${attr(product.id)}" data-format="${attr(defaultFormat)}" data-price="${attr(product.price)}" data-title="${attr(product.title)}" data-code="${attr(product.code)}" style="flex:1.3; font-size:11px; height:34px; padding:0; display:flex; justify-content:center; align-items:center; gap:5px; font-weight:700; border-radius:6px; border:none; cursor:pointer; background:var(--navy); color:#fff;">
+                                  ${icon("zap", 13)} Buy Now
+                                </button>
+                              `}
                             </div>
 
                           </div>
-
                         </article>
                       `;
-                     })
-                     .join("")}
+
+                      // Inject In-Feed Sponsored Monetization Card after the 4th item
+                      const sponsoredAdHtml = (index === 3) ? `
+                        <article class="sponsored-card reveal is-visible" style="border-radius:10px; border:1.5px dashed var(--gold); background:linear-gradient(135deg, rgba(200,161,90,0.09) 0%, rgba(17,29,66,0.04) 100%); padding:18px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden;">
+                          <div style="position:absolute; top:10px; right:10px; font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); background:#fff; border:1px solid rgba(200,161,90,0.3); border-radius:4px; padding:2px 6px;">Sponsored</div>
+                          <div>
+                            <span style="font-size:10px; font-weight:700; text-transform:uppercase; color:var(--gold); letter-spacing:0.1em; display:block; margin-bottom:4px;">Custom Studio</span>
+                            <h3 style="font-family:var(--font-serif); font-size:17px; font-weight:700; color:var(--navy); margin:0 0 6px;">Looking for Custom Digitizing?</h3>
+                            <p style="font-size:11.5px; line-height:1.45; color:var(--ink-soft); margin:0 0 14px;">Upload your own blouse sketch, wedding logo, or photo. Get high-precision machine files delivered in 24 hours.</p>
+                          </div>
+                          <a href="https://wa.me/918309897055?text=Hello%20Godavari%20Designers%2C%20I%20need%20a%20custom%20embroidery%20digitizing%20quote." target="_blank" rel="noopener noreferrer" class="button" style="background:#25D366; color:#fff; font-size:11.5px; font-weight:700; height:34px; border-radius:6px; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; border:none;">
+                            ${icon("message-circle", 14)} Send Sketch on WA
+                          </a>
+                        </article>
+                      ` : "";
+
+                      return productCardHtml + sponsoredAdHtml;
+                    }
+                  )
+                  .join("")}
               </div>`
 
             : `<div class="empty-state" style="padding: 80px 20px; border: 1px dashed var(--border); border-radius: 8px; text-align: center;">

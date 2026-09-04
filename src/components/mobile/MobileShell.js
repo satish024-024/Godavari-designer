@@ -7,6 +7,7 @@ import { renderCartDrawer } from "../CartDrawer.js";
 import { renderQuoteModal } from "../QuoteModal.js";
 import { renderStoryModal } from "../StoryModal.js";
 import { renderQuickViewModal } from "../QuickViewModal.js";
+import { renderPaymentModal } from "../PaymentModal.js";
 import { renderToast } from "../Toast.js";
 import { ui } from "../../services/store.js";
 
@@ -25,6 +26,7 @@ export function renderMobileShell(pageContent) {
       ${ui.quoteOpen ? renderQuoteModal() : ""}
       ${ui.storyOpen ? renderStoryModal() : ""}
       ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
+      ${renderPaymentModal()}
       ${renderToast()}
     </div>
   `;

@@ -49,7 +49,9 @@ import {
   onAuthChange,
   submitCartQuote,
   clearCartQuoteResult,
-  submitQuoteModal
+  submitQuoteModal,
+  downloadMachineFile,
+  isProductUnlocked
 } from "./services/store.js";
 import { storageService } from "./services/supabase.js";
 import { clone, escapeHtml, attr, icon, money, isMobileViewport, mediaUrl } from "./utils/helpers.js";
@@ -67,21 +69,22 @@ import { renderQuickViewModal } from "./components/QuickViewModal.js";
 import { renderBottomNavigation } from "./components/BottomNavigation.js";
 import { renderMobileDrawer } from "./components/MobileDrawer.js";
 import { renderMobileShell } from "./components/mobile/MobileShell.js";
+import { renderPaymentModal, openPaymentModal, closePaymentModal, initPaymentModalDelegates } from "./components/PaymentModal.js";
 
 
 // Pages
-import { renderHome } from "./pages/Home.js";
-import { renderCatalog, catalogState } from "./pages/Catalog.js";
-import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js";
-import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js";
-import { renderCart } from "./pages/Cart.js";
-import { renderWishlist } from "./pages/Wishlist.js";
-import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js";
-import { renderAuth, initAuthDelegates } from "./pages/Auth.js";
-import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js";
-import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js";
-import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js";
-import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js";
+import { renderHome } from "./pages/Home.js?v=9";
+import { renderCatalog, catalogState } from "./pages/Catalog.js?v=9";
+import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=9";
+import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=9";
+import { renderCart } from "./pages/Cart.js?v=9";
+import { renderWishlist } from "./pages/Wishlist.js?v=9";
+import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=9";
+import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=9";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=9";
+import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=9";
+import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=9";
+import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=9";
 
 // Company & Support Pages
 import {
@@ -244,6 +247,7 @@ function render() {
         ${ui.quoteOpen ? renderQuoteModal() : ""}
         ${ui.storyOpen ? renderStoryModal() : ""}
         ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
+        ${renderPaymentModal()}
         ${renderToast()}
       </div>
     `;
@@ -821,6 +825,22 @@ function downloadJson() {
   URL.revokeObjectURL(link.href);
 }
 
+// Anti-Theft Right-Click Protection for Machine Embroidery Assets
+document.addEventListener("contextmenu", (e) => {
+  if (
+    e.target.closest(".product-media") ||
+    e.target.closest(".image-shield") ||
+    e.target.closest(".detail-main-image-wrapper") ||
+    e.target.closest("#detailMainImg") ||
+    e.target.closest(".detail-gallery-container") ||
+    e.target.closest(".catalog-grid-zedge") ||
+    e.target.closest(".product-card")
+  ) {
+    e.preventDefault();
+    showToast("🔒 Godavari Designers: Machine stitch files & artwork are protected and unlocked upon purchase.");
+  }
+});
+
 // Event delegation
 document.addEventListener("click", (event) => {
   const trigger = event.target.closest("[data-action]");
@@ -957,31 +977,56 @@ document.addEventListener("click", (event) => {
     window.open(whatsappUrl, "_blank");
   }
 
-  if (action === "download-production-file") {
+  // 1-Click Amazon-Style Buy Now
+  if (action === "buy-now") {
     const id = trigger.dataset.id;
     const format = trigger.dataset.format || "DST";
-    const product = site.products.find(p => p.id === id);
-    if (product) {
-      const content = `Tajima DST Format Embroidery File\r\n` +
-                      `Design Code: ${product.code}\r\n` +
-                      `Title: ${product.title}\r\n` +
-                      `Format: ${format}\r\n` +
-                      `Stitches: ${product.totalStitchCount || product.stitchCount || 35000}\r\n` +
-                      `Colors: ${product.threadColors || 6}\r\n` +
-                      `Dimensions: ${product.dimensions || "100mm x 100mm"}\r\n` +
-                      `Created by: Godavari Designer Studio\r\n` +
-                      `Date: 2026-06-22\r\n`;
-      const blob = new Blob([content], { type: "application/octet-stream" });
-      const downloadUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = `${product.code}-${product.title.replace(/\s+/g, '_')}.${format.toLowerCase()}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(downloadUrl);
-      showToast(`${format} production file downloaded successfully!`);
+    const price = parseFloat(trigger.dataset.price || "45");
+    const title = trigger.dataset.title || "Embroidery Design";
+    const code = trigger.dataset.code || "GD-DESIGN";
+    openPaymentModal({
+      items: [{ productId: id, format, price, title, code }],
+      total: price,
+      orderRef: `GD-BUY-${Date.now().toString().slice(-6)}`
+    });
+    return;
+  }
+
+  // 1-Click Cart Instant Pay via PhonePe / UPI
+  if (action === "cart-instant-pay") {
+    if (!cart || cart.length === 0) {
+      showToast("Your cart is empty");
+      return;
     }
+    let subtotal = 0;
+    const items = cart.map(item => {
+      const p = site.products.find(x => x.id === item.id) || {};
+      const formatObj = p.formats ? p.formats.find(f => f.format === item.format) : null;
+      const price = formatObj ? formatObj.price : (p.price || 45);
+      subtotal += price * item.qty;
+      return {
+        productId: item.id,
+        format: item.format,
+        price: price,
+        title: p.title,
+        code: p.code
+      };
+    });
+    closePanels();
+    openPaymentModal({
+      items,
+      total: subtotal,
+      orderRef: `GD-CART-${Date.now().toString().slice(-6)}`
+    });
+    return;
+  }
+
+  // Secure Machine File Download (Protected by Entitlement & Payment Verification)
+  if (action === "download-production-file" || action === "download-machine-file") {
+    const id = trigger.dataset.id;
+    const format = trigger.dataset.format || "DST";
+    downloadMachineFile(id, format);
+    return;
   }
 
   if (action === "download-spec-sheet") {
@@ -1113,6 +1158,18 @@ document.addEventListener("click", (event) => {
     triggerRender();
   }
 
+  if (action === "filter-tag") {
+    const val = trigger.dataset.value;
+    catalogState.selectedTag = (catalogState.selectedTag === val || val === "All") ? "All" : val;
+    catalogState.visibleLimit = 8;
+    triggerRender();
+  }
+
+  if (action === "clear-catalog-search") {
+    catalogState.searchQuery = "";
+    triggerRender();
+  }
+
   if (action === "filter-subcategory") {
     catalogState.selectedSubcategory = trigger.dataset.value;
     catalogState.visibleLimit = 8;
@@ -1152,6 +1209,7 @@ document.addEventListener("click", (event) => {
     catalogState.selectedCategory = "All";
     catalogState.selectedSubcategory = "All";
     catalogState.selectedCollection = "All";
+    catalogState.selectedTag = "All";
     catalogState.minPrice = 0;
     catalogState.maxPrice = 100;
     catalogState.selectedDifficulty = "All";
@@ -1644,6 +1702,7 @@ window.addEventListener("resize", () => {
 // Bootstrap Application
 async function bootstrap() {
   initDB();
+  initPaymentModalDelegates();
   onStateChange(render);
   initRouter();
   

@@ -169,9 +169,26 @@ export function renderCustomOrder() {
     <section class="content-section custom-order-section" style="padding-top: var(--header-height); background: var(--ivory);">
       <div style="width: min(100%, 1280px); margin: 0 auto; padding: 24px 24px 80px;">
         
-        <div style="margin-bottom: 32px;">
-          <h1 style="font-family: var(--font-serif); font-size: clamp(36px, 4.5vw, 54px); color: var(--navy); font-weight: 700; margin: 0 0 8px;">Request Custom Digitizing</h1>
-          <p style="color: var(--ink-soft); font-size: 15px; max-width: 600px; margin: 0;">Upload your custom sketch or artwork, define dimensions, and receive production-ready embroidery files.</p>
+        <div style="margin-bottom: 24px;">
+          <h1 style="font-family: var(--font-serif); font-size: clamp(34px, 4.5vw, 52px); color: var(--navy); font-weight: 700; margin: 0 0 8px;">Request Custom Digitizing</h1>
+          <p style="color: var(--ink-soft); font-size: 15px; max-width: 660px; margin: 0;">Upload your custom sketch or artwork, mention size and receive ready to embroidery files.</p>
+        </div>
+
+        <!-- WhatsApp Fast Track Redirect Banner (Sheet 3) -->
+        <div style="background: linear-gradient(135deg, rgba(37, 211, 102, 0.12) 0%, rgba(17, 29, 66, 0.05) 100%); border: 1.5px solid rgba(37, 211, 102, 0.35); border-radius: 12px; padding: 18px 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 32px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #25D366; display: grid; place-items: center; color: #fff; flex-shrink: 0; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.35);">
+              ${icon("message-circle", 24)}
+            </div>
+            <div>
+              <strong style="font-size: 15px; color: var(--navy); display: block; margin-bottom: 2px;">Direct WhatsApp Consultation</strong>
+              <span style="font-size: 13px; color: var(--ink-soft);">Prefer sending photos on WhatsApp? Our senior digitizer will reply with exact stitch quotes and preview.</span>
+            </div>
+          </div>
+          <a href="https://wa.me/918309897055?text=Hello%20Godavari%20Designers%2C%20I%20would%20like%20to%20request%20a%20Custom%20Digitizing%20Quote." target="_blank" rel="noopener noreferrer" class="button" style="background: #25D366; color: #fff; font-weight: 700; font-size: 13.5px; padding: 10px 22px; border-radius: 99px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; border: none; box-shadow: 0 4px 14px rgba(37, 211, 102, 0.35); transition: transform 0.2s;">
+            <span>Chat on WhatsApp</span>
+            ${icon("arrow-right", 15)}
+          </a>
         </div>
 
         <div class="custom-order-layout">
@@ -317,25 +334,45 @@ export function renderCustomOrder() {
                   </label>
                 </div>
 
+                <!-- Size & Dimensions Inputs (Sheet 3) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                  <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
+                    <span>Width *</span>
+                    <input type="number" name="dimensionWidth" step="0.1" required placeholder="e.g. 8" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                  </label>
+                  <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
+                    <span>Height *</span>
+                    <input type="number" name="dimensionHeight" step="0.1" required placeholder="e.g. 10" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
+                  </label>
+                  <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
+                    <span>Unit *</span>
+                    <select name="dimensionUnit" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px; background: #fff;">
+                      <option value="Inches" selected>Inches</option>
+                      <option value="mm">Millimeters (mm)</option>
+                      <option value="cm">Centimeters (cm)</option>
+                    </select>
+                  </label>
+                </div>
+
                 <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                   <span>Stitch Description & Special Instructions *</span>
-                  <textarea name="projectDescription" required placeholder="Describe dimensions (e.g. width 18cm, pot neck neck depth 9 inches), specific fabrics or placement, thread guidelines..." style="width: 100%; height: 110px; padding: 10px; border: 1px solid var(--border); border-radius: 4px; resize: none;"></textarea>
+                  <textarea name="projectDescription" required placeholder="Mention specific design instructions, neckline depth, sleeve length, or embroidery placement..." style="width: 100%; height: 95px; padding: 10px; border: 1px solid var(--border); border-radius: 4px; resize: none;"></textarea>
                 </label>
 
-                <!-- Urgency Level Selectable Cards -->
-                <div style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 2px;">Select Urgency Level</div>
+                <!-- Urgency Level Selectable Cards (Sheet 3) -->
+                <div style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 2px;">Select Turnaround Time</div>
                 <div class="urgency-grid">
                   <div class="option-select-card ${selectedUrgency === "Standard" ? "active" : ""}" data-action="set-urgency" data-urgency="Standard">
-                    <div class="option-select-title">Standard</div>
-                    <div class="option-select-desc">3–5 Days &bull; Reg Price</div>
+                    <div class="option-select-title">⚡ Standard</div>
+                    <div class="option-select-desc">4–6 Days &bull; Reg Price</div>
                   </div>
-                  <div class="option-select-card ${selectedUrgency === "Priority" ? "active" : ""}" data-action="set-urgency" data-urgency="Priority">
-                    <div class="option-select-title">Priority</div>
-                    <div class="option-select-desc">24–48 Hours &bull; +25%</div>
+                  <div class="option-select-card ${selectedUrgency === "Express" ? "active" : ""}" data-action="set-urgency" data-urgency="Express">
+                    <div class="option-select-title">⚡ Express</div>
+                    <div class="option-select-desc">48 Hours &bull; Priority</div>
                   </div>
                   <div class="option-select-card ${selectedUrgency === "Urgent" ? "active" : ""}" data-action="set-urgency" data-urgency="Urgent">
-                    <div class="option-select-title">Urgent</div>
-                    <div class="option-select-desc">Under 12 Hours &bull; +50%</div>
+                    <div class="option-select-title">⚡ Urgent</div>
+                    <div class="option-select-desc">24 Hours &bull; Express</div>
                   </div>
                 </div>
               </div>
@@ -345,17 +382,17 @@ export function renderCustomOrder() {
             <div class="form-step-card">
               <div class="form-step-title">
                 <span style="color:var(--gold);">${icon("cpu", 20)}</span>
-                <span>Embroidery Specifications</span>
+                <span>Embroidery Machine Specifications</span>
               </div>
-              <div class="form-step-desc">Target format and fabric optimizations. No hardcoded specs.</div>
+              <div class="form-step-desc">Target format and fabric optimizations for your embroidery machines.</div>
 
               <div style="display: grid; gap: 20px;">
                 
                 <!-- Format Select badges -->
                 <div>
-                  <div style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 10px;">Select Format</div>
+                  <div style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 10px;">Select Format (Required for your machine)</div>
                   <div class="spec-cards-grid">
-                    ${["DST", "PES", "JEF", "EXP", "XXX"]
+                    ${["DST", "PES", "JEF", "EXP", "XXX", "EMB"]
                       .map(
                         (fmt) => `
                           <div class="spec-option-card ${selectedFormat === fmt ? "active" : ""}" data-action="set-format" data-format="${attr(fmt)}">

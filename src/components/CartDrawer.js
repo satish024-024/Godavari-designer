@@ -55,10 +55,16 @@ export function renderCartDrawer() {
           <span>Total</span>
           <strong>${money(total)}</strong>
         </div>
-        <button type="button" class="button button-primary full-width" data-action="open-quote">
-          <span>Request Production Quote</span>
-          ${icon("arrow-right", 20)}
-        </button>
+        <div style="display: grid; gap: 8px;">
+          <a href="#/checkout" class="button button-primary full-width" data-action="close-panels" style="text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px; min-height:46px; font-weight:700; background:var(--navy); color:#fff;">
+            <span>Proceed to Checkout</span>
+            ${icon("arrow-right", 18)}
+          </a>
+          <button type="button" class="button button-secondary full-width" data-action="cart-instant-pay" style="display:flex; align-items:center; justify-content:center; gap:6px; min-height:40px; font-size:13px; font-weight:700;">
+            ${icon("zap", 15)}
+            <span>1-Click Pay via PhonePe / UPI</span>
+          </button>
+        </div>
       </aside>
     </div>
   `;

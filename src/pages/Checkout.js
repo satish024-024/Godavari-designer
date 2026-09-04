@@ -1,5 +1,6 @@
 import { site, cart, currentUser, showToast, triggerRender } from "../services/store.js";
 import { orderService } from "../services/supabase.js";
+import { openPaymentModal } from "../components/PaymentModal.js";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 // Local Page State
@@ -115,9 +116,15 @@ Please confirm my order.`;
 
           <!-- Checkout actions -->
           <div style="display: grid; gap: 12px; width: 100%; margin-top: 20px;">
-            <!-- Primary WhatsApp CTA -->
-            <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="background: #25d366; color: #fff; text-decoration: none; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; font-weight: 700; border-radius: 4px; font-size: 15px; box-shadow: var(--shadow-deep);">
-              ${icon("phone", 18)} Confirm Order via WhatsApp
+            <!-- Primary Instant Online Payment CTA -->
+            <button type="button" class="button button-primary" data-action="reopen-checkout-payment" style="width: 100%; min-height: 48px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 15px; background: var(--navy); color: #fff; border-radius: 6px; border: none; cursor: pointer; box-shadow: var(--shadow-deep);">
+              ${icon("zap", 18)}
+              <span>Pay ${money(submissionResult.total)} & Unlock Files (PhonePe / UPI)</span>
+            </button>
+
+            <!-- Secondary WhatsApp CTA -->
+            <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="button" style="background: #25d366; color: #fff; text-decoration: none; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; font-weight: 700; border-radius: 6px; font-size: 13.5px;">
+              ${icon("phone", 16)} WhatsApp Confirmation
             </a>
 
             <div class="checkout-actions-row">
@@ -393,6 +400,7 @@ export function initCheckoutEvents() {
           address: orderData.shippingAddress,
           total: subtotal,
           orderType: checkoutOrderType,
+          items: dbItems,
           createdAt: new Date().toISOString()
         };
 
@@ -400,7 +408,12 @@ export function initCheckoutEvents() {
         cart.length = 0;
         localStorage.setItem("godavari-designer-cart-v1", JSON.stringify([]));
 
-        showToast("Order placed successfully!");
+        showToast("Order submitted! Opening payment gateway...");
+        openPaymentModal({
+          items: dbItems,
+          total: subtotal,
+          orderRef: orderRef
+        });
         triggerRender();
       } catch (err) {
         console.error("Order submission failure:", err);
@@ -410,6 +423,18 @@ export function initCheckoutEvents() {
           submitBtn.innerHTML = `Submit & Place Order ${icon("arrow-right", 18)}`;
         }
       }
+    }
+  });
+
+  // Handle reopen payment modal click from checkout success
+  document.addEventListener("click", (e) => {
+    const payBtn = e.target.closest("[data-action='reopen-checkout-payment']");
+    if (payBtn && submissionResult) {
+      openPaymentModal({
+        items: submissionResult.items || [],
+        total: submissionResult.total || 0,
+        orderRef: submissionResult.referenceNumber
+      });
     }
   });
 }
