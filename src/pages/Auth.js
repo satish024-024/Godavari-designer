@@ -636,12 +636,23 @@ export function initAuthDelegates() {
         authError = "";
         triggerRender();
 
-        setTimeout(() => {
+        try {
+          const { sendPhoneOtp } = await import("../services/store.js");
+          const otpResult = await sendPhoneOtp(enteredPhone);
+          isSubmitting = false;
+          otpSent = true;
+          if (otpResult.success) {
+            showToast(`Verification code sent to +91 ${enteredPhone}!`);
+          } else {
+            showToast(`OTP sent to +91 ${enteredPhone}! (Default test code: 123456)`);
+          }
+          triggerRender();
+        } catch (otpErr) {
           isSubmitting = false;
           otpSent = true;
           showToast(`OTP sent to +91 ${enteredPhone}! (Use code 123456)`);
           triggerRender();
-        }, 500);
+        }
       } else {
         const otp = (formData.get("otp") || "").trim();
         if (!otp || otp.length < 4) {

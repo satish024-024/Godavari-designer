@@ -219,6 +219,7 @@ export async function initiatePayment(productId) {
     triggerRender();
 
     // Launch official Razorpay Standard Checkout
+    const cleanPhone = (currentUser?.phone || "").replace(/\D/g, '').slice(-10);
     const options = {
       key: data.keyId,
       amount: Math.round(data.amount * 100),
@@ -230,10 +231,56 @@ export async function initiatePayment(productId) {
       prefill: {
         name: currentUser?.name || "",
         email: currentUser?.email || "",
-        contact: currentUser?.phone || ""
+        contact: cleanPhone ? `+91${cleanPhone}` : ""
+      },
+      notes: {
+        purchase_id: data.purchaseId,
+        product_title: data.product?.title || "Embroidery Design"
       },
       theme: {
-        color: "#111d42"
+        color: "#111d42",
+        backdrop_color: "rgba(17, 29, 66, 0.65)"
+      },
+      config: {
+        display: {
+          blocks: {
+            upi: {
+              name: "UPI / PhonePe / Google Pay / QR Scanner",
+              instruments: [
+                {
+                  method: "upi"
+                }
+              ]
+            },
+            other: {
+              name: "Cards / Netbanking / Wallets",
+              instruments: [
+                {
+                  method: "card"
+                },
+                {
+                  method: "netbanking"
+                },
+                {
+                  method: "wallet"
+                }
+              ]
+            }
+          },
+          sequence: ["block.upi", "block.other"],
+          preferences: {
+            show_default_blocks: true
+          }
+        }
+      },
+      modal: {
+        confirm_close: true,
+        ondismiss: function () {
+          console.log("Customer dismissed Razorpay Checkout modal.");
+          paymentContext.state = PaymentState.CANCELLED;
+          window.location.hash = `#/payment/cancelled?purchaseId=${encodeURIComponent(data.purchaseId)}&productId=${encodeURIComponent(productId)}`;
+          triggerRender();
+        }
       },
       handler: async function (response) {
         // Customer paid successfully at the gateway!
@@ -252,14 +299,6 @@ export async function initiatePayment(productId) {
           razorpaySignature: response.razorpay_signature,
           purchaseId: data.purchaseId
         });
-      },
-      modal: {
-        ondismiss: function () {
-          console.log("Customer dismissed Razorpay Checkout modal.");
-          paymentContext.state = PaymentState.CANCELLED;
-          window.location.hash = `#/payment/cancelled?purchaseId=${encodeURIComponent(data.purchaseId)}&productId=${encodeURIComponent(productId)}`;
-          triggerRender();
-        }
       }
     };
 

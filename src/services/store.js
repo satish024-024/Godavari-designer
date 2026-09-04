@@ -563,6 +563,25 @@ export async function loginWithGoogle() {
   }
 }
 
+export async function sendPhoneOtp(phone) {
+  try {
+    initSupabase();
+    const cleanPhone = phone.replace(/\D/g, "").slice(-10);
+    const formattedPhone = `+91${cleanPhone}`;
+    const { data, error } = await supabase.auth.signInWithOtp({
+      phone: formattedPhone
+    });
+    if (error) {
+      console.warn("Supabase signInWithOtp notice:", error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true, data };
+  } catch (err) {
+    console.warn("sendPhoneOtp notice:", err.message);
+    return { success: false, error: err.message };
+  }
+}
+
 export async function loginWithPhoneOtp(phone, otp) {
   try {
     let user = null;
