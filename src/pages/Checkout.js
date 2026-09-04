@@ -1,6 +1,6 @@
 import { site, cart, currentUser, showToast, triggerRender } from "../services/store.js";
 import { orderService } from "../services/supabase.js";
-import { openPaymentModal } from "../components/PaymentModal.js";
+import { openPaymentModal } from "../components/PaymentModal.js?v=10";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 // Local Page State

@@ -4,7 +4,8 @@
  * All custom QR codes, manual UPI instructions, and manual verification buttons are eliminated.
  */
 
-import { paymentContext, PaymentState, initiatePayment, closePreCheckout } from "../services/paymentService.js";
+import { paymentContext, PaymentState, initiatePayment, closePreCheckout, openPreCheckout } from "../services/paymentService.js";
+import { site } from "../services/store.js";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 export function renderPaymentModal() {
@@ -133,4 +134,31 @@ export function initPaymentModalDelegates() {
       return;
     }
   });
+}
+
+/**
+ * Compatibility helper to open pre-checkout modal from checkout or external calls
+ */
+export function openPaymentModal(options = {}) {
+  if (!options) return;
+  let product = null;
+  if (options.productId) {
+    product = site.products?.find(p => p.id === options.productId);
+  } else if (options.items && options.items.length > 0) {
+    const firstId = options.items[0].productId || options.items[0].id;
+    product = site.products?.find(p => p.id === firstId);
+  }
+
+  if (!product && options.total) {
+    product = {
+      id: options.productId || (options.items && options.items[0]?.productId) || "cart-order",
+      title: options.orderRef ? `Order ${options.orderRef}` : "Embroidery Order",
+      price: options.total,
+      formats: ["DST", "PES"]
+    };
+  }
+
+  if (product) {
+    openPreCheckout(product);
+  }
 }

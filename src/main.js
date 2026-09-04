@@ -69,7 +69,7 @@ import { renderQuickViewModal } from "./components/QuickViewModal.js";
 import { renderBottomNavigation } from "./components/BottomNavigation.js";
 import { renderMobileDrawer } from "./components/MobileDrawer.js";
 import { renderMobileShell } from "./components/mobile/MobileShell.js";
-import { renderPaymentModal, initPaymentModalDelegates } from "./components/PaymentModal.js";
+import { renderPaymentModal, initPaymentModalDelegates, openPaymentModal } from "./components/PaymentModal.js?v=10";
 import { 
   renderPaymentProcessing, 
   renderPaymentSuccess, 
@@ -92,18 +92,18 @@ import {
 
 
 // Pages
-import { renderHome } from "./pages/Home.js?v=9";
-import { renderCatalog, catalogState } from "./pages/Catalog.js?v=9";
-import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=9";
-import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=9";
-import { renderCart } from "./pages/Cart.js?v=9";
-import { renderWishlist } from "./pages/Wishlist.js?v=9";
-import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=9";
-import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=9";
-import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=9";
-import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=9";
-import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=9";
-import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=9";
+import { renderHome } from "./pages/Home.js?v=10";
+import { renderCatalog, catalogState } from "./pages/Catalog.js?v=10";
+import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=10";
+import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=10";
+import { renderCart } from "./pages/Cart.js?v=10";
+import { renderWishlist } from "./pages/Wishlist.js?v=10";
+import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=10";
+import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=10";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=10";
+import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=10";
+import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=10";
+import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=10";
 
 // Company & Support Pages
 import {

@@ -15,14 +15,14 @@
 
 import crypto from "crypto";
 import http from "http";
-import { config, assertProductionSafety, isRazorpayConfigured } from "../api/lib/config.js";
+import { config, assertProductionSafety, isRazorpayConfigured } from "../lib/config.js";
 import {
   generateGuestToken,
   hashGuestToken,
   verifyHmacSha256,
   createDownloadGrant,
   consumeDownloadGrant
-} from "../api/lib/crypto.js";
+} from "../lib/crypto.js";
 import {
   getProductById,
   getPurchaseById,
@@ -33,7 +33,7 @@ import {
   checkActiveEntitlement,
   atomicIncrementDownloadCount,
   recordWebhookEvent
-} from "../api/lib/supabase.js";
+} from "../lib/supabase.js";
 import {
   createRazorpayOrder,
   verifyRazorpaySignature,
@@ -41,7 +41,7 @@ import {
   fetchRazorpayPayment,
   fetchRazorpayOrder,
   setMockPayment
-} from "../api/lib/razorpay.js";
+} from "../lib/razorpay.js";
 
 // Test Reporter
 let passedTests = 0;

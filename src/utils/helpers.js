@@ -53,7 +53,11 @@ export function isMobileViewport() {
   return window.innerWidth <= 768;
 }
 
-export function renderAdBlock(slotId = "0000000000", format = "auto") {
+export function renderAdBlock(slotId = "", format = "auto") {
+  // Only render manual ad block if a genuine numeric slot ID is configured
+  if (!slotId || !/^\d+$/.test(String(slotId).trim())) {
+    return "";
+  }
   return `
     <div class="ad-container" style="margin: 20px 0; text-align: center; overflow: hidden; min-height: 90px;">
       <ins class="adsbygoogle"
@@ -69,10 +73,13 @@ export function renderAdBlock(slotId = "0000000000", format = "auto") {
 export function triggerAds() {
   try {
     const ads = document.querySelectorAll('.adsbygoogle:not([data-adsbygoogle-status="done"])');
-    ads.forEach(() => {
-      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    ads.forEach((ad) => {
+      // Only push ad when container has positive width to avoid TagError (availableWidth=0)
+      if (ad.offsetWidth > 0 && typeof window.adsbygoogle !== "undefined") {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
     });
-  } catch (e) {
-    console.error("AdSense error:", e);
+  } catch (_) {
+    // Non-blocking
   }
 }
