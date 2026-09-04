@@ -231,11 +231,13 @@ export function handleRouting() {
   // SECURITY VALIDATIONS
   // ------------------------------------------
 
-  // 1. Validate product slug
+  // 1. Validate product slug — check both live state and local cache
   if (matchedRoute.page === "product-detail") {
     if (dataSynced) {
-      const products = DB.getProducts();
-      if (!products.some((p) => p.slug === matchedParams.slug)) {
+      const cachedProducts = DB.getProducts();
+      const liveProducts = site.products || [];
+      const allKnownSlugs = new Set([...cachedProducts.map(p => p.slug), ...liveProducts.map(p => p.slug)]);
+      if (!allKnownSlugs.has(matchedParams.slug)) {
         window.location.hash = "#/404";
         return;
       }

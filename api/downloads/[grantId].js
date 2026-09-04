@@ -94,11 +94,42 @@ export default async function handler(req, res) {
     }
 
     let fileBuffer;
-    const fileExtension = format === "PES" ? "pes" : "dst";
-    if (format === "PES") {
-      fileBuffer = generatePesFileBuffer(product);
-    } else {
-      fileBuffer = generateDstFileBuffer(product);
+    let fileExtension = format === "PES" ? "pes" : "dst";
+
+    // If a real uploaded machine file exists, attempt to stream it
+    if (product.design_file) {
+      try {
+        const designPath = product.design_file.replace(/^\/+/, "");
+        const bucketUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+        const storageUrl = `${bucketUrl.replace(/\/$/, "")}/storage/v1/object/digitized-designs/${encodeURIComponent(designPath)}`;
+        const storageRes = await fetch(storageUrl, {
+          headers: { "Authorization": `Bearer ${serviceKey}`, "apikey": serviceKey }
+        });
+        if (storageRes.ok) {
+          const realBuffer = Buffer.from(await storageRes.arrayBuffer());
+          if (realBuffer.length > 0) {
+            fileBuffer = realBuffer;
+            // Determine extension from the stored file name
+            const storedName = designPath.split("/").pop() || "";
+            const storedExt = storedName.split(".").pop()?.toLowerCase();
+            if (storedExt && storedExt.length <= 4) {
+              fileExtension = storedExt;
+            }
+          }
+        }
+      } catch (streamErr) {
+        console.warn("Failed to stream real design file, falling back to generated:", streamErr.message);
+      }
+    }
+
+    // Fallback: generate synthetic file if no real file was streamed
+    if (!fileBuffer) {
+      if (format === "PES") {
+        fileBuffer = generatePesFileBuffer(product);
+      } else {
+        fileBuffer = generateDstFileBuffer(product);
+      }
     }
 
     const filename = `${product.code || "GD-DESIGN"}_${format}.${fileExtension}`;

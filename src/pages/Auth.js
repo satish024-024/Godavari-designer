@@ -4,6 +4,7 @@ import { escapeHtml, icon, attr } from "../utils/helpers.js";
 
 // Local Page State (Priority 1: Phone OTP for non-technical users from Sheet 4 & 5)
 let authMode = "phone"; // 'phone' | 'signin' | 'signup' | 'forgot' | 'reset-confirm'
+let isAdminLoginRoute = false;
 let authError = "";
 let isSubmitting = false;
 let resetConfirmModeLoaded = false;
@@ -11,6 +12,13 @@ let otpSent = false;
 let enteredPhone = "";
 
 export function renderAuth() {
+  // Detect admin login route and auto-switch to email/password mode
+  const currentHash = window.location.hash || "";
+  isAdminLoginRoute = currentHash.includes("/admin/login");
+  if (isAdminLoginRoute && authMode === "phone") {
+    authMode = "signin";
+  }
+
   // Sync password reset mode from URL query parameters
   const params = ui.pageParams || {};
   if (params.mode === "reset-confirm" && !resetConfirmModeLoaded) {
@@ -18,8 +26,10 @@ export function renderAuth() {
     resetConfirmModeLoaded = true;
   }
 
-  let titleText = "Sign In";
-  let subtitleText = "Access your luxury design library and digitizing tracker.";
+  let titleText = isAdminLoginRoute ? "Admin Portal Sign In" : "Sign In";
+  let subtitleText = isAdminLoginRoute
+    ? "Administrator access — restricted to Godavari design management."
+    : "Access your luxury design library and digitizing tracker.";
   let formContentHtml = "";
 
   // CSS Styles specific to the Auth module

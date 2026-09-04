@@ -428,7 +428,7 @@ function renderDashboardOverview() {
                     <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(o.customer_email || "")}</div>
                   </td>
                   <td>${new Date(o.created_at).toLocaleDateString()}</td>
-                  <td><strong>$${o.total}</strong></td>
+                  <td><strong>₹${o.total}</strong></td>
                   <td><span class="admin-pill ${o.payment_status === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${o.payment_status}</span></td>
                   <td><span class="admin-pill admin-pill-gold">${o.status}</span></td>
                   <td style="text-align: center;">
@@ -711,14 +711,14 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group">
-            <label class="admin-form-label" for="prodPrice">Price ($)</label>
+            <label class="admin-form-label" for="prodPrice">Price (₹)</label>
             <input type="number" id="prodPrice" name="price" value="${isEdit ? p.price : ''}" class="admin-form-control" placeholder="e.g. 45">
           </div>
 
           <div class="admin-form-group">
             <label class="admin-form-label" for="prodCategoryId">Category</label>
-            <select id="prodCategoryId" name="categoryId" class="admin-form-control" data-filters-collection="prodCollectionId">
-              <option value="">Select Category</option>
+            <select id="prodCategoryId" name="categoryId" class="admin-form-control" required data-filters-collection="prodCollectionId">
+              <option value="">— Select Category (Required) —</option>
               ${cats.map(c => `<option value="${c.id}" ${isEdit && p.categoryId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
             </select>
           </div>
@@ -809,6 +809,24 @@ function renderProductsModule() {
                 <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Click to replace image</span>
               </div>
               <input type="hidden" name="image" value="${isEdit ? escapeHtml(p.image || '') : ''}">
+            </div>
+          </div>
+
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label class="admin-form-label" for="productDesignFile">Digitized Machine File (.DST, .PES, .JEF, .EXP, .XXX, .ZIP)</label>
+            <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; background: #faf8f5; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
+              <input type="file" id="productDesignFile" accept=".dst,.pes,.jef,.exp,.xxx,.zip" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              <div class="design-file-placeholder" style="${isEdit && p.designFile ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
+                ${icon("file-archive", 28)}
+                <span style="font-size: 13px; font-weight: 500; color: var(--navy);">Click to upload embroidery machine file</span>
+                <span style="font-size: 11px; color: var(--ink-soft);">DST, PES, JEF, EXP, XXX, ZIP up to 25MB</span>
+              </div>
+              <div class="design-file-preview" style="${isEdit && p.designFile ? 'display: flex; flex-direction: column; align-items: center; gap: 6px;' : 'display: none;'}">
+                <span style="font-size: 13px; font-weight: 700; color: var(--navy);">${icon("check-circle", 16)} Machine file attached</span>
+                <span style="font-size: 11px; color: var(--ink-soft); word-break: break-all;">${isEdit && p.designFile ? escapeHtml(p.designFile) : ''}</span>
+                <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Click to replace file</span>
+              </div>
+              <input type="hidden" name="designFile" value="${isEdit ? escapeHtml(p.designFile || '') : ''}">
             </div>
           </div>
 
@@ -910,6 +928,7 @@ function renderProductsModule() {
               <th style="text-align: right;">Price</th>
               <th>Stitches (Back / Hands)</th>
               <th>Emb. Details</th>
+              <th>Machine File</th>
               <th style="text-align: center;">Actions</th>
             </tr>
           </thead>
@@ -928,11 +947,17 @@ function renderProductsModule() {
                     </div>
                   </td>
                   <td>${escapeHtml(categoryName)}</td>
-                  <td style="text-align: right; font-weight: 600; color: var(--navy);">$${p.price}</td>
+                  <td style="text-align: right; font-weight: 600; color: var(--navy);">₹${p.price}</td>
                   <td>${formattedStitches}</td>
                   <td>
                     <div>Speed: <strong>${p.rpm} RPM</strong></div>
                     <div style="font-size: 11px; color: rgba(17,29,66,0.5); margin-top: 2px;">Est: ${p.estimatedEmbroideryTime} mins</div>
+                  </td>
+                  <td style="text-align: center;">
+                    ${p.designFile
+                      ? `<span style="color: #16a34a; font-weight: 700; font-size: 12px;" title="${escapeHtml(p.designFile)}">${icon("check-circle", 14)} Attached</span>`
+                      : `<span style="color: rgba(17,29,66,0.3); font-size: 12px;">${icon("minus-circle", 14)} None</span>`
+                    }
                   </td>
                   <td style="text-align: center;">
                     <div style="display: flex; gap: 8px; justify-content: center;">
@@ -1257,7 +1282,7 @@ function renderOrdersModule() {
                             <div style="font-size:11px; color:rgba(17,29,66,0.5);">Format: <strong>${escapeHtml(item.format || "DST")}</strong></div>
                           </div>
                         </div>
-                        <div style="font-weight:700; font-size:14px;">$${item.price}</div>
+                        <div style="font-weight:700; font-size:14px;">₹${item.price}</div>
                       </div>
                     `;
                   }).join("")}
@@ -1350,7 +1375,7 @@ function renderOrdersModule() {
                   <div style="font-size:11px; color:rgba(17,29,66,0.5);">${escapeHtml(o.customer_email || "")}</div>
                 </td>
                 <td>${new Date(o.created_at).toLocaleDateString()}</td>
-                <td><strong>$${o.total}</strong></td>
+                <td><strong>₹${o.total}</strong></td>
                 <td><span class="admin-pill ${o.payment_status === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${o.payment_status}</span></td>
                 <td><span class="admin-pill admin-pill-gold">${o.status}</span></td>
                 <td style="text-align: center;">
@@ -1907,7 +1932,7 @@ function renderCustomRequestsModule() {
                   </td>
                   <td>${dateStr}</td>
                   <td>${detailVal}</td>
-                  <td><strong>${r.quoteAmount ? `$${r.quoteAmount}` : "—"}</strong></td>
+                  <td><strong>${r.quoteAmount ? `₹${r.quoteAmount}` : "—"}</strong></td>
                   <td><span class="admin-pill ${r.paymentStatus === 'paid' ? 'admin-pill-success' : 'admin-pill-danger'}">${r.paymentStatus || 'unpaid'}</span></td>
                   <td><span class="admin-pill admin-pill-gold">${r.status}</span></td>
                   <td style="text-align: center;">
@@ -2459,7 +2484,6 @@ function renderModule(section) {
   const moduleMap = {
     "dashboard": () => renderDashboardOverview(),
     "products": () => renderProductsModule(),
-    "categories": () => renderComingSoon("Categories", "Organize designs into categories.", "tag"), // Fallback if needed, but we implemented categories!
     "categories": () => renderCategoriesModule(),
     "collections": () => renderCollectionsModule(),
     "orders": () => renderOrdersModule(),
@@ -2535,11 +2559,13 @@ export function renderAdminDashboard(params = {}) {
 let eventsBound = false;
 
 export function initAdminDashboardDelegates() {
-  // Sidebar toggle for mobile
+  // Sidebar toggle for mobile — these DOM elements are re-created each render,
+  // so we always re-bind them. But global document listeners are guarded below.
   const menuToggle = document.getElementById("adminMenuToggle");
   const sidebar = document.getElementById("adminSidebar");
   const overlay = document.getElementById("adminSidebarOverlay");
-  if (menuToggle && sidebar && overlay) {
+  if (menuToggle && sidebar && overlay && !menuToggle._gdBound) {
+    menuToggle._gdBound = true;
     const toggleSidebar = () => {
       sidebar.classList.toggle("admin-sidebar--open");
       const isOpen = sidebar.classList.contains("admin-sidebar--open");
@@ -2550,9 +2576,10 @@ export function initAdminDashboardDelegates() {
     overlay.addEventListener("click", toggleSidebar);
   }
 
-  // Logout button
+  // Logout button — also re-created each render, guard with flag
   const logoutBtn = document.getElementById("adminLogoutBtn");
-  if (logoutBtn) {
+  if (logoutBtn && !logoutBtn._gdBound) {
+    logoutBtn._gdBound = true;
     logoutBtn.addEventListener("click", async () => {
       await logout();
       resetLoadedState();
@@ -2729,6 +2756,24 @@ export function initAdminDashboardDelegates() {
               preview.style.display = "flex";
             };
             reader.readAsDataURL(file);
+          }
+        }
+      }
+    }
+
+    // Product Embroidery Machine Design File Preview
+    if (e.target.id === "productDesignFile") {
+      const file = e.target.files[0];
+      if (file) {
+        const card = e.target.closest("div");
+        if (card) {
+          const placeholder = card.querySelector(".design-file-placeholder");
+          const preview = card.querySelector(".design-file-preview");
+          if (placeholder && preview) {
+            const nameSpan = preview.querySelectorAll("span")[1];
+            if (nameSpan) nameSpan.innerText = file.name;
+            placeholder.style.display = "none";
+            preview.style.display = "flex";
           }
         }
       }
@@ -3350,6 +3395,7 @@ export function initAdminDashboardDelegates() {
         log(`Refreshing product catalog from server...`);
         recordLocalWrite();
         site.products = await productService.getProducts();
+        DB.saveProducts(site.products); // Sync local cache for storefront
         log(`All done! Imported ${files.length} products successfully.`);
         showToast(`Bulk imported ${files.length} designs successfully!`);
 
@@ -3423,6 +3469,19 @@ export function initAdminDashboardDelegates() {
 
         if (!id && !imageUrl) {
           throw new Error("Please select a design image file to upload.");
+        }
+
+        // Upload digitized embroidery machine file if provided
+        const designFileInput = document.getElementById("productDesignFile");
+        const designFile = designFileInput ? designFileInput.files[0] : null;
+        let designFileUrl = formData.get("designFile") || "";
+
+        if (designFile) {
+          if (submitBtn) submitBtn.innerText = "Uploading Machine File...";
+          console.log("Admin: Uploading embroidery machine file:", designFile.name);
+          const cleanDesignName = `design_${Date.now()}_${designFile.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+          designFileUrl = await storageService.uploadDesignFile(designFile, cleanDesignName);
+          console.log("Admin: Machine file uploaded successfully. Path:", designFileUrl);
         }
         
         const tagsStr = formData.get("tags") || "";
@@ -3509,6 +3568,7 @@ export function initAdminDashboardDelegates() {
           height: parseInt(formData.get("height") || 100, 10) || 100,
           image: imageUrl,
           gallery: [imageUrl],
+          designFile: designFileUrl || null,
           difficultyLevel: formData.get("difficultyLevel") || "Intermediate",
           recommendedFabrics,
           tags,
@@ -3516,6 +3576,11 @@ export function initAdminDashboardDelegates() {
           featured: true,
           bestSeller: true
         };
+
+        // Validate required category before save
+        if (!prodPayload.categoryId || !prodPayload.categoryId.includes('-')) {
+          throw new Error("Please select a valid category before saving.");
+        }
 
         console.log("Admin: Saving product payload to Supabase:", prodPayload);
 

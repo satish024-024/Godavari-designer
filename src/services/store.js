@@ -716,6 +716,12 @@ export async function createCategory(cat) {
     recordLocalWrite();
     const cats = await categoryService.getCategories();
     DB.saveCategories(cats);
+    // Sanitize catalog filter state so storefront doesn't hold stale category references
+    try {
+      const { sanitizeCatalogState } = await import("../pages/Catalog.js");
+      const cols = site.collections || [];
+      sanitizeCatalogState(cats, cols);
+    } catch (_) {}
     triggerRender();
   } catch (error) {
     showToast(`Error: ${error.message}`);
@@ -728,6 +734,11 @@ export async function updateCategory(id, updatedCat) {
     recordLocalWrite();
     const cats = await categoryService.getCategories();
     DB.saveCategories(cats);
+    try {
+      const { sanitizeCatalogState } = await import("../pages/Catalog.js");
+      const cols = site.collections || [];
+      sanitizeCatalogState(cats, cols);
+    } catch (_) {}
     triggerRender();
   } catch (error) {
     showToast(`Error: ${error.message}`);
@@ -740,6 +751,11 @@ export async function deleteCategory(id) {
     recordLocalWrite();
     const cats = await categoryService.getCategories();
     DB.saveCategories(cats);
+    try {
+      const { sanitizeCatalogState } = await import("../pages/Catalog.js");
+      const cols = site.collections || [];
+      sanitizeCatalogState(cats, cols);
+    } catch (_) {}
     triggerRender();
   } catch (error) {
     showToast(`Error: ${error.message}`);

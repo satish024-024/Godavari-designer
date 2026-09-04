@@ -138,7 +138,7 @@ function mapProductToDB(p) {
     title: p.title,
     description: p.description,
     price: Number(p.price),
-    category_id: (p.categoryId && typeof p.categoryId === 'string' && p.categoryId.includes('-')) ? p.categoryId : null,
+    category_id: (p.categoryId && typeof p.categoryId === 'string' && p.categoryId.includes('-')) ? p.categoryId : (() => { throw new Error('Category is required. Please select a valid category before saving.'); })(),
     collection_id: (p.collectionId && typeof p.collectionId === 'string' && p.collectionId.includes('-')) ? p.collectionId : null,
     image: p.image,
     gallery: p.gallery || [],
