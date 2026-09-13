@@ -61,8 +61,9 @@ function getRpmProgress(rpm) {
 }
 
 export function renderProductDetail() {
-  const slug = ui.pageParams.slug;
-  const product = site.products.find((p) => p.slug === slug);
+  try {
+    const slug = ui.pageParams?.slug;
+    const product = site.products.find((p) => p.slug === slug || p.id === slug || p._id === slug);
   
   if (!product) {
     return `
@@ -74,10 +75,30 @@ export function renderProductDetail() {
     `;
   }
 
+  // Fallback defaults for formats, hoop, and specifications matching defaultSite.js
+  const hoop = product.hoopSize || product.dimensions || "200mm x 300mm";
+  const defaultFormats = [
+    { format: "DST", price: product.price, machineBrand: "Tajima", machineModel: "Commercial Multi-Needle", hoopSize: hoop },
+    { format: "PES", price: product.price, machineBrand: "Brother", machineModel: "Innov-is Series", hoopSize: hoop },
+    { format: "JEF", price: product.price, machineBrand: "Janome", machineModel: "Memory Craft", hoopSize: hoop }
+  ];
+
+  const formats = Array.isArray(product.formats) && product.formats.length > 0
+    ? product.formats.map(f => ({
+        format: typeof f === "string" ? f : (f.format || "DST"),
+        price: Number(f.price != null ? f.price : product.price),
+        machineBrand: f.machineBrand || "Universal",
+        machineModel: f.machineModel || "Commercial Multi-Needle",
+        hoopSize: f.hoopSize || hoop,
+        label: f.label || (typeof f === "string" ? f : f.format),
+        notes: f.notes || ""
+      }))
+    : defaultFormats;
+
   // Auto-initialize local state when product changes
   if (lastProductId !== product.id) {
     lastProductId = product.id;
-    activeFormatCode = product.formats && product.formats.length > 0 ? product.formats[0].format : "DST";
+    activeFormatCode = formats[0].format;
     activeImageSrc = product.image;
     activeGalleryMode = "zoom";
     isCustomModalOpen = false;
@@ -88,20 +109,29 @@ export function renderProductDetail() {
 
   const isSaved = wishlist.has(product.id);
   const isUnlocked = isProductUnlocked(product.id);
-  const selectedFormat = product.formats.find(f => f.format === activeFormatCode) || product.formats[0];
-  const displayPrice = selectedFormat ? selectedFormat.price : product.price;
+  const selectedFormat = formats.find(f => f.format === activeFormatCode) || formats[0];
+  const displayPrice = selectedFormat ? Number(selectedFormat.price != null ? selectedFormat.price : product.price) : Number(product.price || 0);
 
-  // Formats listing helper
-  const uniqueFormatsList = product.machineFormats.join(", ");
-  const fabricsList = product.recommendedFabrics.join(", ");
+  // Formats listing helper (defensive against undefined arrays)
+  const uniqueFormatsList = Array.isArray(product.machineFormats) && product.machineFormats.length > 0
+    ? product.machineFormats.join(", ")
+    : formats.map(f => f.format).join(", ");
+
+  const fabricsList = Array.isArray(product.recommendedFabrics) && product.recommendedFabrics.length > 0
+    ? product.recommendedFabrics.join(", ")
+    : "Pure Silk, Raw Silk, Velvet, Cotton, Net, Georgette";
+
+  const totalStitches = Number(product.totalStitchCount || product.stitchCount || 45000);
+  const backStitches = Number(product.backStitchCount != null ? product.backStitchCount : Math.round(totalStitches * 0.6));
+  const handStitches = Number(product.handStitchCount != null ? product.handStitchCount : Math.round(totalStitches * 0.4));
 
   // Custom Use Cases fallback
   const useCases = product.recommendedUseCases || product.recommended_use_cases || getDefaultUseCases(product);
-  const formattedDuration = formatEmbroideryDuration(product.estimatedEmbroideryTime);
+  const formattedDuration = formatEmbroideryDuration(product.estimatedEmbroideryTime || Math.round(totalStitches / 700));
   const productTags = Array.isArray(product.tags) ? product.tags.filter(Boolean) : [];
   const productName = product.title || product.code || "Untitled Product";
   const selectedFormatLabel = selectedFormat?.label || selectedFormat?.format || activeFormatCode || "N/A";
-  const rpmProgress = getRpmProgress(product.rpm);
+  const rpmProgress = getRpmProgress(product.rpm || 850);
 
   // WhatsApp prefills
   const whatsappNumber = (site.brand.contact.phone || "+91 83098 97055").replace(/[^0-9+]/g, '');
@@ -241,15 +271,15 @@ export function renderProductDetail() {
               Selected: <strong style="color: var(--navy);">${escapeHtml(selectedFormatLabel)}</strong>
             </div>
             <div class="format-cards-grid">
-              ${product.formats
+              ${formats
                 .map(
                   (f) => `
                     <div class="format-card ${activeFormatCode === f.format ? "active" : ""}" data-action="select-format" data-format="${attr(f.format)}">
-                      <div class="format-card-brand">${escapeHtml(f.machineBrand)}</div>
+                      <div class="format-card-brand">${escapeHtml(f.machineBrand || "Universal")}</div>
                       <div class="format-card-badge">${escapeHtml(f.label || f.format)}</div>
-                      <div class="format-card-model" style="display:none;">${escapeHtml(f.machineModel)}</div>
-                      <div class="format-card-hoop">Hoop: ${escapeHtml(f.hoopSize)}</div>
-                      <div class="format-card-price" style="font-weight:700; color:var(--gold); margin-top:2px;">${money(f.price)}</div>
+                      <div class="format-card-model" style="display:none;">${escapeHtml(f.machineModel || "Commercial")}</div>
+                      <div class="format-card-hoop">Hoop: ${escapeHtml(f.hoopSize || hoop)}</div>
+                      <div class="format-card-price" style="font-weight:700; color:var(--gold); margin-top:2px;">${money(f.price != null ? f.price : displayPrice)}</div>
                     </div>
                   `
                 )
@@ -338,7 +368,7 @@ export function renderProductDetail() {
               </div>
               <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
                 <span style="color: var(--ink-soft); font-weight: 600;">Stitches Breakdown</span>
-                <span style="color: var(--navy); font-weight: 700;">${product.totalStitchCount.toLocaleString()} total (${(product.backStitchCount || 0).toLocaleString()} back)</span>
+                <span style="color: var(--navy); font-weight: 700;">${totalStitches.toLocaleString()} total (${backStitches.toLocaleString()} back)</span>
               </div>
               <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
                 <span style="color: var(--ink-soft); font-weight: 600;">Thread Colors</span>
@@ -352,8 +382,8 @@ export function renderProductDetail() {
                 <span style="color: var(--ink-soft); font-weight: 600;">Compatible Machines</span>
                 <span style="color: var(--navy); font-weight: 700; text-align: right;">
                   ${(() => {
-                    const brands = [...new Set(product.formats.map(f => f.machineBrand).filter(Boolean))];
-                    return escapeHtml(brands.join(", "));
+                    const brands = [...new Set((formats || []).map(f => f.machineBrand).filter(Boolean))];
+                    return escapeHtml(brands.length > 0 ? brands.join(", ") : "Universal Multi-Needle");
                   })()}
                 </span>
               </div>
@@ -714,8 +744,8 @@ export function renderProductDetail() {
               
               <!-- Back and Hands Stitch Counts Breakdown -->
               <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--ink-soft); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
-                <span>Back Stitches: <strong style="color: var(--navy);">${(product.backStitchCount || 0).toLocaleString()}</strong></span>
-                <span>Hands Stitches: <strong style="color: var(--navy);">${(product.handStitchCount || 0).toLocaleString()}</strong></span>
+                <span>Back Stitches: <strong style="color: var(--navy);">${backStitches.toLocaleString()}</strong></span>
+                <span>Hands Stitches: <strong style="color: var(--navy);">${handStitches.toLocaleString()}</strong></span>
               </div>
               
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -781,8 +811,8 @@ export function renderProductDetail() {
                 <div class="spec-row">
                   <span style="font-weight:700; color:var(--navy);">Stitch Details</span>
                   <div style="display:grid; gap:4px; color:var(--navy);">
-                    <strong>Back: ${product.backStitchCount.toLocaleString()}</strong>
-                    <strong>Hand: ${product.handStitchCount.toLocaleString()}</strong>
+                    <strong>Back: ${backStitches.toLocaleString()}</strong>
+                    <strong>Hand: ${handStitches.toLocaleString()}</strong>
                   </div>
                 </div>
               </div>
@@ -793,7 +823,7 @@ export function renderProductDetail() {
               <div style="display:grid; gap:12px; color:var(--navy);">
                 <div style="display:flex; justify-content:space-between; gap:12px;">
                   <span style="font-weight:600;">Embroidery Speed</span>
-                  <strong>${product.rpm} RPM</strong>
+                  <strong>${product.rpm || 850} RPM</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; gap:12px;">
                   <span style="font-weight:600;">Estimated Time</span>
@@ -801,7 +831,7 @@ export function renderProductDetail() {
                 </div>
                 <div style="display:flex; justify-content:space-between; gap:12px;">
                   <span style="font-weight:600;">Total Stitch Count</span>
-                  <strong>${product.totalStitchCount.toLocaleString()}</strong>
+                  <strong>${totalStitches.toLocaleString()}</strong>
                 </div>
               </div>
             </div>
@@ -845,9 +875,9 @@ export function renderProductDetail() {
                 <div style="display:flex; justify-content:space-between; gap:12px;">
                   <span style="font-weight:600; color:var(--navy);">Compatible Machines</span>
                   <strong style="color:var(--navy);">${escapeHtml(
-                    product.formats && product.formats.length > 0
-                      ? [...new Set(product.formats.map(f => f.machineBrand).filter(Boolean))].join(", ")
-                      : "N/A"
+                    formats && formats.length > 0
+                      ? [...new Set(formats.map(f => f.machineBrand).filter(Boolean))].join(", ")
+                      : "Universal Multi-Needle"
                   )}</strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; gap:12px;">
@@ -862,15 +892,15 @@ export function renderProductDetail() {
               Selected: <strong style="color: var(--navy);">${escapeHtml(selectedFormatLabel)}</strong>
             </div>
             <div class="format-cards-grid">
-              ${product.formats
+              ${formats
                 .map(
                   (f) => `
                     <div class="format-card ${activeFormatCode === f.format ? "active" : ""}" data-action="select-format" data-format="${attr(f.format)}">
-                      <div class="format-card-brand">${escapeHtml(f.machineBrand)}</div>
+                      <div class="format-card-brand">${escapeHtml(f.machineBrand || "Universal")}</div>
                       <div class="format-card-badge">${escapeHtml(f.label || f.format)}</div>
-                      <div class="format-card-model">${escapeHtml(f.machineModel)}</div>
-                      <div class="format-card-hoop">Hoop: ${escapeHtml(f.hoopSize)}</div>
-                      <div class="format-card-price">${money(f.price)}</div>
+                      <div class="format-card-model">${escapeHtml(f.machineModel || "Commercial")}</div>
+                      <div class="format-card-hoop">Hoop: ${escapeHtml(f.hoopSize || hoop)}</div>
+                      <div class="format-card-price">${money(f.price != null ? f.price : displayPrice)}</div>
                       
                       ${f.stitchLimit ? `<div style="font-size:10px; color:var(--ink-soft); margin-top:4px;">Stitches: ${f.stitchLimit}</div>` : ""}
                       ${f.notes ? `<div style="font-size:9px; color:var(--gold); margin-top:2px;" title="${attr(f.notes)}">${escapeHtml(f.notes)}</div>` : ""}
@@ -1163,6 +1193,18 @@ export function renderProductDetail() {
         : ""
     }
   `;
+  } catch (err) {
+    console.error("renderProductDetail caught error:", err);
+    return `
+      <section class="content-section" style="padding: 80px 24px; text-align: center; background: var(--ivory);">
+        <div style="max-width: 500px; margin: 0 auto; background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 40px; box-shadow: var(--shadow);">
+          <h2 style="font-family: var(--font-serif); font-size: 26px; color: var(--navy); margin-bottom: 12px;">Unable to display design</h2>
+          <p style="color: var(--ink-soft); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">We encountered an issue preparing the machine stitch details for this design. Please return to the catalog.</p>
+          <a href="#/catalog" class="button button-primary" style="display: inline-block;">Return to Catalog</a>
+        </div>
+      </section>
+    `;
+  }
 }
 
 // Bind Zoom & Drag Pan Handlers
@@ -1329,9 +1371,12 @@ export function initProductDetailEvents() {
       
       try {
         const product = site.products.find(p => p.id === lastProductId);
-        const format = activeFormatCode;
-        const selectedFormatObj = product.formats.find(f => f.format === format) || product.formats[0];
-        const price = selectedFormatObj ? selectedFormatObj.price : product.price;
+        const format = activeFormatCode || "DST";
+        const pFormats = Array.isArray(product?.formats) && product.formats.length > 0
+          ? product.formats
+          : [{ format, price: product?.price || 0 }];
+        const selectedFormatObj = pFormats.find(f => f.format === format) || pFormats[0];
+        const price = selectedFormatObj ? selectedFormatObj.price : (product?.price || 0);
         
         const metadata = `[Product Customization Request]
 Product ID: ${product.id}

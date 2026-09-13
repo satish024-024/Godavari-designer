@@ -77,6 +77,75 @@ function mapStoriesFromTestimonials(rows) {
   };
 }
 
+// Product normalizer: Enforces all required specifications and arrays matching defaultSite.js format
+export function normalizeProduct(p) {
+  if (!p) return null;
+  const totalStitch = Number(p.totalStitchCount || p.stitchCount || 45000);
+  const backStitch = p.backStitchCount != null ? Number(p.backStitchCount) : Math.round(totalStitch * 0.6);
+  const handStitch = p.handStitchCount != null ? Number(p.handStitchCount) : Math.round(totalStitch * 0.4);
+  const hoop = p.hoopSize || p.dimensions || "200mm x 300mm";
+  const width = Number(p.width || 200);
+  const height = Number(p.height || 300);
+  const price = Number(p.price || 0);
+
+  const rawFormats = Array.isArray(p.formats) && p.formats.length > 0
+    ? p.formats
+    : [
+        { format: "DST", machineBrand: "Tajima", machineModel: "Commercial Multi-Needle", hoopSize: hoop, price },
+        { format: "PES", machineBrand: "Brother", machineModel: "Innov-is Series", hoopSize: hoop, price },
+        { format: "JEF", machineBrand: "Janome", machineModel: "Memory Craft", hoopSize: hoop, price }
+      ];
+
+  const formats = rawFormats.map(f => {
+    if (typeof f === "string") {
+      return { format: f, machineBrand: "Commercial", machineModel: "Universal", hoopSize: hoop, price };
+    }
+    return {
+      format: f.format || "DST",
+      machineBrand: f.machineBrand || "Universal / Commercial",
+      machineModel: f.machineModel || "Multi-Needle",
+      hoopSize: f.hoopSize || hoop,
+      price: Number(f.price != null ? f.price : price)
+    };
+  });
+
+  const machineFormats = Array.isArray(p.machineFormats) && p.machineFormats.length > 0
+    ? p.machineFormats
+    : formats.map(f => f.format);
+
+  const recommendedFabrics = Array.isArray(p.recommendedFabrics) && p.recommendedFabrics.length > 0
+    ? p.recommendedFabrics
+    : ["Pure Silk", "Raw Silk", "Velvet", "Cotton", "Net", "Georgette"];
+
+  return {
+    ...p,
+    price,
+    width,
+    height,
+    dimensions: p.dimensions || `${width}mm x ${height}mm`,
+    hoopSize: hoop,
+    totalStitchCount: totalStitch,
+    stitchCount: totalStitch,
+    backStitchCount: backStitch,
+    handStitchCount: handStitch,
+    rpm: Number(p.rpm || 850),
+    estimatedEmbroideryTime: Number(p.estimatedEmbroideryTime || p.estimated_time || Math.round(totalStitch / 700)),
+    threadColors: Number(p.threadColors || p.thread_colors || 5),
+    difficultyLevel: p.difficultyLevel || p.difficulty_level || "Commercial Grade",
+    label: p.label || "Commercial Grade",
+    collection: p.collection || "Bridal Luxury Collection",
+    category: p.category || "Embroidery Design",
+    formats,
+    machineFormats,
+    recommendedFabrics
+  };
+}
+
+// Ensure initial in-memory default products are also normalized
+if (site && site.products) {
+  site.products = site.products.map(normalizeProduct);
+}
+
 // ==========================================
 // ASYNC INITIALIZATION & SYNC LAYER
 // ==========================================
@@ -193,7 +262,7 @@ export async function syncFromSupabase() {
           combined.push(p);
         }
       }
-      prods = combined.length > 0 ? combined : defaultSite.products;
+      prods = (combined.length > 0 ? combined : defaultSite.products).map(normalizeProduct).filter(Boolean);
       site.products = prods;
       DB.saveProducts(prods);
 
@@ -231,7 +300,7 @@ export async function syncFromSupabase() {
       // Fallback: restore from local cache
       const cachedCats = DB.getCategories();
       const cachedProds = DB.getProducts();
-      if (cachedProds.length > 0) site.products = cachedProds;
+      if (cachedProds.length > 0) site.products = cachedProds.map(normalizeProduct).filter(Boolean);
       
       dataSynced = true;
       import("./router.js").then(({ handleRouting }) => {

@@ -123,30 +123,46 @@ export async function fetchSanityLake() {
 export function mapSanityProduct(p) {
   if (!p) return null;
   const rawId = p._id || `prod_${p.slug || Date.now()}`;
+  const totalStitch = Number(p.stitchCount || 45000);
+  const backStitch = Math.round(totalStitch * 0.6);
+  const handStitch = Math.round(totalStitch * 0.4);
+  const hoop = p.hoopSize || '200mm x 300mm';
+  const price = Number(p.price || 0);
   return {
     id: rawId,
     _id: rawId,
     slug: p.slug || p._id,
     code: p.code || 'GD-COMMERCIAL',
     title: p.title || 'Untitled Embroidery Design',
-    description: p.description || '',
-    price: Number(p.price || 0),
+    description: p.description || 'Commercial grade machine embroidery design, tested for high-speed multi-needle production.',
+    price: price,
     category: p.category || 'Blouse Designs',
     categoryId: p.category ? `category_${p.category.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : 'category_blouses',
+    collection: 'Bridal Luxury Collection',
+    label: 'Commercial Grade',
     image: p.image || '/banner.jpeg',
     gallery: Array.isArray(p.gallery) && p.gallery.length > 0 ? p.gallery : (p.image ? [p.image] : ['/banner.jpeg']),
     designFile: p.designFile || '',
     designFileName: p.designFileName || '',
     sizes: p.sizes || [],
-    stitchCount: p.stitchCount || 45000,
-    totalStitchCount: p.stitchCount || 45000,
-    hoopSize: p.hoopSize || '200mm x 300mm',
+    stitchCount: totalStitch,
+    totalStitchCount: totalStitch,
+    backStitchCount: backStitch,
+    handStitchCount: handStitch,
+    width: 200,
+    height: 300,
+    dimensions: hoop,
+    hoopSize: hoop,
     threadColors: p.threadColors || 5,
+    rpm: 850,
+    estimatedEmbroideryTime: Math.round(totalStitch / 700),
+    recommendedFabrics: ['Raw Silk', 'Pure Silk', 'Velvet', 'Cotton', 'Net', 'Georgette'],
     formats: [
-      { format: 'DST' },
-      { format: 'PES' }
+      { format: 'DST', machineBrand: 'Tajima', machineModel: 'Commercial Multi-Needle', hoopSize: hoop, price },
+      { format: 'PES', machineBrand: 'Brother', machineModel: 'Innov-is Series', hoopSize: hoop, price },
+      { format: 'JEF', machineBrand: 'Janome', machineModel: 'Memory Craft', hoopSize: hoop, price }
     ],
-    machineFormats: ['DST', 'PES'],
+    machineFormats: ['DST', 'PES', 'JEF'],
     difficultyLevel: 'Commercial Grade',
     featured: true,
     bestSeller: false,

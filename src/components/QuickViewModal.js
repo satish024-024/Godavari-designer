@@ -2,15 +2,66 @@ import { site, wishlist, addToCart, toggleWishlist, closePanels } from "../servi
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 export function renderQuickViewModal(productId) {
-  const product = site.products.find((p) => p.id === productId);
-  if (!product) return "";
+  try {
+    const product = site.products.find(
+      (p) => p.id === productId || p._id === productId || p.slug === productId
+    );
+    if (!product) return "";
 
-  const isSaved = wishlist.has(product.id);
-  const formatsList = product.machineFormats.join(", ");
-  const fabricsList = product.recommendedFabrics.join(", ");
+    const isSaved = wishlist.has(product.id);
 
-  return `
-    <div class="overlay-panel quickview-overlay" role="dialog" aria-modal="true" aria-label="Quick view ${attr(product.title)}">
+    // Fallbacks matching defaultSite.js format
+    const formatsList =
+      Array.isArray(product.machineFormats) && product.machineFormats.length > 0
+        ? product.machineFormats.join(", ")
+        : "DST, PES, JEF";
+
+    const fabricsList =
+      Array.isArray(product.recommendedFabrics) && product.recommendedFabrics.length > 0
+        ? product.recommendedFabrics.join(", ")
+        : "Silk, Raw Silk, Cotton, Net, Velvet, Georgette";
+
+    const totalStitch = Number(product.totalStitchCount || product.stitchCount || 45000);
+    const backStitch =
+      product.backStitchCount != null ? Number(product.backStitchCount) : Math.round(totalStitch * 0.6);
+    const handStitch =
+      product.handStitchCount != null ? Number(product.handStitchCount) : Math.round(totalStitch * 0.4);
+
+    const hoop = product.hoopSize || product.dimensions || "200mm x 300mm";
+    const width = Number(product.width || 200);
+    const height = Number(product.height || 300);
+    const dimensionsText = product.dimensions || `${width}mm x ${height}mm`;
+    const rpm = product.rpm || 850;
+    const estTime = product.estimatedEmbroideryTime || Math.round(totalStitch / 700);
+    const threadColors = product.threadColors || 5;
+    const difficulty = product.difficultyLevel || "Commercial Grade";
+    const label = product.label || "Commercial Grade";
+    const collection = product.collection || "Bridal Luxury Collection";
+    const category = product.category || "Embroidery Design";
+    const title = product.title || "Untitled Embroidery Design";
+    const price = Number(product.price || 0);
+    const desc =
+      product.description ||
+      "Machine-ready commercial embroidery file with tested thread trims and verified stitch density.";
+
+    const rawFormats =
+      Array.isArray(product.formats) && product.formats.length > 0
+        ? product.formats
+        : [
+            { format: "DST", machineBrand: "Tajima", machineModel: "Commercial Multi-Needle", hoopSize: hoop },
+            { format: "PES", machineBrand: "Brother", machineModel: "Innov-is Series", hoopSize: hoop },
+            { format: "JEF", machineBrand: "Janome", machineModel: "Memory Craft", hoopSize: hoop }
+          ];
+
+    const formats = rawFormats.map((f) => ({
+      format: typeof f === "string" ? f : f.format || "DST",
+      machineBrand: f.machineBrand || "Universal / Commercial",
+      machineModel: f.machineModel || "Multi-Needle",
+      hoopSize: f.hoopSize || hoop
+    }));
+
+    return `
+    <div class="overlay-panel quickview-overlay" role="dialog" aria-modal="true" aria-label="Quick view ${attr(title)}">
       <div class="overlay-scrim" data-action="close-panels"></div>
       <section class="quickview-modal">
         <button type="button" class="icon-button modal-close" data-action="close-panels" aria-label="Close details">${icon("x", 22)}</button>
@@ -19,7 +70,7 @@ export function renderQuickViewModal(productId) {
           <!-- Left: Gallery -->
           <div class="quickview-gallery">
             <div class="main-image-wrapper">
-              <img id="quickviewMainImg" src="${attr(mediaUrl(product.image))}" alt="${attr(product.title)}" />
+              <img id="quickviewMainImg" src="${attr(mediaUrl(product.image))}" alt="${attr(title)}" />
             </div>
             ${
               product.gallery && product.gallery.length > 1
@@ -40,31 +91,31 @@ export function renderQuickViewModal(productId) {
 
           <!-- Right: Specs and Info -->
           <div class="quickview-info">
-            <span class="product-label">${escapeHtml(product.label)}</span>
-            <h2 class="product-title">${escapeHtml(product.title)}</h2>
+            <span class="product-label">${escapeHtml(label)}</span>
+            <h2 class="product-title">${escapeHtml(title)}</h2>
             <div class="product-meta-row">
-              <span>Category: <strong>${escapeHtml(product.category)}</strong></span>
-              <span>Collection: <strong>${escapeHtml(product.collection)}</strong></span>
+              <span>Category: <strong>${escapeHtml(category)}</strong></span>
+              <span>Collection: <strong>${escapeHtml(collection)}</strong></span>
             </div>
-            <p class="product-price">${money(product.price)}</p>
-            <p class="product-desc">${escapeHtml(product.description)}</p>
+            <p class="product-price">${money(price)}</p>
+            <p class="product-desc">${escapeHtml(desc)}</p>
             
             <div class="specs-table">
               <div class="specs-row">
                 <span>Stitch Breakdown</span>
-                <strong>${product.totalStitchCount.toLocaleString()} total (${product.backStitchCount.toLocaleString()} back, ${product.handStitchCount.toLocaleString()} hand)</strong>
+                <strong>${totalStitch.toLocaleString()} total (${backStitch.toLocaleString()} back, ${handStitch.toLocaleString()} hand)</strong>
               </div>
               <div class="specs-row">
                 <span>Dimensions (W x H)</span>
-                <strong>${product.width}mm x ${product.height}mm (${escapeHtml(product.dimensions)})</strong>
+                <strong>${width}mm x ${height}mm (${escapeHtml(dimensionsText)})</strong>
               </div>
               <div class="specs-row">
                 <span>Machine Speed & Time</span>
-                <strong>${product.rpm} RPM &bull; ~${product.estimatedEmbroideryTime} mins</strong>
+                <strong>${rpm} RPM &bull; ~${estTime} mins</strong>
               </div>
               <div class="specs-row">
                 <span>Thread Colors & Difficulty</span>
-                <strong>${product.threadColors} colors &bull; ${escapeHtml(product.difficultyLevel)}</strong>
+                <strong>${threadColors} colors &bull; ${escapeHtml(difficulty)}</strong>
               </div>
               <div class="specs-row">
                 <span>Recommended Fabrics</span>
@@ -80,7 +131,7 @@ export function renderQuickViewModal(productId) {
             <label class="format-select-label">
               <span>Select File Format & View Compatibility</span>
               <select id="qvFileFormat" class="format-dropdown" data-action="qv-change-format" data-id="${attr(product.id)}">
-                ${product.formats
+                ${formats
                   .map(
                     (f) => `
                       <option value="${attr(f.format)}">
@@ -114,5 +165,9 @@ export function renderQuickViewModal(productId) {
         </div>
       </section>
     </div>
-  `;
+    `;
+  } catch (err) {
+    console.error("renderQuickViewModal error caught safely:", err);
+    return "";
+  }
 }

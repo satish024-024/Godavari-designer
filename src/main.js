@@ -154,170 +154,177 @@ function renderLoadingAuth() {
 
 // Master Render loop
 function render() {
-  applyTheme();
+  try {
+    applyTheme();
 
-  // Page switcher
-  let pageContent = "";
-  switch (ui.page) {
-    case "home":
-      pageContent = renderHome();
-      break;
-    case "catalog":
-      pageContent = renderCatalog();
-      break;
-    case "product-detail":
-      pageContent = renderProductDetail();
-      break;
-    case "custom-order":
-      pageContent = renderCustomOrder();
-      break;
-    case "cart":
-      pageContent = renderCart();
-      break;
-    case "wishlist":
-      pageContent = renderWishlist();
-      break;
-    case "checkout":
-      pageContent = renderCheckout();
-      break;
-    case "track-order":
-      pageContent = renderOrderTracking();
-      break;
-    case "account":
-      pageContent = renderAccount();
-      break;
-    case "auth":
-      pageContent = renderAuth();
-      break;
-    case "admin-dashboard":
-      pageContent = `
-        <section class="content-section" style="padding: 100px 24px; min-height: 70vh; display: grid; place-items: center; background: var(--ivory);">
-          <div style="background: #ffffff; border: 1.5px solid #f03e2f; border-radius: 12px; padding: 40px; max-width: 540px; text-align: center; box-shadow: var(--shadow-deep);">
-            <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(240,62,47,0.08); color: #f03e2f; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
-              <svg style="width: 32px; height: 32px; fill: currentColor;" viewBox="0 0 24 24">
-                <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
-              </svg>
+    // Page switcher
+    let pageContent = "";
+    switch (ui.page) {
+      case "home":
+        pageContent = renderHome();
+        break;
+      case "catalog":
+        pageContent = renderCatalog();
+        break;
+      case "product-detail":
+        pageContent = renderProductDetail();
+        break;
+      case "custom-order":
+        pageContent = renderCustomOrder();
+        break;
+      case "cart":
+        pageContent = renderCart();
+        break;
+      case "wishlist":
+        pageContent = renderWishlist();
+        break;
+      case "checkout":
+        pageContent = renderCheckout();
+        break;
+      case "track-order":
+        pageContent = renderOrderTracking();
+        break;
+      case "account":
+        pageContent = renderAccount();
+        break;
+      case "auth":
+        pageContent = renderAuth();
+        break;
+      case "admin-dashboard":
+        pageContent = `
+          <section class="content-section" style="padding: 100px 24px; min-height: 70vh; display: grid; place-items: center; background: var(--ivory);">
+            <div style="background: #ffffff; border: 1.5px solid #f03e2f; border-radius: 12px; padding: 40px; max-width: 540px; text-align: center; box-shadow: var(--shadow-deep);">
+              <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(240,62,47,0.08); color: #f03e2f; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+                <svg style="width: 32px; height: 32px; fill: currentColor;" viewBox="0 0 24 24">
+                  <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+                </svg>
+              </div>
+              <h1 style="font-family: var(--font-serif); font-size: 26px; color: var(--navy); margin-bottom: 10px;">Sanity Studio CMS</h1>
+              <p style="color: var(--ink-soft); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">Store administration and design file management is hosted directly on Sanity Studio Cloud. Click below to manage products, multi-size machine files, categories, and orders.</p>
+              <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a href="https://godavari-designers.sanity.studio/" target="_blank" rel="noopener noreferrer" class="button" style="background: #f03e2f; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
+                  <span>Launch Sanity Studio</span>
+                  <span>↗</span>
+                </a>
+                <a href="#/" class="button button-outline" style="text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: 700; font-size: 13px;">
+                  Return to Store
+                </a>
+              </div>
             </div>
-            <h1 style="font-family: var(--font-serif); font-size: 26px; color: var(--navy); margin-bottom: 10px;">Sanity Studio CMS</h1>
-            <p style="color: var(--ink-soft); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">Store administration and design file management is hosted directly on Sanity Studio Cloud. Click below to manage products, multi-size machine files, categories, and orders.</p>
-            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-              <a href="https://godavari-designers.sanity.studio/" target="_blank" rel="noopener noreferrer" class="button" style="background: #f03e2f; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
-                <span>Launch Sanity Studio</span>
-                <span>↗</span>
-              </a>
-              <a href="#/" class="button button-outline" style="text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: 700; font-size: 13px;">
-                Return to Store
-              </a>
-            </div>
-          </div>
-        </section>
-      `;
-      break;
-    case "loading-auth":
-      pageContent = renderLoadingAuth();
-      break;
-    case "about-us":
-      pageContent = renderAboutUs();
-      break;
-    case "our-process":
-      pageContent = renderOurProcess();
-      break;
-    case "why-godavari":
-      pageContent = renderWhyGodavari();
-      break;
-    case "reviews":
-      pageContent = renderReviews();
-      break;
-    case "careers":
-      pageContent = renderCareers();
-      break;
-    case "faqs":
-      pageContent = renderFAQs();
-      break;
-    case "shipping-delivery":
-      pageContent = renderShippingDelivery();
-      break;
-    case "returns-refunds":
-      pageContent = renderReturnsRefunds();
-      break;
-    case "terms-of-service":
-      pageContent = renderTermsService();
-      break;
-    case "privacy-policy":
-      pageContent = renderPrivacyPolicy();
-      break;
-    case "service-detail":
-      pageContent = renderServicePage(ui.pageParams.service);
-      break;
-    case "location-detail":
-      pageContent = renderLocationPage(ui.pageParams.location);
-      break;
-    case "payment-processing":
-      pageContent = renderPaymentProcessing(ui.queryParams);
-      break;
-    case "payment-success":
-      pageContent = renderPaymentSuccess(ui.queryParams);
-      break;
-    case "payment-pending":
-      pageContent = renderPaymentPending(ui.queryParams);
-      break;
-    case "payment-failed":
-      pageContent = renderPaymentFailed(ui.queryParams);
-      break;
-    case "payment-cancelled":
-      pageContent = renderPaymentCancelled(ui.queryParams);
-      break;
-    case "payment-support":
-      pageContent = renderPaymentSupport(ui.queryParams);
-      break;
-    case "purchases":
-      pageContent = renderPurchasesHistory();
-      break;
-    case "purchase-detail":
-      pageContent = renderPurchaseDetail(ui.queryParams, ui.pageParams);
-      break;
-    case "404":
-      pageContent = renderNotFound();
-      break;
-    default:
-      pageContent = renderHome();
-  }
+          </section>
+        `;
+        break;
+      case "loading-auth":
+        pageContent = renderLoadingAuth();
+        break;
+      case "about-us":
+        pageContent = renderAboutUs();
+        break;
+      case "our-process":
+        pageContent = renderOurProcess();
+        break;
+      case "why-godavari":
+        pageContent = renderWhyGodavari();
+        break;
+      case "reviews":
+        pageContent = renderReviews();
+        break;
+      case "careers":
+        pageContent = renderCareers();
+        break;
+      case "faqs":
+        pageContent = renderFAQs();
+        break;
+      case "shipping-delivery":
+        pageContent = renderShippingDelivery();
+        break;
+      case "returns-refunds":
+        pageContent = renderReturnsRefunds();
+        break;
+      case "terms-of-service":
+        pageContent = renderTermsService();
+        break;
+      case "privacy-policy":
+        pageContent = renderPrivacyPolicy();
+        break;
+      case "service-detail":
+        pageContent = renderServicePage(ui.pageParams.service);
+        break;
+      case "location-detail":
+        pageContent = renderLocationPage(ui.pageParams.location);
+        break;
+      case "payment-processing":
+        pageContent = renderPaymentProcessing(ui.queryParams);
+        break;
+      case "payment-success":
+        pageContent = renderPaymentSuccess(ui.queryParams);
+        break;
+      case "payment-pending":
+        pageContent = renderPaymentPending(ui.queryParams);
+        break;
+      case "payment-failed":
+        pageContent = renderPaymentFailed(ui.queryParams);
+        break;
+      case "payment-cancelled":
+        pageContent = renderPaymentCancelled(ui.queryParams);
+        break;
+      case "payment-support":
+        pageContent = renderPaymentSupport(ui.queryParams);
+        break;
+      case "purchases":
+        pageContent = renderPurchasesHistory();
+        break;
+      case "purchase-detail":
+        pageContent = renderPurchaseDetail(ui.queryParams, ui.pageParams);
+        break;
+      case "404":
+        pageContent = renderNotFound();
+        break;
+      default:
+        pageContent = renderHome();
+    }
 
-  // Admin dashboard and loading state get their own full-screen shell — no site header/footer
-  if (ui.page === "admin-dashboard" || ui.page === "loading-auth") {
-    app.innerHTML = `
-      <div class="full-screen-wrapper">
-        ${pageContent}
-        ${renderToast()}
-      </div>
-    `;
-    afterRender();
-    return;
-  }
-
-  if (isMobileViewport()) {
-    app.innerHTML = renderMobileShell(pageContent);
-  } else {
-    app.innerHTML = `
-      <div class="site-shell desktop-shell">
-        ${renderHeader(false)}
-        <main>
+    // Admin dashboard and loading state get their own full-screen shell — no site header/footer
+    if (ui.page === "admin-dashboard" || ui.page === "loading-auth") {
+      app.innerHTML = `
+        <div class="full-screen-wrapper">
           ${pageContent}
-        </main>
-        ${renderFooter()}
-        ${renderFloatingActions()}
-        ${ui.searchOpen ? renderSearchOverlay() : ""}
-        ${ui.cartOpen ? renderCartDrawer() : ""}
-        ${ui.quoteOpen ? renderQuoteModal() : ""}
-        ${ui.storyOpen ? renderStoryModal() : ""}
-        ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
-        ${renderPaymentModal()}
-        ${renderToast()}
-      </div>
-    `;
-  }
+          ${renderToast()}
+        </div>
+      `;
+      afterRender();
+      return;
+    }
 
-  afterRender();
+    if (isMobileViewport()) {
+      app.innerHTML = renderMobileShell(pageContent);
+    } else {
+      app.innerHTML = `
+        <div class="site-shell desktop-shell">
+          ${renderHeader(false)}
+          <main>
+            ${pageContent}
+          </main>
+          ${renderFooter()}
+          ${renderFloatingActions()}
+          ${ui.searchOpen ? renderSearchOverlay() : ""}
+          ${ui.cartOpen ? renderCartDrawer() : ""}
+          ${ui.quoteOpen ? renderQuoteModal() : ""}
+          ${ui.storyOpen ? renderStoryModal() : ""}
+          ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
+          ${renderPaymentModal()}
+          ${renderToast()}
+        </div>
+      `;
+    }
+
+    afterRender();
+  } catch (renderError) {
+    console.error("Critical render loop error caught:", renderError);
+    if (ui.quickViewProductId) {
+      ui.quickViewProductId = null;
+    }
+  }
 }
 
 
@@ -1299,6 +1306,7 @@ document.addEventListener("click", (event) => {
 
   // --- Quick View Actions ---
   if (action === "quick-view") {
+    closePanels();
     ui.quickViewProductId = trigger.dataset.id;
     triggerRender();
   }
@@ -1314,7 +1322,7 @@ document.addEventListener("click", (event) => {
 
   if (action === "qv-add-cart") {
     const format = document.getElementById("qvFileFormat")?.value || "DST";
-    addToCart(trigger.dataset.id);
+    addToCart(trigger.dataset.id, format);
     showToast(`Added design with format ${format}`);
     closePanels();
     triggerRender();
