@@ -451,6 +451,43 @@ export const defaultSite = {
         { format: "DST", machineBrand: "Tajima", machineModel: "All Multi-Head", hoopSize: "3\", 4\", 5\", 7\", 8\" All Sizes", price: 100 },
         { format: "ZIP", machineBrand: "Universal", machineModel: "Full 5-Size Archive", hoopSize: "Complete Bundle", price: 100 }
       ]
+    },
+    {
+      id: "jc5243-hibiscus-floral-cutwork-blouse-set",
+      code: "JC5243",
+      slug: "jc5243-hibiscus-floral-cutwork-blouse-set",
+      title: "Hibiscus Floral Cutwork Blouse Set - Full Parts",
+      description: "Designer hibiscus floral motif embroidery blouse pattern set (Code: JC5243). Includes all 14 multi-part Tajima DST files: Back Neck (B1, B2, B3, B4, BN), Floral Bunches, Front Neck Placements (FRONT, FR, FR1, FULL, FULL1), and Sleeves / Hands (HAND, HAND1, HAND2). Production-ready for commercial embroidery machines.",
+      price: 100,
+      category: "Blouse Designs",
+      collection: "blouses",
+      image: "https://cdn.sanity.io/images/6l7i886u/production/6a4c70d59bf25f0a960fcf1776d9bdc3e4934df0-320x246.jpg",
+      gallery: ["https://cdn.sanity.io/images/6l7i886u/production/6a4c70d59bf25f0a960fcf1776d9bdc3e4934df0-320x246.jpg"],
+      stitchCount: 52000,
+      threadColors: 5,
+      dimensions: "Front, Back, Bunches & Sleeves (All 14 Parts)",
+      machineFormats: ["DST", "ZIP"],
+      designFile: "https://cdn.sanity.io/files/6l7i886u/production/908c96074d7bd1b47def485cf8405683f70a65c3.zip",
+      featured: true,
+      bestSeller: true,
+      tags: ["hibiscus", "floral", "blouse", "JC5243", "14-parts", "DST", "cutwork"],
+      seoTitle: "Hibiscus Floral Cutwork Blouse Set 14 Parts (JC5243) | Godavari",
+      seoDescription: "Download the complete 14-part Hibiscus floral cutwork designer blouse machine embroidery bundle in DST format for ₹100.",
+      createdAt: "2026-09-13T09:10:00.000Z",
+      updatedAt: "2026-09-13T09:10:00.000Z",
+      width: 250,
+      height: 300,
+      backStitchCount: 28000,
+      handStitchCount: 24000,
+      totalStitchCount: 52000,
+      rpm: 850,
+      estimatedEmbroideryTime: 42,
+      difficultyLevel: "Intermediate",
+      recommendedFabrics: ["Silk", "Velvet", "Cotton", "Raw Silk", "Organza"],
+      formats: [
+        { format: "DST", machineBrand: "Tajima", machineModel: "Multi-Head", hoopSize: "Full 14-Part Set", price: 100 },
+        { format: "ZIP", machineBrand: "Universal", machineModel: "Complete Archive", hoopSize: "Full Bundle", price: 100 }
+      ]
     }
   ],
   stories: {

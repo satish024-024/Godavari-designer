@@ -30,68 +30,72 @@ export function renderPaymentModal() {
     <div class="overlay-panel payment-modal-overlay active" role="dialog" aria-modal="true" aria-labelledby="precheckout-title">
       <div class="overlay-scrim" data-action="close-precheckout" tabindex="-1"></div>
       
-      <section class="payment-modal-card luxury-card" style="max-width: 440px; width: 92%; margin: auto; background: var(--ivory, #f8f6f2); border-radius: 14px; border: 1px solid var(--border, #e6ded1); box-shadow: 0 24px 70px rgba(17, 29, 66, 0.16); overflow: hidden; position: relative; z-index: 1000; animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+      <section class="payment-modal-card luxury-card" style="max-width: 460px; width: 100%; margin: auto; background: #fff; border-radius: 16px; border: 1px solid var(--border, #e6ded1); box-shadow: 0 25px 60px -12px rgba(17, 29, 66, 0.28); overflow: hidden; position: relative; z-index: 2;">
         
         <!-- Header -->
-        <div style="padding: 16px 20px; background: var(--navy, #111d42); color: #fff; display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold, #c8a15a);"></span>
+        <div style="padding: 18px 24px; background: var(--navy, #111d42); color: #fff; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold, #c8a15a); box-shadow: 0 0 8px rgba(200, 161, 90, 0.6);"></span>
             <h3 id="precheckout-title" style="font-family: var(--font-serif, serif); font-size: 19px; margin: 0; color: #fff; font-weight: 600; letter-spacing: 0.02em;">
               Unlock Embroidery Design
             </h3>
           </div>
-          <button type="button" class="icon-button" data-action="close-precheckout" aria-label="Close" style="color: #fff; background: rgba(255,255,255,0.12); border: none; border-radius: 50%; width: 30px; height: 30px; display: grid; place-items: center; cursor: pointer; transition: background 0.2s;">
+          <button type="button" class="icon-button" data-action="close-precheckout" aria-label="Close" style="color: #fff; background: rgba(255,255,255,0.12); border: none; border-radius: 50%; width: 32px; height: 32px; display: grid; place-items: center; cursor: pointer; transition: background 0.2s;">
             ${icon("x", 16)}
           </button>
         </div>
 
         <!-- Body -->
-        <div style="padding: 24px 22px; display: grid; gap: 20px;">
+        <div style="padding: 24px; display: grid; gap: 18px; background: #faf9f6;">
           
           <!-- Product Showcase Card -->
-          <div style="display: flex; gap: 16px; background: #fff; border: 1px solid var(--border, #e6ded1); border-radius: 10px; padding: 14px; align-items: center;">
-            <div style="width: 72px; height: 72px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border, #e6ded1); flex-shrink: 0; background: var(--surface, #efe8dd);">
-              <img src="${attr(mediaUrl(p.image))}" alt="${attr(p.title)}" style="width: 100%; height: 100%; object-fit: cover;" />
+          <div style="display: flex; gap: 16px; background: #fff; border: 1px solid var(--border, #e6ded1); border-radius: 12px; padding: 14px; align-items: center; box-shadow: 0 2px 8px rgba(17,29,66,0.04);">
+            <div style="width: 76px; height: 76px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border, #e6ded1); flex-shrink: 0; background: #f4efe6;">
+              <img src="${attr(mediaUrl(p.image))}" alt="${attr(p.title)}" style="width: 100%; height: 100%; object-fit: contain; background: #fff;" />
             </div>
-            <div style="overflow: hidden; flex: 1;">
-              <div style="font-size: 10.5px; font-weight: 700; color: var(--gold, #c8a15a); letter-spacing: 0.06em; text-transform: uppercase;">
+            <div style="overflow: hidden; flex: 1; min-width: 0;">
+              <div style="display: inline-block; font-size: 11px; font-weight: 800; color: #111d42; background: rgba(200,161,90,0.2); padding: 2px 7px; border-radius: 4px; letter-spacing: 0.05em; text-transform: uppercase;">
                 ${escapeHtml(p.code || "GD-DESIGN")}
               </div>
-              <h4 style="font-family: var(--font-serif, serif); font-size: 17px; margin: 2px 0 4px; color: var(--navy, #111d42); line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <h4 style="font-family: var(--font-serif, serif); font-size: 16px; margin: 5px 0 3px; color: var(--navy, #111d42); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                 ${escapeHtml(p.title || "Embroidery Design")}
               </h4>
-              <span style="font-size: 11px; color: var(--ink-soft, rgba(17,29,66,0.72)); display: block;">
-                Commercial .DST & .PES Machine Files
+              <span style="font-size: 11.5px; color: rgba(17,29,66,0.65); display: block;">
+                Commercial .DST Machine Files Set
               </span>
             </div>
           </div>
 
-          <!-- Price Row -->
-          <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border, #e6ded1); padding-bottom: 14px;">
+          <!-- Price & License Block -->
+          <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--border, #e6ded1); border-radius: 12px; padding: 16px 18px;">
             <div>
-              <span style="font-size: 12px; color: var(--ink-soft, rgba(17,29,66,0.72)); font-weight: 500; display: block;">Total Price:</span>
-              <span style="font-size: 11px; color: #52c41a; font-weight: 600;">Includes Commercial Machine License</span>
+              <span style="font-size: 12px; color: rgba(17,29,66,0.6); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: block;">
+                Total Amount
+              </span>
+              <span style="font-size: 12px; color: #15803d; font-weight: 700; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                ✓ Commercial Machine License
+              </span>
             </div>
-            <div style="font-size: 26px; font-family: var(--font-serif, serif); font-weight: 700; color: var(--navy, #111d42);">
+            <div style="font-size: 28px; font-family: var(--font-serif, serif); font-weight: 800; color: var(--navy, #111d42); letter-spacing: -0.02em; white-space: nowrap; padding-left: 12px;">
               ${money(price)}
             </div>
           </div>
 
           <!-- Logged-in Account Banner -->
-          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(17,29,66,0.04); border: 1px solid var(--border, #e6ded1); border-radius: 8px; padding: 8px 12px; font-size: 11.5px; color: var(--navy, #111d42);">
-            <span style="display: flex; align-items: center; gap: 6px;">
-              ${icon("user-check", 14)}
+          <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(17,29,66,0.04); border: 1px solid var(--border, #e6ded1); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--navy, #111d42);">
+            <span style="display: flex; align-items: center; gap: 6px; color: rgba(17,29,66,0.7);">
+              ${icon("user-check", 15)}
               <span>Purchasing as:</span>
             </span>
-            <strong style="font-weight: 700; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            <strong style="font-weight: 700; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--navy, #111d42);">
               ${escapeHtml(currentUser?.email || currentUser?.phone || currentUser?.name || "Godavari Member")}
             </strong>
           </div>
 
           <!-- Razorpay Security Badge -->
-          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 11.5px; color: var(--ink-soft, rgba(17,29,66,0.72));">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; color: rgba(17,29,66,0.7);">
             ${icon("shield-check", 16)}
-            <span>Secure payment powered by <strong>Razorpay</strong></span>
+            <span>Secure 256-bit encrypted checkout via <strong>Razorpay</strong></span>
           </div>
 
           <!-- Primary Pay Button -->
@@ -101,20 +105,20 @@ export function renderPaymentModal() {
             data-action="start-razorpay-checkout" 
             data-id="${attr(p.id)}"
             ${isLoading ? "disabled" : ""}
-            style="width: 100%; min-height: 50px; font-size: 14.5px; font-weight: 700; border-radius: 8px; border: none; cursor: ${isLoading ? "not-allowed" : "pointer"}; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--navy, #111d42); color: #fff; box-shadow: 0 12px 30px rgba(17, 29, 66, 0.2); transition: all 0.2s;"
+            style="width: 100%; min-height: 52px; font-size: 15px; font-weight: 700; border-radius: 10px; border: none; cursor: ${isLoading ? "not-allowed" : "pointer"}; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--navy, #111d42); color: #fff; box-shadow: 0 10px 25px rgba(17, 29, 66, 0.25); transition: all 0.2s;"
           >
             ${isLoading ? `
               <span class="btn-spinner" aria-hidden="true"></span>
               <span>${btnLabel}</span>
             ` : `
-              ${icon("lock", 16)}
+              ${icon("lock", 17)}
               <span>${btnLabel}</span>
             `}
           </button>
 
           <!-- Safe Disclaimer -->
-          <p style="margin: 0; font-size: 11px; color: var(--ink-soft, rgba(17,29,66,0.72)); text-align: center; line-height: 1.4;">
-            Instant unlock upon payment. Downloads available in both Tajima (.DST) and Brother (.PES) formats.
+          <p style="margin: 0; font-size: 11.5px; color: rgba(17,29,66,0.55); text-align: center; line-height: 1.4;">
+            Instant unlock after payment. High-speed Tajima (.DST) machine embroidery bundle available immediately.
           </p>
 
         </div>
