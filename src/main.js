@@ -69,7 +69,7 @@ import { renderQuickViewModal } from "./components/QuickViewModal.js";
 import { renderBottomNavigation } from "./components/BottomNavigation.js";
 import { renderMobileDrawer } from "./components/MobileDrawer.js";
 import { renderMobileShell } from "./components/mobile/MobileShell.js";
-import { renderPaymentModal, initPaymentModalDelegates, openPaymentModal } from "./components/PaymentModal.js";
+import { renderPaymentModal, initPaymentModalDelegates, openPaymentModal } from "./components/PaymentModal.js?v=10";
 import { 
   renderPaymentProcessing, 
   renderPaymentSuccess, 
@@ -86,25 +86,24 @@ import {
 } from "./pages/Purchases.js";
 import { 
   openPreCheckout, 
-  closePreCheckout,
   downloadDesignFile, 
   initiatePayment 
 } from "./services/paymentService.js";
 
 
 // Pages
-import { renderHome } from "./pages/Home.js";
-import { renderCatalog, catalogState } from "./pages/Catalog.js";
-import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js";
-import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js";
-import { renderCart } from "./pages/Cart.js";
-import { renderWishlist } from "./pages/Wishlist.js";
-import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js";
-import { renderAuth, initAuthDelegates } from "./pages/Auth.js";
-import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js";
-import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js";
-import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js";
-import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js";
+import { renderHome } from "./pages/Home.js?v=10";
+import { renderCatalog, catalogState } from "./pages/Catalog.js?v=10";
+import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=10";
+import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=10";
+import { renderCart } from "./pages/Cart.js?v=10";
+import { renderWishlist } from "./pages/Wishlist.js?v=10";
+import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=10";
+import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=10";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=10";
+import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=10";
+import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=10";
+import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=10";
 
 // Company & Support Pages
 import {
@@ -296,49 +295,29 @@ function render() {
     return;
   }
 
-  try {
-    if (isMobileViewport()) {
-      app.innerHTML = renderMobileShell(pageContent);
-    } else {
-      app.innerHTML = `
-        <div class="site-shell desktop-shell">
-          ${renderHeader(false)}
-          <main>
-            ${pageContent}
-          </main>
-          ${renderFooter()}
-          ${renderFloatingActions()}
-          ${ui.searchOpen ? renderSearchOverlay() : ""}
-          ${ui.cartOpen ? renderCartDrawer() : ""}
-          ${ui.quoteOpen ? renderQuoteModal() : ""}
-          ${ui.storyOpen ? renderStoryModal() : ""}
-          ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
-          ${renderPaymentModal()}
-          ${renderToast()}
-        </div>
-      `;
-    }
-    afterRender();
-  } catch (renderErr) {
-    console.error("DOM render caught error:", renderErr);
-    // Reset quick view to prevent permanent modal lock
-    if (ui.quickViewProductId) {
-      ui.quickViewProductId = null;
-    }
-    try {
-      app.innerHTML = `
-        <div class="site-shell desktop-shell">
-          ${renderHeader(false)}
-          <main>
-            ${pageContent}
-          </main>
-          ${renderFooter()}
-          ${renderToast()}
-        </div>
-      `;
-      afterRender();
-    } catch (_) {}
+  if (isMobileViewport()) {
+    app.innerHTML = renderMobileShell(pageContent);
+  } else {
+    app.innerHTML = `
+      <div class="site-shell desktop-shell">
+        ${renderHeader(false)}
+        <main>
+          ${pageContent}
+        </main>
+        ${renderFooter()}
+        ${renderFloatingActions()}
+        ${ui.searchOpen ? renderSearchOverlay() : ""}
+        ${ui.cartOpen ? renderCartDrawer() : ""}
+        ${ui.quoteOpen ? renderQuoteModal() : ""}
+        ${ui.storyOpen ? renderStoryModal() : ""}
+        ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
+        ${renderPaymentModal()}
+        ${renderToast()}
+      </div>
+    `;
   }
+
+  afterRender();
 }
 
 
@@ -1072,7 +1051,7 @@ document.addEventListener("click", (event) => {
   // Buy Now via Razorpay Standard Architecture (Requires Authentication)
   if (action === "buy-now") {
     const id = trigger.dataset.id;
-    const p = site.products.find(x => x.id === id || x._id === id || x.slug === id);
+    const p = site.products.find(x => x.id === id);
 
     if (!currentUser) {
       sessionStorage.setItem("godavari_pending_buy_now", JSON.stringify({
@@ -1087,20 +1066,6 @@ document.addEventListener("click", (event) => {
     if (p) {
       openPreCheckout(p);
     } else if (id) {
-      initiatePayment(id);
-    }
-    return;
-  }
-
-  // Pre-Checkout Modal Payment & Close Actions
-  if (action === "close-precheckout") {
-    closePreCheckout();
-    return;
-  }
-
-  if (action === "start-razorpay-checkout") {
-    const id = trigger.dataset.id;
-    if (id) {
       initiatePayment(id);
     }
     return;
@@ -1334,7 +1299,6 @@ document.addEventListener("click", (event) => {
 
   // --- Quick View Actions ---
   if (action === "quick-view") {
-    closePanels();
     ui.quickViewProductId = trigger.dataset.id;
     triggerRender();
   }
@@ -1350,7 +1314,7 @@ document.addEventListener("click", (event) => {
 
   if (action === "qv-add-cart") {
     const format = document.getElementById("qvFileFormat")?.value || "DST";
-    addToCart(trigger.dataset.id, format);
+    addToCart(trigger.dataset.id);
     showToast(`Added design with format ${format}`);
     closePanels();
     triggerRender();

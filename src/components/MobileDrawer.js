@@ -43,31 +43,19 @@ export function renderMobileDrawer() {
             <div class="drawer-divider"></div>
           ` : "";
         })()}
-        <button type="button" class="drawer-link" data-action="open-search" style="display: flex; align-items: center; gap: 8px; color: var(--navy); font-weight: 600;">
-          ${icon("search", 16)}
-          <span>Search All Designs...</span>
-        </button>
-        <div class="drawer-divider"></div>
         <a href="#/" class="drawer-link" data-action="close-panels">Home</a>
-        <a href="#/catalog" class="drawer-link" data-action="close-panels">Design Library (All)</a>
-        <a href="#/custom-order" class="drawer-link" data-action="close-panels">Custom Orders & Digitizing</a>
         <div class="drawer-divider"></div>
+        <button type="button" class="drawer-link" data-action="scroll-to" data-target="collections">Collections</button>
         <a href="#/catalog?category=blouses" class="drawer-link" data-action="close-panels">Designer Blouses</a>
         <a href="#/catalog?category=saree" class="drawer-link" data-action="close-panels">Saree Borders</a>
         <a href="#/catalog?category=kids-wear" class="drawer-link" data-action="close-panels">Kids Wear</a>
         <a href="#/catalog?collection=bridal" class="drawer-link" data-action="close-panels">Bridal Collection</a>
         <div class="drawer-divider"></div>
-        <a href="${currentUser ? "#/account" : "#/auth"}" class="drawer-link" data-action="close-panels" style="display: flex; align-items: center; gap: 8px;">
-          ${icon("user", 16)}
-          <span>${currentUser ? "My Account & Orders" : "Sign In / Register"}</span>
-        </a>
-        <a href="#/wishlist" class="drawer-link" data-action="close-panels" style="display: flex; align-items: center; gap: 8px;">
-          ${icon("heart", 16)}
-          <span>Saved Wishlist</span>
-        </a>
+        <a href="#/custom-order" class="drawer-link" data-action="close-panels">Custom Orders</a>
+        <a href="#/catalog" class="drawer-link" data-action="close-panels">Design Library</a>
         <div class="drawer-divider"></div>
         <button type="button" class="drawer-link" data-action="scroll-to" data-target="stories">About Us</button>
-        <button type="button" class="drawer-link" data-action="scroll-to" data-target="footer">Contact Us</button>
+        <button type="button" class="drawer-link" data-action="scroll-to" data-target="footer">Contact</button>
       </nav>
 
       <div class="drawer-footer">

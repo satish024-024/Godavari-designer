@@ -49,23 +49,11 @@ export function loadRazorpayScript() {
   }
 
   razorpayScriptPromise = new Promise((resolve, reject) => {
-    if (window.Razorpay) {
-      razorpayScriptLoaded = true;
-      resolve(true);
-      return;
-    }
-
     // Check if script already in DOM
     const existing = document.querySelector('script[src*="checkout.razorpay.com"]');
-    if (existing) {
-      existing.addEventListener("load", () => {
-        razorpayScriptLoaded = true;
-        resolve(true);
-      });
-      existing.addEventListener("error", () => {
-        razorpayScriptPromise = null;
-        reject(new Error("Failed to load secure Razorpay checkout script. Please check your internet connection."));
-      });
+    if (existing && window.Razorpay) {
+      razorpayScriptLoaded = true;
+      resolve(true);
       return;
     }
 
@@ -232,36 +220,65 @@ export async function initiatePayment(productId) {
 
     // Launch official Razorpay Standard Checkout
     const cleanPhone = (currentUser?.phone || "").replace(/\D/g, '').slice(-10);
-    const logoUrl = typeof window !== "undefined" && window.location?.origin
-      ? `${window.location.origin}/logo.jpeg`
-      : "https://godavaridesigners.com/logo.jpeg";
-
     const options = {
       key: data.keyId,
       amount: Math.round(data.amount * 100),
       currency: data.currency || "INR",
       name: "Godavari Designers",
-      description: data.product?.title ? `${data.product.title} (.DST & .PES)` : "Commercial Machine Files",
-      image: logoUrl,
+      description: "Commercial DST & PES Machine Files",
+      image: "/logo.jpeg",
       order_id: data.orderId,
       prefill: {
         name: currentUser?.name || "",
         email: currentUser?.email || "",
-        contact: cleanPhone && cleanPhone.length === 10 ? cleanPhone : ""
+        contact: cleanPhone ? `+91${cleanPhone}` : ""
       },
       notes: {
         purchase_id: data.purchaseId,
-        product_id: productId,
-        product_code: data.product?.code || "GD-DESIGN"
+        product_title: data.product?.title || "Embroidery Design"
       },
       theme: {
-        color: "#111d42"
+        color: "#111d42",
+        backdrop_color: "rgba(17, 29, 66, 0.65)"
+      },
+      config: {
+        display: {
+          blocks: {
+            upi: {
+              name: "UPI / PhonePe / Google Pay / QR Scanner",
+              instruments: [
+                {
+                  method: "upi"
+                }
+              ]
+            },
+            other: {
+              name: "Cards / Netbanking / Wallets",
+              instruments: [
+                {
+                  method: "card"
+                },
+                {
+                  method: "netbanking"
+                },
+                {
+                  method: "wallet"
+                }
+              ]
+            }
+          },
+          sequence: ["block.upi", "block.other"],
+          preferences: {
+            show_default_blocks: true
+          }
+        }
       },
       modal: {
+        confirm_close: true,
         ondismiss: function () {
           console.log("Customer dismissed Razorpay Checkout modal.");
-          paymentContext.state = PaymentState.IDLE;
-          paymentContext.isPreCheckoutOpen = false;
+          paymentContext.state = PaymentState.CANCELLED;
+          window.location.hash = `#/payment/cancelled?purchaseId=${encodeURIComponent(data.purchaseId)}&productId=${encodeURIComponent(productId)}`;
           triggerRender();
         }
       },
@@ -271,7 +288,6 @@ export async function initiatePayment(productId) {
         
         paymentContext.paymentId = response.razorpay_payment_id;
         paymentContext.state = PaymentState.PAYMENT_PROCESSING;
-        paymentContext.isPreCheckoutOpen = false;
         
         // Immediately navigate to secure processing page
         window.location.hash = `#/payment/processing?purchaseId=${encodeURIComponent(data.purchaseId)}&orderId=${encodeURIComponent(response.razorpay_order_id)}`;
@@ -292,14 +308,14 @@ export async function initiatePayment(productId) {
       console.error("Razorpay payment failed:", response.error);
       paymentContext.state = PaymentState.FAILED;
       paymentContext.error = response.error?.description || "Payment failed";
-      showToast(paymentContext.error);
+      window.location.hash = `#/payment/failed?purchaseId=${encodeURIComponent(data.purchaseId)}&productId=${encodeURIComponent(productId)}&reason=${encodeURIComponent(paymentContext.error)}`;
       triggerRender();
     });
 
     rzp.open();
   } catch (err) {
     console.error("initiatePayment error:", err);
-    paymentContext.state = PaymentState.IDLE;
+    paymentContext.state = PaymentState.FAILED;
     paymentContext.error = err.message;
     showToast(err.message || "Failed to initialize payment");
     triggerRender();

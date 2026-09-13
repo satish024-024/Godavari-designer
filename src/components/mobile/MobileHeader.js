@@ -20,16 +20,11 @@ export function renderMobileHeader() {
         <span class="mobile-brand-sub">${escapeHtml(site.brand.name.split(" ").slice(1).join(" ") || "Designer")}</span>
       </a>
 
-      <!-- Right: Action Buttons (Search & Cart) -->
-      <div class="mobile-header-actions" style="display: flex; align-items: center; gap: 2px;">
-        <button type="button" class="mobile-search-btn" data-action="open-search" aria-label="Search designs" style="background: transparent; border: none; color: var(--navy); width: 42px; height: 42px; display: grid; place-items: center; cursor: pointer; padding: 0;">
-          ${icon("search", 20)}
-        </button>
-        <button type="button" class="mobile-cart-btn" data-action="open-cart" aria-label="Cart (${count} items)" style="background: transparent; border: none; color: var(--navy); width: 42px; height: 42px; display: grid; place-items: center; cursor: pointer; padding: 0; position: relative;">
-          ${icon("shopping-bag", 20)}
-          <span class="mobile-cart-badge${count === 0 ? " mobile-cart-badge--empty" : ""}">${count}</span>
-        </button>
-      </div>
+      <!-- Right: Cart Action Button -->
+      <button type="button" class="mobile-cart-btn" data-action="open-cart" aria-label="Cart (${count} items)">
+        ${icon("shopping-bag", 22)}
+        <span class="mobile-cart-badge${count === 0 ? " mobile-cart-badge--empty" : ""}">${count}</span>
+      </button>
     </header>
   `;
 }

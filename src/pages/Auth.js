@@ -328,7 +328,7 @@ export function renderAuth() {
               <span>Phone Number</span>
               <div class="auth-input-wrapper">
                 <span class="auth-input-icon">${icon("phone", 17)}</span>
-                <input type="tel" name="phone" inputmode="tel" placeholder="83098 97055" class="auth-input" autocomplete="tel" />
+                <input type="text" name="phone" placeholder="83098 97055" class="auth-input" autocomplete="tel" />
               </div>
             </label>
 
@@ -389,7 +389,7 @@ export function renderAuth() {
               </label>
               <label class="auth-label">
                 <span>Postal / Zip Code</span>
-                <input type="text" name="postalCode" inputmode="numeric" placeholder="Postal Code" class="auth-input" style="padding-left: 14px;" autocomplete="postal-code" />
+                <input type="text" name="postalCode" placeholder="Postal Code" class="auth-input" style="padding-left: 14px;" autocomplete="postal-code" />
               </label>
             </div>
           </div>

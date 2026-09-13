@@ -1,6 +1,6 @@
 import { site, cart, currentUser, showToast, triggerRender } from "../services/store.js";
 import { orderService } from "../services/supabase.js";
-import { openPaymentModal } from "../components/PaymentModal.js";
+import { openPaymentModal } from "../components/PaymentModal.js?v=10";
 import { escapeHtml, attr, icon, money, mediaUrl } from "../utils/helpers.js";
 
 // Local Page State
@@ -269,12 +269,12 @@ Please confirm my order.`;
                 <div class="checkout-contact-grid">
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Email Address *</span>
-                    <input type="email" name="customerEmail" inputmode="email" required value="${attr(defaultEmail)}" placeholder="name@designer.com" autocomplete="email" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px;" />
+                    <input type="email" name="customerEmail" required value="${attr(defaultEmail)}" placeholder="name@designer.com" autocomplete="email" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
  
                   <label style="display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--navy);">
                     <span>Phone Number (Mandatory) *</span>
-                    <input type="tel" name="customerPhone" inputmode="tel" required placeholder="+91 83098 97055" autocomplete="tel" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 6px;" />
+                    <input type="tel" name="customerPhone" required placeholder="+91 83098 97055" autocomplete="tel" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 4px;" />
                   </label>
                 </div>
               </div>

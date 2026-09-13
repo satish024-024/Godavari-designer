@@ -38,48 +38,48 @@ export function renderSearchOverlay() {
         </div>
 
         <!-- Search Field -->
-        <form class="search-field-wrap" id="searchForm" data-action="search-submit" style="display:flex; align-items:center; gap:0; margin: 16px clamp(12px, 3vw, 24px) 0; border: 1.5px solid rgba(17,29,66,0.15); border-radius: 12px; overflow: hidden; background: #fff; transition: border-color 200ms;">
-          <span style="padding: 0 clamp(10px, 2vw, 14px); color: var(--ink-soft); display:flex; align-items:center; flex-shrink:0;">
+        <form class="search-field-wrap" id="searchForm" data-action="search-submit" style="display:flex; align-items:center; gap:0; margin: 20px 24px 0; border: 1.5px solid rgba(17,29,66,0.15); border-radius: 12px; overflow: hidden; background: #fff; transition: border-color 200ms;">
+          <span style="padding: 0 14px; color: var(--ink-soft); display:flex; align-items:center; flex-shrink:0;">
             ${icon("search", 18)}
           </span>
           <input
             id="searchInput"
             type="search"
             value="${attr(ui.searchQuery)}"
-            placeholder="Search designs, codes..."
+            placeholder="Search by name, category, stitch count..."
             autocomplete="off"
             spellcheck="false"
             aria-label="Search designs"
-            style="flex:1; height:48px; border:none; background:transparent; color:var(--navy); font-size:16px; font-weight:500; outline:none; padding:0; min-width:0;"
+            style="flex:1; height:52px; border:none; background:transparent; color:var(--navy); font-size:15px; font-weight:500; outline:none; padding:0;"
           />
           ${raw ? `
             <button type="button" id="searchClearBtn" data-action="search-clear" aria-label="Clear search"
-              style="padding: 0 10px; border:none; background:transparent; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center;">
+              style="padding: 0 12px; border:none; background:transparent; color:var(--ink-soft); cursor:pointer; display:flex; align-items:center;">
               ${icon("x-circle", 16)}
             </button>
           ` : ""}
           <button type="submit" data-action="search-submit" aria-label="Search"
-            style="height:48px; padding: 0 clamp(12px, 3vw, 20px); background:var(--navy); color:#fff; border:none; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; white-space:nowrap; transition: background 200ms; flex-shrink:0;">
+            style="height:52px; padding: 0 20px; background:var(--navy); color:#fff; border:none; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; white-space:nowrap; transition: background 200ms;">
             ${icon("arrow-right", 16)}
-            <span class="search-btn-label">Search</span>
+            <span>Search</span>
           </button>
         </form>
 
         <!-- Results -->
-        <div class="search-results" style="display:flex; flex-direction:column; gap:0; max-height:56vh; overflow-y:auto; padding: 14px clamp(12px, 3vw, 24px) 24px; -webkit-overflow-scrolling:touch;">
+        <div class="search-results" style="display:flex; flex-direction:column; gap:0; max-height:56vh; overflow-y:auto; padding: 16px 24px 24px;">
 
           ${!query ? `
             <!-- Prompt state -->
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 16px; text-align:center; gap:10px; color:var(--ink-soft);">
-              ${icon("search", 28)}
-              <p style="margin:0; font-size:13.5px; font-weight:500;">Type to search designs, collections, or categories</p>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center; gap:10px; color:var(--ink-soft);">
+              ${icon("search", 32)}
+              <p style="margin:0; font-size:14px; font-weight:500;">Type to search designs, collections, or categories</p>
             </div>
           ` : showEmpty ? `
             <!-- Empty state -->
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 16px; text-align:center; gap:10px;">
-              ${icon("search-x", 28)}
-              <p style="margin:0; font-size:14.5px; font-weight:600; color:var(--navy);">No results for "${escapeHtml(raw)}"</p>
-              <p style="margin:0; font-size:12.5px; color:var(--ink-soft);">Try a different keyword or browse all designs below.</p>
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 20px; text-align:center; gap:10px;">
+              ${icon("search-x", 32)}
+              <p style="margin:0; font-size:15px; font-weight:600; color:var(--navy);">No results for "${escapeHtml(raw)}"</p>
+              <p style="margin:0; font-size:13px; color:var(--ink-soft);">Try a different keyword or browse all designs below.</p>
               <a href="#/catalog" data-action="close-panels"
                 style="margin-top:8px; display:inline-flex; align-items:center; gap:6px; color:var(--gold); font-size:13px; font-weight:700; text-decoration:none;">
                 ${icon("layout-grid", 15)} Browse all designs
@@ -87,7 +87,7 @@ export function renderSearchOverlay() {
             </div>
           ` : `
             <!-- Result count label -->
-            <p style="margin:0 0 10px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft);">
+            <p style="margin:0 0 12px; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft);">
               ${results.length} result${results.length !== 1 ? "s" : ""} for "${escapeHtml(raw)}"
             </p>
 
@@ -95,19 +95,19 @@ export function renderSearchOverlay() {
             ${results.map((item) => `
               <a href="${item.kind === "Design" ? `#/product/${item.slug}` : `#/catalog?collection=${item.slug}`}"
                 data-action="close-panels"
-                style="display:grid; grid-template-columns:clamp(56px, 16vw, 68px) 1fr auto; gap:10px; align-items:center; padding:10px; border-radius:10px; text-decoration:none; color:inherit; transition: background 180ms; margin-bottom:6px; background:rgba(248,246,242,0.6); border: 1px solid rgba(230,222,209,0.6);">
+                style="display:grid; grid-template-columns:72px 1fr auto; gap:14px; align-items:center; padding:12px; border-radius:10px; text-decoration:none; color:inherit; transition: background 180ms; margin-bottom:6px; background:rgba(248,246,242,0.6); border: 1px solid rgba(230,222,209,0.6);">
                 <img
                   src="${attr(mediaUrl(item.image))}"
                   alt="${attr(item.title)}"
-                  style="width:clamp(56px, 16vw, 68px); height:clamp(52px, 15vw, 64px); object-fit:cover; border-radius:6px; background:var(--surface);"
+                  style="width:72px; height:68px; object-fit:cover; border-radius:6px; background:var(--surface);"
                   loading="lazy"
                 />
                 <div style="min-width:0;">
-                  <span style="font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold);">${escapeHtml(item.kind)}</span>
-                  <h3 style="font-family:var(--font-serif); font-size:15px; font-weight:700; margin:1px 0 2px; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.title)}</h3>
-                  <p style="margin:0; font-size:11.5px; color:var(--ink-soft); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.description || "")}</p>
+                  <span style="font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold);">${escapeHtml(item.kind)}</span>
+                  <h3 style="font-family:var(--font-serif); font-size:17px; font-weight:700; margin:2px 0 3px; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.title)}</h3>
+                  <p style="margin:0; font-size:12px; color:var(--ink-soft); font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.description || "")}</p>
                 </div>
-                <span style="flex-shrink:0; color:var(--ink-soft);">${icon("chevron-right", 15)}</span>
+                <span style="flex-shrink:0; color:var(--ink-soft);">${icon("chevron-right", 16)}</span>
               </a>
             `).join("")}
 

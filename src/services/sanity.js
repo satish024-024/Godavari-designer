@@ -123,10 +123,6 @@ export async function fetchSanityLake() {
 export function mapSanityProduct(p) {
   if (!p) return null;
   const rawId = p._id || `prod_${p.slug || Date.now()}`;
-  const totalStitch = Number(p.stitchCount || 45000);
-  const backStitch = Math.round(totalStitch * 0.6);
-  const handStitch = Math.round(totalStitch * 0.4);
-  const hoop = p.hoopSize || '200mm x 300mm';
   return {
     id: rawId,
     _id: rawId,
@@ -137,31 +133,20 @@ export function mapSanityProduct(p) {
     price: Number(p.price || 0),
     category: p.category || 'Blouse Designs',
     categoryId: p.category ? `category_${p.category.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : 'category_blouses',
-    collection: 'Bridal Luxury Collection',
-    label: 'Commercial Grade',
     image: p.image || '/banner.jpeg',
     gallery: Array.isArray(p.gallery) && p.gallery.length > 0 ? p.gallery : (p.image ? [p.image] : ['/banner.jpeg']),
     designFile: p.designFile || '',
     designFileName: p.designFileName || '',
     sizes: p.sizes || [],
-    stitchCount: totalStitch,
-    totalStitchCount: totalStitch,
-    backStitchCount: backStitch,
-    handStitchCount: handStitch,
-    width: 200,
-    height: 300,
-    dimensions: hoop,
-    hoopSize: hoop,
+    stitchCount: p.stitchCount || 45000,
+    totalStitchCount: p.stitchCount || 45000,
+    hoopSize: p.hoopSize || '200mm x 300mm',
     threadColors: p.threadColors || 5,
-    rpm: 850,
-    estimatedEmbroideryTime: Math.round(totalStitch / 700),
-    recommendedFabrics: ['Raw Silk', 'Pure Silk', 'Velvet', 'Cotton', 'Net', 'Georgette'],
     formats: [
-      { format: 'DST', machineBrand: 'Tajima / Commercial', machineModel: 'All Multi-Needle', hoopSize: hoop },
-      { format: 'PES', machineBrand: 'Brother / Babylock', machineModel: 'Innov-is Series', hoopSize: hoop },
-      { format: 'JEF', machineBrand: 'Janome', machineModel: 'Memory Craft', hoopSize: hoop }
+      { format: 'DST' },
+      { format: 'PES' }
     ],
-    machineFormats: ['DST', 'PES', 'JEF'],
+    machineFormats: ['DST', 'PES'],
     difficultyLevel: 'Commercial Grade',
     featured: true,
     bestSeller: false,
