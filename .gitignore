@@ -22,3 +22,5 @@ scratch/
 skills-lock.json
 razorpay-cli/
 *.zip
+.env.vercel*
+JC*-DSTFULL/

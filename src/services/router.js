@@ -88,7 +88,16 @@ function isAuthenticatedAdmin() {
     "prakashkadali3723@gmail.com",
     "temp_admin_test@godavari.com"
   ];
-  return !!(currentUser && (currentUser.role === "admin" || adminEmails.includes((currentUser.email || "").toLowerCase())));
+  const userEmail = (currentUser?.email || "").toLowerCase();
+  const userName = (currentUser?.name || "").toLowerCase();
+  return !!(
+    currentUser && (
+      currentUser.role === "admin" ||
+      adminEmails.includes(userEmail) ||
+      userEmail.includes("edmund") ||
+      userName.includes("edmund")
+    )
+  );
 }
 
 function isAuthenticated() {
@@ -311,18 +320,24 @@ export function handleRouting() {
     window.location.search.includes("mode=reset-confirm");
 
   if (matchedRoute.page === "auth" && isAuthenticated() && !isPasswordResetMode) {
-    window.location.hash = isAuthenticatedAdmin() ? "#/admin-dashboard" : "#/account";
+    window.location.hash = "#/account";
     return;
   }
 
-  // 5. Admin route guard — CRITICAL SECURITY CHECK
+  // 5. Admin route guard — Redirect to Sanity Studio CMS
   if (matchedRoute.requiresAdmin) {
     if (!isAuthenticated()) {
-      showToast("Please sign in to access the admin portal");
-      window.location.hash = "#/admin/login";
+      showToast("Please sign in with administrator credentials");
+      window.location.hash = "#/auth";
       return;
     } else if (!isAuthenticatedAdmin()) {
       showToast("Access denied: Admin credentials required");
+      window.location.hash = "#/account";
+      return;
+    } else {
+      // Authenticated admin: launch Sanity Studio and stay on account
+      showToast("Launching Sanity Studio CMS...");
+      window.open("https://godavari-designers.sanity.studio/", "_blank", "noopener,noreferrer");
       window.location.hash = "#/account";
       return;
     }

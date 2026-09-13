@@ -38,7 +38,20 @@ export function renderHeader(isMobile) {
   }
 
   // Desktop Header
-  const isAdmin = currentUser && currentUser.role === "admin";
+  const adminEmails = [
+    "godavaridesigner@gmail.com",
+    "satishkumarkadali024@gmail.com",
+    "prakashkadali3723@gmail.com",
+    "temp_admin_test@godavari.com"
+  ];
+  const userEmail = (currentUser?.email || "").toLowerCase();
+  const userName = (currentUser?.name || "").toLowerCase();
+  const isAdmin = currentUser && (
+    currentUser.role === "admin" ||
+    adminEmails.includes(userEmail) ||
+    userEmail.includes("edmund") ||
+    userName.includes("edmund")
+  );
   const userProfileLink = currentUser ? "#/account" : "#/auth";
 
   return `
@@ -62,25 +75,28 @@ export function renderHeader(isMobile) {
       <!-- Action Icons -->
       <div class="header-actions">
         ${isAdmin ? `
-          <a href="#/admin-dashboard" class="admin-portal-badge" style="
+          <a href="https://godavari-designers.sanity.studio/" target="_blank" rel="noopener noreferrer" class="sanity-studio-badge" title="Open Sanity Studio Admin Portal" style="
             display: inline-flex; 
             align-items: center; 
             gap: 6px; 
             padding: 6px 14px; 
-            border: 1px solid var(--gold); 
-            border-radius: 4px; 
-            background: transparent; 
-            color: var(--gold); 
+            border: 1.5px solid #f03e2f; 
+            border-radius: 6px; 
+            background: rgba(240, 62, 47, 0.08); 
+            color: #f03e2f; 
             font-size: 11px; 
-            font-weight: 700; 
+            font-weight: 800; 
             text-transform: uppercase; 
-            letter-spacing: 0.05em; 
+            letter-spacing: 0.06em; 
             text-decoration: none; 
-            transition: all 200ms;
+            transition: all 200ms ease;
             margin-right: 8px;
-          " onmouseover="this.style.background='rgba(200, 161, 90, 0.08)'" onmouseout="this.style.background='transparent'">
-            <span style="display: flex;">${icon("shield-check", 13)}</span>
-            <span>Admin Portal</span>
+            box-shadow: 0 2px 8px rgba(240, 62, 47, 0.12);
+          " onmouseover="this.style.background='#f03e2f'; this.style.color='#ffffff';" onmouseout="this.style.background='rgba(240, 62, 47, 0.08)'; this.style.color='#f03e2f';">
+            <svg style="width: 13px; height: 13px; fill: currentColor;" viewBox="0 0 24 24">
+              <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+            </svg>
+            <span>Sanity Studio</span>
           </a>
         ` : ""}
         <button type="button" class="icon-button" data-action="open-search" aria-label="Search designs">

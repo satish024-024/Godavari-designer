@@ -2,6 +2,7 @@ import { DB } from "./db.js";
 import { config } from "./config.js";
 import { defaultSite } from "../data/defaultSite.js";
 import { mergeDefaults, clone, money } from "../utils/helpers.js";
+import { fetchSanityLake, mapSanityProduct } from "./sanity.js";
 import {
   initSupabase,
   supabase,
@@ -99,9 +100,21 @@ export async function syncFromSupabase() {
   pendingSyncPromise = (async () => {
     initSupabase();
     try {
-      console.log("Store: Initiating full state sync from Supabase...");
-      // 1. Fetch website settings (section rows)
-      const settings = await settingsService.getWebsiteSettings();
+      console.log("Store: Initiating live sync from Sanity Content Lake & Supabase...");
+      
+      // Fetch directly from Sanity Cloud Content Lake
+      const sanityData = await fetchSanityLake().catch(() => null);
+
+      // 1. Fetch website settings
+      let settings = {};
+      try { settings = await settingsService.getWebsiteSettings(); } catch (_) {}
+      if (sanityData?.siteContent) {
+        if (sanityData.siteContent.heroHeadline) site.hero.headline = sanityData.siteContent.heroHeadline;
+        if (sanityData.siteContent.heroSubheadline) site.hero.subheadline = sanityData.siteContent.heroSubheadline;
+        if (sanityData.siteContent.ctaTitle) site.cta.title = sanityData.siteContent.ctaTitle;
+        if (sanityData.siteContent.ctaSubtitle) site.cta.subtitle = sanityData.siteContent.ctaSubtitle;
+        if (sanityData.siteContent.tagline) site.brand.tagline = sanityData.siteContent.tagline;
+      }
       const sections = ['brand', 'navigation', 'hero', 'steps', 'stories', 'cta', 'footer', 'theme'];
       sections.forEach((sec) => {
         if (settings[sec]) {
@@ -110,28 +123,94 @@ export async function syncFromSupabase() {
       });
 
       // 2. Fetch testimonials & map to stories
-      const testimonials = await testimonialService.getTestimonials();
-      if (testimonials && testimonials.length > 0) {
-        site.stories = mapStoriesFromTestimonials(testimonials);
+      if (sanityData?.testimonials && sanityData.testimonials.length > 0) {
+        site.stories = sanityData.testimonials.map(t => ({
+          name: t.name || 'Boutique Client',
+          role: t.role || (t.boutiqueName ? `${t.boutiqueName}, ${t.location || ''}` : 'Boutique Owner'),
+          quote: t.content || '',
+          rating: t.rating || 5,
+          image: t.avatar || defaultSite.stories[0]?.image || '/banner.jpeg'
+        }));
+      } else {
+        const testimonials = await testimonialService.getTestimonials().catch(() => []);
+        if (testimonials && testimonials.length > 0) {
+          site.stories = mapStoriesFromTestimonials(testimonials);
+        }
       }
 
       // 3. Fetch categories
-      const cats = await categoryService.getCategories();
-      DB.saveCategories(cats); // Cache categories in LocalStorage
+      let cats = [];
+      if (sanityData?.categories && sanityData.categories.length > 0) {
+        cats = sanityData.categories.map(c => ({
+          id: c._id,
+          name: c.name || c.title,
+          slug: c.slug || c._id,
+          description: c.description || '',
+          featured: !!c.featured,
+          image: c.image || null,
+          bannerImage: c.bannerImage || c.image || null,
+          displayOrder: c.displayOrder || 1
+        }));
+      } else {
+        cats = await categoryService.getCategories().catch(() => []);
+      }
+      if (cats.length > 0) DB.saveCategories(cats);
 
       // 4. Fetch collections
-      const cols = await collectionService.getCollections();
+      let cols = [];
+      if (sanityData?.collections && sanityData.collections.length > 0) {
+        cols = sanityData.collections.map(col => ({
+          id: col._id,
+          title: col.title,
+          slug: col.slug || col._id,
+          description: col.description || '',
+          featured: !!col.featured,
+          image: col.image || null,
+          bannerImage: col.bannerImage || col.image || null,
+          displayOrder: col.displayOrder || 1
+        }));
+      } else {
+        cols = await collectionService.getCollections().catch(() => []);
+      }
       site.collections = cols;
 
-      // 5. Fetch products
-      const prods = await productService.getProducts();
+      // 5. Fetch products (Merge Sanity products directly!)
+      let prods = [];
+      const sanityProducts = (sanityData?.products || []).map(mapSanityProduct).filter(Boolean);
+      const supabaseProducts = await productService.getProducts().catch(() => []);
+
+      const seenSlugs = new Set();
+      const combined = [];
+      for (const p of sanityProducts) {
+        if (!seenSlugs.has(p.slug)) {
+          seenSlugs.add(p.slug);
+          combined.push(p);
+        }
+      }
+      for (const p of supabaseProducts) {
+        if (!seenSlugs.has(p.slug)) {
+          seenSlugs.add(p.slug);
+          combined.push(p);
+        }
+      }
+      prods = combined.length > 0 ? combined : defaultSite.products;
       site.products = prods;
-      DB.saveProducts(prods); // Cache products in LocalStorage
+      DB.saveProducts(prods);
 
       // 6. Fetch FAQs
-      faqs = await faqService.getFaqs();
+      if (sanityData?.faqs && sanityData.faqs.length > 0) {
+        faqs = sanityData.faqs.map(f => ({
+          id: f._id,
+          question: f.question,
+          answer: f.answer,
+          category: f.category || 'General',
+          order: f.order || 1
+        }));
+      } else {
+        faqs = await faqService.getFaqs().catch(() => []);
+      }
 
-      // Controlled State Update Path: Sanitize Catalog State (decoupled from rendering)
+      // Controlled State Update Path: Sanitize Catalog State
       try {
         const { sanitizeCatalogState } = await import("../pages/Catalog.js");
         sanitizeCatalogState(cats, cols);
@@ -222,7 +301,7 @@ export async function processPendingBuyNow() {
 
 export function getPostAuthRedirect(user) {
   if (user && user.role === 'admin') {
-    return '#/admin-dashboard';
+    return '#/account';
   }
   const pendingBuyNow = sessionStorage.getItem("godavari_pending_buy_now");
   if (pendingBuyNow) {

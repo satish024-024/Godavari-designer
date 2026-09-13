@@ -190,7 +190,28 @@ function render() {
       pageContent = renderAuth();
       break;
     case "admin-dashboard":
-      pageContent = renderAdminDashboard(ui.pageParams);
+      pageContent = `
+        <section class="content-section" style="padding: 100px 24px; min-height: 70vh; display: grid; place-items: center; background: var(--ivory);">
+          <div style="background: #ffffff; border: 1.5px solid #f03e2f; border-radius: 12px; padding: 40px; max-width: 540px; text-align: center; box-shadow: var(--shadow-deep);">
+            <div style="width: 64px; height: 64px; border-radius: 16px; background: rgba(240,62,47,0.08); color: #f03e2f; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+              <svg style="width: 32px; height: 32px; fill: currentColor;" viewBox="0 0 24 24">
+                <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+              </svg>
+            </div>
+            <h1 style="font-family: var(--font-serif); font-size: 26px; color: var(--navy); margin-bottom: 10px;">Sanity Studio CMS</h1>
+            <p style="color: var(--ink-soft); font-size: 14px; line-height: 1.6; margin-bottom: 24px;">Store administration and design file management is hosted directly on Sanity Studio Cloud. Click below to manage products, multi-size machine files, categories, and orders.</p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+              <a href="https://godavari-designers.sanity.studio/" target="_blank" rel="noopener noreferrer" class="button" style="background: #f03e2f; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 8px;">
+                <span>Launch Sanity Studio</span>
+                <span>↗</span>
+              </a>
+              <a href="#/" class="button button-outline" style="text-decoration: none; padding: 12px 20px; border-radius: 6px; font-weight: 700; font-size: 13px;">
+                Return to Store
+              </a>
+            </div>
+          </div>
+        </section>
+      `;
       break;
     case "loading-auth":
       pageContent = renderLoadingAuth();
