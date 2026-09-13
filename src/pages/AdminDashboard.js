@@ -124,6 +124,71 @@ let editingProduct = null;
 let isAddingProduct = false;
 let isBulkImporting = false;
 
+// Multi-Asset Design Photography & Multi-Size Machine Files State
+let adminProductSlots = {
+  front: null,
+  back: null,
+  hands: null,
+  detail: null
+};
+let adminMachineFiles = [];
+
+function renderAdminMachineFilesTable() {
+  const container = document.getElementById("adminMachineFilesContainer");
+  if (!container) return;
+
+  if (!adminMachineFiles || adminMachineFiles.length === 0) {
+    container.innerHTML = `
+      <div style="background: #fff; border: 1px dashed var(--border); border-radius: 8px; padding: 14px; text-align: center; font-size: 12px; color: rgba(17,29,66,0.5);">
+        No machine files attached yet. Drop or select .DST / .PES / .JEF files above.
+      </div>
+    `;
+    return;
+  }
+
+  const rows = adminMachineFiles.map((mf) => {
+    const isReady = mf.file ? "Ready to Upload" : (mf.path ? "Attached & Saved" : "Ready");
+    const statusColor = mf.file ? "#2563eb" : "#16a34a";
+    return `
+      <tr style="border-bottom: 1px solid var(--border); font-size: 12.5px;">
+        <td style="padding: 8px 12px; width: 170px;">
+          <input type="text" class="admin-mf-size-input admin-form-control" data-id="${attr(mf.id)}" value="${attr(mf.size)}" style="font-size: 12px; font-weight: 600; padding: 5px 8px; height: 32px;" placeholder="e.g. Size 34">
+        </td>
+        <td style="padding: 8px 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; background: var(--navy); color: #fff;">${escapeHtml((mf.format || "DST").toUpperCase())}</span>
+            <span style="font-weight: 500; color: var(--navy); word-break: break-all;">${escapeHtml(mf.name)}</span>
+          </div>
+        </td>
+        <td style="padding: 8px 12px; width: 130px; color: ${statusColor}; font-weight: 600; font-size: 11.5px;">
+          ${escapeHtml(isReady)}
+        </td>
+        <td style="padding: 8px 12px; width: 44px; text-align: right;">
+          <button type="button" class="admin-remove-mf-btn" data-id="${attr(mf.id)}" style="background: none; border: none; color: #dc2626; cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 6px;" title="Remove file">&times;</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  container.innerHTML = `
+    <div style="background: #fff; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-top: 6px;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+          <tr style="background: #faf8f5; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px;">
+            <th style="padding: 8px 12px;">Size / Part</th>
+            <th style="padding: 8px 12px;">Machine File</th>
+            <th style="padding: 8px 12px;">Status</th>
+            <th style="padding: 8px 12px; text-align: right;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
 let editingCategory = null;
 let isAddingCategory = false;
 
@@ -679,6 +744,11 @@ function renderProductsModule() {
     const tagsString = Array.isArray(p.tags) ? p.tags.join(", ") : "";
     const fabricsString = Array.isArray(p.recommendedFabrics) ? p.recommendedFabrics.join(", ") : "Silk, Organza, Velvet";
     
+    // Automatically render machine files table into DOM
+    setTimeout(() => {
+      renderAdminMachineFilesTable();
+    }, 0);
+
     return `
       <div class="admin-module">
         <div style="margin-bottom: 24px;">
@@ -687,7 +757,7 @@ function renderProductsModule() {
           </button>
         </div>
 
-        <form id="adminProductForm" class="admin-form" action="javascript:void(0);" method="POST">
+        <form id="adminProductForm" class="admin-form" action="javascript:void(0);" method="POST" onsubmit="event.preventDefault(); return false;">
           <input type="hidden" name="id" value="${p.id || ''}">
           
           <div style="grid-column: span 2;">
@@ -796,37 +866,117 @@ function renderProductsModule() {
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label" for="productImageFile">Design Image</label>
-            <div class="image-upload-card" style="border: 2px dashed var(--border); border-radius: 12px; padding: 24px; text-align: center; background: #fff; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
-              <input type="file" id="productImageFile" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
-              <div class="upload-placeholder" style="${isEdit && p.image ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
-                ${icon("upload-cloud", 32)}
-                <span style="font-size: 13px; font-weight: 500; color: var(--navy);">Click or drag image here to upload design</span>
-                <span style="font-size: 11px; color: var(--ink-soft);">PNG, JPG, WEBP up to 10MB</span>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+              <label class="admin-form-label" style="margin-bottom: 0;">Multi-Angle Design Photography</label>
+              <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Front, Back, Hands & Detail Views</span>
+            </div>
+            <p style="font-size: 12px; color: rgba(17,29,66,0.6); margin: 0 0 12px;">Upload photography for each angle. Front Neck is required as the primary catalog cover image. Customers will interactively zoom and browse all angles on the storefront.</p>
+
+            <div class="admin-slot-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px;">
+              <!-- Slot 1: Front Neck -->
+              <div class="admin-slot-card" data-slot="front" style="border: 2px dashed ${adminProductSlots.front?.previewUrl || p.image || (Array.isArray(p.gallery) && p.gallery[0]) ? 'var(--gold)' : 'var(--border)'}; border-radius: 12px; padding: 14px; background: #fff; text-align: center; position: relative; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px;">1. Front Neck</span>
+                  <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;">PRIMARY *</span>
+                </div>
+                <div class="admin-slot-body" style="height: 140px; position: relative; display: flex; align-items: center; justify-content: center; background: #faf8f5; border-radius: 8px; overflow: hidden;">
+                  <input type="file" id="adminSlotInput_front" data-slot="front" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
+                  <div class="admin-slot-ph" style="${adminProductSlots.front?.previewUrl || p.image || (Array.isArray(p.gallery) && p.gallery[0]) ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 4px;'}">
+                    ${icon("upload-cloud", 24)}
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--navy);">Front Neck</span>
+                    <span style="font-size: 10px; color: rgba(17,29,66,0.5);">Main Cover (PNG/JPG)</span>
+                  </div>
+                  <div class="admin-slot-prev" style="${adminProductSlots.front?.previewUrl || p.image || (Array.isArray(p.gallery) && p.gallery[0]) ? 'display: block; width: 100%; height: 100%; position: relative;' : 'display: none;'}">
+                    <img src="${attr(adminProductSlots.front?.previewUrl || (p.image ? mediaUrl(p.image) : (Array.isArray(p.gallery) && p.gallery[0] ? mediaUrl(p.gallery[0]) : '')))}" style="width: 100%; height: 100%; object-fit: contain; background: #fff;">
+                    <button type="button" class="admin-slot-remove-btn" data-slot="front" style="position: absolute; top: 6px; right: 6px; z-index: 3; width: 24px; height: 24px; border-radius: 50%; background: rgba(17,29,66,0.85); color: #fff; border: none; font-size: 14px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Remove image">&times;</button>
+                  </div>
+                </div>
+                <input type="hidden" name="image_front" value="${attr(adminProductSlots.front?.url || p.image || (Array.isArray(p.gallery) && p.gallery[0]) || '')}">
               </div>
-              <div class="upload-preview" style="${isEdit && p.image ? 'display: flex; flex-direction: column; align-items: center; gap: 8px;' : 'display: none;'}">
-                <img src="${isEdit && p.image ? attr(mediaUrl(p.image)) : ''}" style="max-height: 140px; max-width: 100%; object-fit: contain; border-radius: 6px; border: 1px solid var(--border);">
-                <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Click to replace image</span>
+
+              <!-- Slot 2: Back Neck -->
+              <div class="admin-slot-card" data-slot="back" style="border: 2px dashed ${adminProductSlots.back?.previewUrl || (Array.isArray(p.gallery) && p.gallery[1]) ? 'var(--gold)' : 'var(--border)'}; border-radius: 12px; padding: 14px; background: #fff; text-align: center; position: relative; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px;">2. Back Neck</span>
+                  <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #fdf4ff; color: #9333ea; border: 1px solid #f0abfc;">BACK VIEW</span>
+                </div>
+                <div class="admin-slot-body" style="height: 140px; position: relative; display: flex; align-items: center; justify-content: center; background: #faf8f5; border-radius: 8px; overflow: hidden;">
+                  <input type="file" id="adminSlotInput_back" data-slot="back" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
+                  <div class="admin-slot-ph" style="${adminProductSlots.back?.previewUrl || (Array.isArray(p.gallery) && p.gallery[1]) ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 4px;'}">
+                    ${icon("upload-cloud", 24)}
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--navy);">Back Neck</span>
+                    <span style="font-size: 10px; color: rgba(17,29,66,0.5);">Heavy Maggam View</span>
+                  </div>
+                  <div class="admin-slot-prev" style="${adminProductSlots.back?.previewUrl || (Array.isArray(p.gallery) && p.gallery[1]) ? 'display: block; width: 100%; height: 100%; position: relative;' : 'display: none;'}">
+                    <img src="${attr(adminProductSlots.back?.previewUrl || (Array.isArray(p.gallery) && p.gallery[1] ? mediaUrl(p.gallery[1]) : ''))}" style="width: 100%; height: 100%; object-fit: contain; background: #fff;">
+                    <button type="button" class="admin-slot-remove-btn" data-slot="back" style="position: absolute; top: 6px; right: 6px; z-index: 3; width: 24px; height: 24px; border-radius: 50%; background: rgba(17,29,66,0.85); color: #fff; border: none; font-size: 14px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Remove image">&times;</button>
+                  </div>
+                </div>
+                <input type="hidden" name="image_back" value="${attr(adminProductSlots.back?.url || (Array.isArray(p.gallery) && p.gallery[1]) || '')}">
               </div>
-              <input type="hidden" name="image" value="${isEdit ? escapeHtml(p.image || '') : ''}">
+
+              <!-- Slot 3: Hands / Sleeves -->
+              <div class="admin-slot-card" data-slot="hands" style="border: 2px dashed ${adminProductSlots.hands?.previewUrl || (Array.isArray(p.gallery) && p.gallery[2]) ? 'var(--gold)' : 'var(--border)'}; border-radius: 12px; padding: 14px; background: #fff; text-align: center; position: relative; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px;">3. Hands / Sleeves</span>
+                  <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a;">SLEEVES</span>
+                </div>
+                <div class="admin-slot-body" style="height: 140px; position: relative; display: flex; align-items: center; justify-content: center; background: #faf8f5; border-radius: 8px; overflow: hidden;">
+                  <input type="file" id="adminSlotInput_hands" data-slot="hands" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
+                  <div class="admin-slot-ph" style="${adminProductSlots.hands?.previewUrl || (Array.isArray(p.gallery) && p.gallery[2]) ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 4px;'}">
+                    ${icon("upload-cloud", 24)}
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--navy);">Hands / Sleeves</span>
+                    <span style="font-size: 10px; color: rgba(17,29,66,0.5);">Border & Sleeve Motif</span>
+                  </div>
+                  <div class="admin-slot-prev" style="${adminProductSlots.hands?.previewUrl || (Array.isArray(p.gallery) && p.gallery[2]) ? 'display: block; width: 100%; height: 100%; position: relative;' : 'display: none;'}">
+                    <img src="${attr(adminProductSlots.hands?.previewUrl || (Array.isArray(p.gallery) && p.gallery[2] ? mediaUrl(p.gallery[2]) : ''))}" style="width: 100%; height: 100%; object-fit: contain; background: #fff;">
+                    <button type="button" class="admin-slot-remove-btn" data-slot="hands" style="position: absolute; top: 6px; right: 6px; z-index: 3; width: 24px; height: 24px; border-radius: 50%; background: rgba(17,29,66,0.85); color: #fff; border: none; font-size: 14px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Remove image">&times;</button>
+                  </div>
+                </div>
+                <input type="hidden" name="image_hands" value="${attr(adminProductSlots.hands?.url || (Array.isArray(p.gallery) && p.gallery[2]) || '')}">
+              </div>
+
+              <!-- Slot 4: Detail / Closeup -->
+              <div class="admin-slot-card" data-slot="detail" style="border: 2px dashed ${adminProductSlots.detail?.previewUrl || (Array.isArray(p.gallery) && p.gallery[3]) ? 'var(--gold)' : 'var(--border)'}; border-radius: 12px; padding: 14px; background: #fff; text-align: center; position: relative; transition: all 0.2s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: 0.5px;">4. Detail / Closeup</span>
+                  <span style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">TEXTURE</span>
+                </div>
+                <div class="admin-slot-body" style="height: 140px; position: relative; display: flex; align-items: center; justify-content: center; background: #faf8f5; border-radius: 8px; overflow: hidden;">
+                  <input type="file" id="adminSlotInput_detail" data-slot="detail" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
+                  <div class="admin-slot-ph" style="${adminProductSlots.detail?.previewUrl || (Array.isArray(p.gallery) && p.gallery[3]) ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 4px;'}">
+                    ${icon("upload-cloud", 24)}
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--navy);">Detail / Closeup</span>
+                    <span style="font-size: 10px; color: rgba(17,29,66,0.5);">Thread Texture & Zari</span>
+                  </div>
+                  <div class="admin-slot-prev" style="${adminProductSlots.detail?.previewUrl || (Array.isArray(p.gallery) && p.gallery[3]) ? 'display: block; width: 100%; height: 100%; position: relative;' : 'display: none;'}">
+                    <img src="${attr(adminProductSlots.detail?.previewUrl || (Array.isArray(p.gallery) && p.gallery[3] ? mediaUrl(p.gallery[3]) : ''))}" style="width: 100%; height: 100%; object-fit: contain; background: #fff;">
+                    <button type="button" class="admin-slot-remove-btn" data-slot="detail" style="position: absolute; top: 6px; right: 6px; z-index: 3; width: 24px; height: 24px; border-radius: 50%; background: rgba(17,29,66,0.85); color: #fff; border: none; font-size: 14px; font-weight: 700; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center;" title="Remove image">&times;</button>
+                  </div>
+                </div>
+                <input type="hidden" name="image_detail" value="${attr(adminProductSlots.detail?.url || (Array.isArray(p.gallery) && p.gallery[3]) || '')}">
+              </div>
             </div>
           </div>
 
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label class="admin-form-label" for="productDesignFile">Digitized Machine File (.DST, .PES, .JEF, .EXP, .XXX, .ZIP)</label>
-            <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 20px; text-align: center; background: #faf8f5; cursor: pointer; transition: border-color 0.2s; position: relative; margin-top: 6px;">
-              <input type="file" id="productDesignFile" accept=".dst,.pes,.jef,.exp,.xxx,.zip" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
-              <div class="design-file-placeholder" style="${isEdit && p.designFile ? 'display: none;' : 'display: flex; flex-direction: column; align-items: center; gap: 8px;'}">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+              <label class="admin-form-label" style="margin-bottom: 0;">Digitized Machine Files & Multi-Size Attachments</label>
+              <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Supports up to 7 Sizes/Parts (.DST, .PES, .JEF, .EXP, .XXX, .ZIP)</span>
+            </div>
+            <p style="font-size: 12px; color: rgba(17,29,66,0.6); margin: 0 0 12px;">Upload embroidery production files for each blouse size (e.g. Size 32, 34, 36, 38, 40, 42, 44 or All Sizes ZIP). When a customer purchases the design, all attached sizes unlock automatically.</p>
+
+            <div class="admin-mf-dropzone" style="border: 2px dashed var(--border); border-radius: 12px; padding: 22px; text-align: center; background: #faf8f5; position: relative; cursor: pointer; transition: border-color 0.2s;">
+              <input type="file" id="adminMachineFileInput" multiple accept=".dst,.pes,.jef,.exp,.xxx,.zip" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
                 ${icon("file-archive", 28)}
-                <span style="font-size: 13px; font-weight: 500; color: var(--navy);">Click to upload embroidery machine file</span>
-                <span style="font-size: 11px; color: var(--ink-soft);">DST, PES, JEF, EXP, XXX, ZIP up to 25MB</span>
+                <span style="font-size: 13.5px; font-weight: 600; color: var(--navy);">Click or Drag & Drop Machine Files</span>
+                <span style="font-size: 11.5px; color: rgba(17,29,66,0.55);">Select multiple sizes at once (DST, PES, JEF, EXP, XXX, ZIP up to 25MB each)</span>
               </div>
-              <div class="design-file-preview" style="${isEdit && p.designFile ? 'display: flex; flex-direction: column; align-items: center; gap: 6px;' : 'display: none;'}">
-                <span style="font-size: 13px; font-weight: 700; color: var(--navy);">${icon("check-circle", 16)} Machine file attached</span>
-                <span style="font-size: 11px; color: var(--ink-soft); word-break: break-all;">${isEdit && p.designFile ? escapeHtml(p.designFile) : ''}</span>
-                <span style="font-size: 12px; color: var(--gold); font-weight: 600;">Click to replace file</span>
-              </div>
-              <input type="hidden" name="designFile" value="${isEdit ? escapeHtml(p.designFile || '') : ''}">
+            </div>
+
+            <div id="adminMachineFilesContainer" style="margin-top: 10px;">
+              <!-- Dynamically populated by renderAdminMachineFilesTable() -->
             </div>
           </div>
 
@@ -2739,56 +2889,62 @@ export function initAdminDashboardDelegates() {
       }
     }
 
-    // Product Image File Preview
-    if (e.target.id === "productImageFile") {
-      const file = e.target.files[0];
-      if (file) {
-        const card = e.target.closest(".image-upload-card");
+    // Multi-Angle Product Slot Image Preview
+    if (e.target.id && e.target.id.startsWith("adminSlotInput_")) {
+      const slotKey = e.target.dataset.slot;
+      const file = e.target.files && e.target.files[0];
+      if (file && slotKey) {
+        const card = e.target.closest(".admin-slot-card");
         if (card) {
-          const placeholder = card.querySelector(".upload-placeholder");
-          const preview = card.querySelector(".upload-preview");
-          const img = card.querySelector(".upload-preview img");
-          if (placeholder && preview && img) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              img.src = event.target.result;
-              placeholder.style.display = "none";
-              preview.style.display = "flex";
-              let badge = preview.querySelector(".image-size-badge");
-              if (!badge) {
-                badge = document.createElement("span");
-                badge.className = "image-size-badge";
-                badge.style.cssText = "font-size:11px;color:rgba(17,29,66,0.6);font-weight:500;";
-                preview.appendChild(badge);
-              }
-              const sizeKb = (file.size / 1024).toFixed(1);
-              badge.innerText = `${file.name} (${sizeKb} KB)`;
-            };
-            reader.readAsDataURL(file);
-          }
+          const ph = card.querySelector(".admin-slot-ph");
+          const prev = card.querySelector(".admin-slot-prev");
+          const img = card.querySelector(".admin-slot-prev img");
+          const hiddenInput = card.querySelector(`input[name="image_${slotKey}"]`);
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const dataUrl = event.target.result;
+            adminProductSlots[slotKey] = { file, url: "", previewUrl: dataUrl };
+            if (img) img.src = dataUrl;
+            if (ph) ph.style.display = "none";
+            if (prev) prev.style.display = "block";
+            card.style.borderColor = "var(--gold)";
+            if (hiddenInput) hiddenInput.value = dataUrl;
+          };
+          reader.readAsDataURL(file);
         }
       }
     }
 
-    // Product Embroidery Machine Design File Preview
-    if (e.target.id === "productDesignFile") {
-      const file = e.target.files[0];
-      if (file) {
-        const card = e.target.closest("div");
-        if (card) {
-          const placeholder = card.querySelector(".design-file-placeholder");
-          const preview = card.querySelector(".design-file-preview");
-          if (placeholder && preview) {
-            const nameSpan = preview.querySelectorAll("span")[1];
-            if (nameSpan) {
-              const ext = (file.name.split('.').pop() || '').toUpperCase();
-              const sizeKb = (file.size / 1024).toFixed(1);
-              nameSpan.innerHTML = `<span style="display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;background:var(--navy);color:#fff;margin-right:6px;">${ext}</span>${escapeHtml(file.name)} <span style="color:rgba(17,29,66,0.5);font-size:11px;">(${sizeKb} KB)</span>`;
-            }
-            placeholder.style.display = "none";
-            preview.style.display = "flex";
-          }
-        }
+    // Product Multi-Size Machine Files Selection
+    if (e.target.id === "adminMachineFileInput") {
+      const files = Array.from(e.target.files || []);
+      if (files.length > 0) {
+        const standardSizes = ["Size 32", "Size 34", "Size 36", "Size 38", "Size 40", "Size 42", "Size 44"];
+        files.forEach((file) => {
+          const ext = (file.name.split(".").pop() || "dst").toUpperCase();
+          const currentCount = adminMachineFiles.length;
+          const defaultSize = currentCount < standardSizes.length ? standardSizes[currentCount] : `Part ${currentCount + 1}`;
+          adminMachineFiles.push({
+            id: `mf_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+            size: defaultSize,
+            name: file.name,
+            format: ext,
+            file: file,
+            path: null,
+            isNew: true
+          });
+        });
+        renderAdminMachineFilesTable();
+        e.target.value = "";
+      }
+    }
+
+    // Machine file inline size name change
+    if (e.target.classList.contains("admin-mf-size-input")) {
+      const id = e.target.dataset.id;
+      const item = adminMachineFiles.find(f => f.id === id);
+      if (item) {
+        item.size = e.target.value.trim() || item.size;
       }
     }
 
@@ -2845,6 +3001,8 @@ export function initAdminDashboardDelegates() {
       isAddingProduct = true;
       isBulkImporting = false;
       editingProduct = null;
+      adminProductSlots = { front: null, back: null, hands: null, detail: null };
+      adminMachineFiles = [];
       triggerRender();
       return;
     }
@@ -2860,6 +3018,8 @@ export function initAdminDashboardDelegates() {
     if (e.target.closest(".admin-product-cancel-btn")) {
       isAddingProduct = false;
       editingProduct = null;
+      adminProductSlots = { front: null, back: null, hands: null, detail: null };
+      adminMachineFiles = [];
       triggerRender();
       return;
     }
@@ -2867,6 +3027,41 @@ export function initAdminDashboardDelegates() {
     if (e.target.closest(".admin-bulk-cancel-btn")) {
       isBulkImporting = false;
       triggerRender();
+      return;
+    }
+
+    const slotRemoveBtn = e.target.closest(".admin-slot-remove-btn");
+    if (slotRemoveBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const slotKey = slotRemoveBtn.dataset.slot;
+      if (slotKey) {
+        adminProductSlots[slotKey] = null;
+        const card = slotRemoveBtn.closest(".admin-slot-card");
+        if (card) {
+          card.style.borderColor = "var(--border)";
+          const ph = card.querySelector(".admin-slot-ph");
+          const prev = card.querySelector(".admin-slot-prev");
+          const img = card.querySelector(".admin-slot-prev img");
+          const fileInput = card.querySelector("input[type='file']");
+          const hiddenInput = card.querySelector(`input[name="image_${slotKey}"]`);
+          if (ph) ph.style.display = "flex";
+          if (prev) prev.style.display = "none";
+          if (img) img.src = "";
+          if (fileInput) fileInput.value = "";
+          if (hiddenInput) hiddenInput.value = "";
+        }
+      }
+      return;
+    }
+
+    const removeMfBtn = e.target.closest(".admin-remove-mf-btn");
+    if (removeMfBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = removeMfBtn.dataset.id;
+      adminMachineFiles = adminMachineFiles.filter(f => f.id !== id);
+      renderAdminMachineFilesTable();
       return;
     }
     
@@ -2877,6 +3072,48 @@ export function initAdminDashboardDelegates() {
       if (prod) {
         editingProduct = prod;
         isAddingProduct = false;
+        
+        const gallery = Array.isArray(prod.gallery) ? prod.gallery : (prod.gallery ? [prod.gallery] : []);
+        const primaryImg = prod.image || gallery[0] || "";
+        adminProductSlots = {
+          front: primaryImg ? { file: null, url: primaryImg, previewUrl: primaryImg } : null,
+          back: gallery[1] ? { file: null, url: gallery[1], previewUrl: gallery[1] } : null,
+          hands: gallery[2] ? { file: null, url: gallery[2], previewUrl: gallery[2] } : null,
+          detail: gallery[3] ? { file: null, url: gallery[3], previewUrl: gallery[3] } : null
+        };
+
+        adminMachineFiles = [];
+        const rawDf = prod.designFile || prod.design_file;
+        if (rawDf) {
+          try {
+            const parsed = typeof rawDf === "string" && rawDf.trim().startsWith("[") ? JSON.parse(rawDf) : null;
+            if (Array.isArray(parsed)) {
+              adminMachineFiles = parsed.map((item, idx) => ({
+                id: `mf_${Date.now()}_${idx}`,
+                size: item.size || `Size ${32 + idx * 2}`,
+                name: item.name || (item.path ? item.path.split("/").pop() : `design_${idx + 1}.dst`),
+                format: item.format || "DST",
+                path: item.path || "",
+                file: null,
+                isNew: false
+              }));
+            } else if (typeof rawDf === "string" && rawDf.length > 0) {
+              const fileName = rawDf.split("/").pop() || "design.dst";
+              const ext = (fileName.split(".").pop() || "dst").toUpperCase();
+              adminMachineFiles = [{
+                id: `mf_${Date.now()}_0`,
+                size: "Full Set / Default",
+                name: fileName,
+                format: ext,
+                path: rawDf,
+                file: null,
+                isNew: false
+              }];
+            }
+          } catch (e) {
+            adminMachineFiles = [];
+          }
+        }
         triggerRender();
       }
       return;
@@ -3474,34 +3711,65 @@ export function initAdminDashboardDelegates() {
       }
 
       try {
-        const fileInput = document.getElementById("productImageFile");
-        const file = fileInput ? fileInput.files[0] : null;
-        let imageUrl = formData.get("image") || "";
-
-        if (file) {
-          if (submitBtn) submitBtn.innerText = "Uploading Image...";
-          console.log("Admin: Uploading design image file:", file.name);
-          const cleanName = `prod_${Date.now()}_${file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
-          imageUrl = await storageService.uploadImage(file, cleanName);
-          console.log("Admin: Image uploaded successfully. URL:", imageUrl);
+        // 1. Process Multi-Angle Image Slots (Front Neck is required)
+        const slotKeys = ["front", "back", "hands", "detail"];
+        const uploadedUrls = {};
+        for (const key of slotKeys) {
+          const slot = adminProductSlots[key];
+          const hiddenVal = formData.get(`image_${key}`) || "";
+          if (slot && slot.file) {
+            if (submitBtn) submitBtn.innerText = `Uploading ${key.toUpperCase()} Image...`;
+            console.log(`Admin: Uploading design ${key} image file:`, slot.file.name);
+            const cleanName = `prod_${key}_${Date.now()}_${slot.file.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+            const url = await storageService.uploadImage(slot.file, cleanName);
+            uploadedUrls[key] = url;
+            console.log(`Admin: ${key} image uploaded successfully. URL:`, url);
+          } else if (slot && slot.url) {
+            uploadedUrls[key] = slot.url;
+          } else if (hiddenVal && !hiddenVal.startsWith("data:")) {
+            uploadedUrls[key] = hiddenVal;
+          }
         }
 
-        if (!id && !imageUrl) {
-          throw new Error("Please select a design image file to upload.");
+        const primaryImage = uploadedUrls.front || (editingProduct ? editingProduct.image : "");
+        if (!primaryImage) {
+          throw new Error("Please upload at least a Front Neck design image (Primary Cover).");
         }
 
-        // Upload digitized embroidery machine file if provided
-        const designFileInput = document.getElementById("productDesignFile");
-        const designFile = designFileInput ? designFileInput.files[0] : null;
-        let designFileUrl = formData.get("designFile") || "";
+        const gallery = [
+          uploadedUrls.front,
+          uploadedUrls.back,
+          uploadedUrls.hands,
+          uploadedUrls.detail
+        ].filter(Boolean);
 
-        if (designFile) {
-          if (submitBtn) submitBtn.innerText = "Uploading Machine File...";
-          console.log("Admin: Uploading embroidery machine file:", designFile.name);
-          const cleanDesignName = `design_${Date.now()}_${designFile.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
-          designFileUrl = await storageService.uploadDesignFile(designFile, cleanDesignName);
-          console.log("Admin: Machine file uploaded successfully. Path:", designFileUrl);
+        // 2. Process Multi-Size Machine Files (Supports up to 7 sizes/parts)
+        const finalizedMachineFiles = [];
+        for (let i = 0; i < adminMachineFiles.length; i++) {
+          const mf = adminMachineFiles[i];
+          if (mf.file) {
+            if (submitBtn) submitBtn.innerText = `Uploading Machine File (${i + 1}/${adminMachineFiles.length})...`;
+            console.log("Admin: Uploading embroidery machine file:", mf.name);
+            const cleanDesignName = `design_${Date.now()}_${mf.name.toLowerCase().replace(/[^a-z0-9.]/g, '_')}`;
+            const uploadedPath = await storageService.uploadDesignFile(mf.file, cleanDesignName);
+            finalizedMachineFiles.push({
+              size: mf.size || `Size ${32 + i * 2}`,
+              name: mf.name,
+              format: mf.format,
+              path: uploadedPath
+            });
+            console.log("Admin: Machine file uploaded successfully. Path:", uploadedPath);
+          } else if (mf.path) {
+            finalizedMachineFiles.push({
+              size: mf.size || `Size ${32 + i * 2}`,
+              name: mf.name,
+              format: mf.format,
+              path: mf.path
+            });
+          }
         }
+
+        const designFileJson = finalizedMachineFiles.length > 0 ? JSON.stringify(finalizedMachineFiles) : null;
         
         const tagsStr = formData.get("tags") || "";
         const tags = tagsStr.split(",").map(t => t.trim()).filter(Boolean);
@@ -3585,9 +3853,9 @@ export function initAdminDashboardDelegates() {
           threadColors: parseInt(formData.get("threadColors") || 0, 10) || 0,
           width: parseInt(formData.get("width") || 100, 10) || 100,
           height: parseInt(formData.get("height") || 100, 10) || 100,
-          image: imageUrl,
-          gallery: [imageUrl],
-          designFile: designFileUrl || null,
+          image: primaryImage,
+          gallery: gallery.length > 0 ? gallery : [primaryImage],
+          designFile: designFileJson,
           difficultyLevel: formData.get("difficultyLevel") || "Intermediate",
           recommendedFabrics,
           tags,
@@ -3620,6 +3888,8 @@ export function initAdminDashboardDelegates() {
 
         isAddingProduct = false;
         editingProduct = null;
+        adminProductSlots = { front: null, back: null, hands: null, detail: null };
+        adminMachineFiles = [];
         triggerRender();
       } catch (err) {
         console.error("Admin: Product save failed:", err);

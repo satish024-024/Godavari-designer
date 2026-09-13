@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Godavari Designers — Multi-Asset Upload & Database Sync Test</title>
+  <style>
+    :root {
+      --navy: #0F172A;
+      --gold: #C8A15A;
+      --gold-hover: #b38d45;
+      --ivory: #FAF8F5;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      --text: #1E293B;
+      --muted: #64748B;
+      --success: #10B981;
+      --danger: #EF4444;
+      --font-serif: "Playfair Display", Georgia, serif;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--ivory);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 32px 16px;
+    }
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      background: var(--surface);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(15,23,42,0.06);
+      padding: 36px;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(200,161,90,0.15);
+      color: var(--gold);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: var(--navy);
+      margin: 28px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: -12px;
+      margin-bottom: 16px;
+    }
+    .grid-slots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .slot-card {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      background: #F8FAFC;
+      transition: all 0.2s ease;
+      position: relative;
+      min-height: 230px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+    .slot-card:hover, .slot-card.dragover {
+      border-color: var(--gold);
+      background: #FFFDF9;
+    }
+    .slot-label {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--navy);
+      margin-bottom: 4px;
+    }
+    .slot-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .slot-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: var(--gold);
+    }
+    .slot-input {
+      display: none;
+    }
+    .slot-preview {
+      width: 100%;
+      height: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .slot-preview img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .slot-meta {
+      font-size: 11px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+    .btn-remove {
+      background: #FEE2E2;
+      color: var(--danger);
+      border: none;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    /* Machine Files Area */
+    .files-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      background: #F8FAFC;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+    .files-zone:hover, .files-zone.dragover {
+      border-color: var(--gold);
+      background: #FFFDF9;
+    }
+    .file-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 13px;
+    }
+    .file-table th, .file-table td {
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .file-table th {
+      background: #F1F5F9;
+      color: var(--navy);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .tag-format {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      background: var(--navy);
+      color: #fff;
+    }
+    .tag-size {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(200,161,90,0.15);
+      color: var(--gold);
+    }
+    /* Form & Actions */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    input, select {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .btn-submit {
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+    .btn-submit:hover {
+      background: #1E293B;
+      transform: translateY(-1px);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-quick-fill {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 14px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 12px;
+    }
+    /* Results Box */
+    .results-box {
+      margin-top: 32px;
+      padding: 20px;
+      border-radius: 12px;
+      background: #0F172A;
+      color: #F8FAFC;
+      font-family: monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      max-height: 350px;
+      overflow-y: auto;
+      display: none;
+    }
+    /* Storefront Card Preview */
+    .preview-card-wrap {
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+      display: none;
+    }
+    .storefront-card {
+      max-width: 320px;
+      background: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    }
+    .card-thumb-nav {
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      background: #FAFAFA;
+      overflow-x: auto;
+    }
+    .card-thumb-nav img {
+      width: 44px;
+      height: 44px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .card-thumb-nav img.active {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(200,161,90,0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <span class="badge">Godavari Designers CMS Testing Portal</span>
+        <h1>Multi-Asset Upload & Cloud Sync</h1>
+        <p class="subtitle">Upload front neck, back neck, hands images and multi-size embroidery files. Test end-to-end cloud storage & database persistence.</p>
+      </div>
+      <div>
+        <a href="/#/admin/products" style="color: var(--gold); text-decoration: none; font-size: 13px; font-weight: 600;">← Back to Admin Dashboard</a>
+      </div>
+    </header>
+
+    <form id="testUploadForm" onsubmit="event.preventDefault(); return false;">
+      <!-- Design Details -->
+      <div class="form-row">
+        <div class="form-group">
+          <label for="prodTitle">Design Title</label>
+          <input type="text" id="prodTitle" value="Bridal Maggam Peacock Saree" required>
+        </div>
+        <div class="form-group">
+          <label for="prodCode">Design Code</label>
+          <input type="text" id="prodCode" value="GD-8801" required>
+        </div>
+        <div class="form-group">
+          <label for="prodPrice">Price (₹)</label>
+          <input type="number" id="prodPrice" value="120" required>
+        </div>
+      </div>
+
+      <!-- Multi-Angle Image Slots -->
+      <div class="section-title">
+        <span>✦</span> Design Images (Multi-Angle Blouse Gallery)
+      </div>
+      <p class="section-desc">Upload each specific angle. Preview updates instantly without refreshing. All images are stored as high-performance public CDN assets.</p>
+
+      <div class="grid-slots">
+        <!-- Front Neck Slot -->
+        <div class="slot-card" id="card_front_neck" onclick="document.getElementById('input_front_neck').click()">
+          <div class="slot-empty" id="empty_front_neck">
+            <div class="slot-icon">📷</div>
+            <div class="slot-label">Front Neck</div>
+            <div class="slot-sub">Click or drag image</div>
+          </div>
+          <div class="slot-preview" id="prev_front_neck">
+            <img src="" id="img_front_neck">
+            <div class="slot-meta" id="meta_front_neck"></div>
+            <button type="button" class="btn-remove" onclick="removeSlot(event, 'front_neck')">Remove</button>
+          </div>
+          <input type="file" id="input_front_neck" class="slot-input" accept="image/*" onchange="handleSlotChange(this, 'front_neck')">
+        </div>
+
+        <!-- Back Neck Slot -->
+        <div class="slot-card" id="card_back_neck" onclick="document.getElementById('input_back_neck').click()">
+          <div class="slot-empty" id="empty_back_neck">
+            <div class="slot-icon">✨</div>
+            <div class="slot-label">Back Neck</div>
+            <div class="slot-sub">Click or drag image</div>
+          </div>
+          <div class="slot-preview" id="prev_back_neck">
+            <img src="" id="img_back_neck">
+            <div class="slot-meta" id="meta_back_neck"></div>
+            <button type="button" class="btn-remove" onclick="removeSlot(event, 'back_neck')">Remove</button>
+          </div>
+          <input type="file" id="input_back_neck" class="slot-input" accept="image/*" onchange="handleSlotChange(this, 'back_neck')">
+        </div>
+
+        <!-- Hands / Sleeves Slot -->
+        <div class="slot-card" id="card_hands" onclick="document.getElementById('input_hands').click()">
+          <div class="slot-empty" id="empty_hands">
+            <div class="slot-icon">💎</div>
+            <div class="slot-label">Hands / Sleeves</div>
+            <div class="slot-sub">Click or drag image</div>
+          </div>
+          <div class="slot-preview" id="prev_hands">
+            <img src="" id="img_hands">
+            <div class="slot-meta" id="meta_hands"></div>
+            <button type="button" class="btn-remove" onclick="removeSlot(event, 'hands')">Remove</button>
+          </div>
+          <input type="file" id="input_hands" class="slot-input" accept="image/*" onchange="handleSlotChange(this, 'hands')">
+        </div>
+
+        <!-- Stitch Closeup / Detail Slot -->
+        <div class="slot-card" id="card_closeup" onclick="document.getElementById('input_closeup').click()">
+          <div class="slot-empty" id="empty_closeup">
+            <div class="slot-icon">🔍</div>
+            <div class="slot-label">Stitch Detail / Closeup</div>
+            <div class="slot-sub">Click or drag image</div>
+          </div>
+          <div class="slot-preview" id="prev_closeup">
+            <img src="" id="img_closeup">
+            <div class="slot-meta" id="meta_closeup"></div>
+            <button type="button" class="btn-remove" onclick="removeSlot(event, 'closeup')">Remove</button>
+          </div>
+          <input type="file" id="input_closeup" class="slot-input" accept="image/*" onchange="handleSlotChange(this, 'closeup')">
+        </div>
+      </div>
+
+      <!-- Multi-Size Embroidery Machine Files -->
+      <div class="section-title">
+        <span>✦</span> Digitized Machine Files (Multiple Sizes / Parts)
+      </div>
+      <p class="section-desc">Attach multiple sizes (Size 34, 36, 38, 40, etc.) or parts (.DST, .PES, .JEF, .EXP, .XXX, .ZIP). All files unlock upon customer purchase.</p>
+
+      <div class="files-zone" id="machineFilesZone" onclick="document.getElementById('machineFilesInput').click()">
+        <div style="font-size: 28px; color: var(--navy); margin-bottom: 6px;">📂</div>
+        <div style="font-weight: 700; color: var(--navy); font-size: 14px;">Click or Drag Machine Files Here</div>
+        <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">Supports multiple files up to 50MB each (.DST, .PES, .JEF, .EXP, .XXX, .ZIP)</div>
+        <input type="file" id="machineFilesInput" multiple accept=".dst,.pes,.jef,.exp,.xxx,.zip" style="display:none;" onchange="handleMachineFiles(this.files)">
+      </div>
+
+      <table class="file-table" id="machineFilesTable" style="display:none;">
+        <thead>
+          <tr>
+            <th>Format</th>
+            <th>File Name</th>
+            <th>Size / Part Label</th>
+            <th>File Size</th>
+            <th style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="machineFilesBody"></tbody>
+      </table>
+
+      <!-- Actions -->
+      <div style="margin-top: 32px; display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px;">
+        <button type="button" class="btn-quick-fill" onclick="autoGenerateSampleFiles()">⚡ Load Sample Test Data</button>
+        <button type="button" class="btn-submit" id="btnUploadAndSave" onclick="executeUploadAndSave()">
+          <span>Upload & Save to Live Storefront</span> →
+        </button>
+      </div>
+    </form>
+
+    <!-- Results Log -->
+    <div class="results-box" id="resultsBox"></div>
+
+    <!-- Live Storefront Preview -->
+    <div class="preview-card-wrap" id="previewWrap">
+      <div class="section-title">✦ Live Storefront Preview</div>
+      <p class="section-desc">How this newly uploaded design renders in the live catalog and product detail gallery:</p>
+      
+      <div class="storefront-card">
+        <div style="position: relative; height: 260px; background: #000;">
+          <img id="storefrontMainImg" src="" style="width: 100%; height: 100%; object-fit: cover;">
+          <div style="position: absolute; top: 12px; left: 12px; background: var(--navy); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;" id="storefrontBadge">GD-8801</div>
+        </div>
+        <div class="card-thumb-nav" id="storefrontThumbs"></div>
+        <div style="padding: 16px;">
+          <h3 id="storefrontTitle" style="font-family: var(--font-serif); font-size: 16px; color: var(--navy); margin-bottom: 6px;"></h3>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="storefrontPrice" style="font-weight: 700; color: var(--navy); font-size: 18px;"></span>
+            <span style="font-size: 12px; color: var(--success); font-weight: 600;" id="storefrontFilesCount"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Asset Storage State
+    const slots = {
+      front_neck: { file: null, label: "Front Neck", url: null },
+      back_neck: { file: null, label: "Back Neck", url: null },
+      hands: { file: null, label: "Hands / Sleeves", url: null },
+      closeup: { file: null, label: "Stitch Closeup", url: null }
+    };
+
+    let machineFilesList = [];
+
+    // Drag and drop setup for slot cards
+    ['front_neck', 'back_neck', 'hands', 'closeup'].forEach(slotKey => {
+      const card = document.getElementById('card_' + slotKey);
+      card.addEventListener('dragover', (e) => { e.preventDefault(); card.classList.add('dragover'); });
+      card.addEventListener('dragleave', () => { card.classList.remove('dragover'); });
+      card.addEventListener('drop', (e) => {
+        e.preventDefault();
+        card.classList.remove('dragover');
+        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          setSlotFile(slotKey, e.dataTransfer.files[0]);
+        }
+      });
+    });
+
+    // Drag and drop setup for machine files zone
+    const zone = document.getElementById('machineFilesZone');
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+    zone.addEventListener('dragleave', () => { zone.classList.remove('dragover'); });
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      if (e.dataTransfer.files) {
+        handleMachineFiles(e.dataTransfer.files);
+      }
+    });
+
+    function handleSlotChange(input, slotKey) {
+      if (input.files && input.files[0]) {
+        setSlotFile(slotKey, input.files[0]);
+      }
+    }
+
+    function setSlotFile(slotKey, file) {
+      slots[slotKey].file = file;
+      const previewUrl = URL.createObjectURL(file);
+      slots[slotKey].previewUrl = previewUrl;
+
+      document.getElementById('empty_' + slotKey).style.display = 'none';
+      const prev = document.getElementById('prev_' + slotKey);
+      prev.style.display = 'flex';
+      document.getElementById('img_' + slotKey).src = previewUrl;
+      const sizeKb = (file.size / 1024).toFixed(1);
+      document.getElementById('meta_' + slotKey).innerText = `${file.name} (${sizeKb} KB)`;
+    }
+
+    function removeSlot(event, slotKey) {
+      event.stopPropagation();
+      slots[slotKey].file = null;
+      slots[slotKey].previewUrl = null;
+      document.getElementById('input_' + slotKey).value = '';
+      document.getElementById('empty_' + slotKey).style.display = 'flex';
+      document.getElementById('prev_' + slotKey).style.display = 'none';
+    }
+
+    function handleMachineFiles(files) {
+      Array.from(files).forEach((f, idx) => {
+        const ext = (f.name.split('.').pop() || '').toUpperCase();
+        // Determine default part / size label from file name
+        let sizeLabel = "Standard Size";
+        const match = f.name.match(/(3[2-9]|4[0-9]|size[-_ ]?\d+|hands|back|front)/i);
+        if (match) {
+          sizeLabel = match[0].toUpperCase();
+        } else if (machineFilesList.length > 0) {
+          sizeLabel = `Size ${32 + machineFilesList.length * 2}`;
+        }
+        machineFilesList.push({ file: f, format: ext, label: sizeLabel });
+      });
+      renderMachineFilesTable();
+    }
+
+    function renderMachineFilesTable() {
+      const table = document.getElementById('machineFilesTable');
+      const tbody = document.getElementById('machineFilesBody');
+      if (machineFilesList.length === 0) {
+        table.style.display = 'none';
+        return;
+      }
+      table.style.display = 'table';
+      tbody.innerHTML = machineFilesList.map((item, idx) => `
+        <tr>
+          <td><span class="tag-format">${item.format}</span></td>
+          <td><strong>${item.file.name}</strong></td>
+          <td>
+            <input type="text" value="${item.label}" onchange="machineFilesList[${idx}].label = this.value" style="padding: 4px 8px; font-size: 12px; width: 140px;">
+          </td>
+          <td>${(item.file.size / 1024).toFixed(1)} KB</td>
+          <td style="text-align: right;">
+            <button type="button" class="btn-remove" onclick="removeMachineFile(${idx})">✕</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function removeMachineFile(idx) {
+      machineFilesList.splice(idx, 1);
+      renderMachineFilesTable();
+    }
+
+    // Convert file to base64
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const res = reader.result;
+          resolve(res.slice(res.indexOf(',') + 1));
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Auto-generate test sample files with HTML5 Canvas (for instant 1-click test)
+    async function autoGenerateSampleFiles() {
+      const createSampleImg = (label, color) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, 600, 600);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 32px Georgia';
+        ctx.textAlign = 'center';
+        ctx.fillText('GODAVARI DESIGNERS', 300, 260);
+        ctx.fillStyle = '#C8A15A';
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(label, 300, 310);
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.font = '16px sans-serif';
+        ctx.fillText('Automated Luxury Digitizing Asset', 300, 350);
+        return new Promise(res => {
+          canvas.toBlob(blob => {
+            res(new File([blob], `${label.toLowerCase().replace(/[^a-z0-9]/g, '_')}.jpg`, { type: 'image/jpeg' }));
+          }, 'image/jpeg', 0.9);
+        });
+      };
+
+      const fFront = await createSampleImg('Front Neck Blouse View', '#0F172A');
+      const fBack = await createSampleImg('Back Neck Heavy Maggam Work', '#1E293B');
+      const fHands = await createSampleImg('Hands & Sleeves Detail', '#334155');
+      const fCloseup = await createSampleImg('Micro Zari Stitch Closeup', '#475569');
+
+      setSlotFile('front_neck', fFront);
+      setSlotFile('back_neck', fBack);
+      setSlotFile('hands', fHands);
+      setSlotFile('closeup', fCloseup);
+
+      // Create 7 different embroidery machine size files
+      machineFilesList = [];
+      const sizes = ['Size 32 (Bust 34)', 'Size 34 (Bust 36)', 'Size 36 (Bust 38)', 'Size 38 (Bust 40)', 'Size 40 (Bust 42)', 'Size 42 (Bust 44)', 'Sleeves All Sizes'];
+      sizes.forEach(s => {
+        const content = `HEADER: TAJIMA EMBROIDERY MACHINE SPECIFICATION\nDESIGN: GD-8801\nSIZE: ${s}\nTOTAL_STITCHES: 28400\nSTOP`;
+        const blob = new Blob([content], { type: 'application/octet-stream' });
+        const file = new File([blob], `GD-8801_${s.replace(/[^a-z0-9]/gi, '_')}.dst`, { type: 'application/octet-stream' });
+        machineFilesList.push({ file, format: 'DST', label: s });
+      });
+      renderMachineFilesTable();
+    }
+
+    async function executeUploadAndSave() {
+      const btn = document.getElementById('btnUploadAndSave');
+      const box = document.getElementById('resultsBox');
+      btn.disabled = true;
+      btn.innerText = 'Uploading to Cloud Storage...';
+      box.style.display = 'block';
+      box.innerHTML = '';
+
+      const log = (msg) => {
+        box.innerHTML += `[${new Date().toLocaleTimeString()}] ${msg}\n`;
+        box.scrollTop = box.scrollHeight;
+      };
+
+      try {
+        log('Starting multi-asset upload pipeline...');
+
+        // 1. Upload Images
+        const uploadedImages = [];
+        let primaryImageUrl = '';
+
+        for (const [slotKey, slotData] of Object.entries(slots)) {
+          if (slotData.file) {
+            log(`Uploading image for ${slotData.label} (${slotData.file.name})...`);
+            const b64 = await fileToBase64(slotData.file);
+            const uploadRes = await fetch('/api/admin/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bucket: 'media-library',
+                filename: `${slotKey}_${slotData.file.name}`,
+                contentType: slotData.file.type || 'image/jpeg',
+                base64: b64
+              })
+            });
+            const json = await uploadRes.json();
+            if (!uploadRes.ok) throw new Error(json.message || 'Image upload failed');
+            log(`✔ Uploaded ${slotData.label}: ${json.publicUrl}`);
+            uploadedImages.push({
+              slot: slotKey,
+              label: slotData.label,
+              url: json.publicUrl
+            });
+            if (!primaryImageUrl || slotKey === 'front_neck') {
+              primaryImageUrl = json.publicUrl;
+            }
+          }
+        }
+
+        if (uploadedImages.length === 0) {
+          throw new Error('Please select at least one design image to upload.');
+        }
+
+        // 2. Upload Machine Files
+        log(`Uploading ${machineFilesList.length} machine embroidery files...`);
+        const uploadedMachineFiles = [];
+        for (const item of machineFilesList) {
+          log(`Uploading machine file ${item.file.name} (${item.label})...`);
+          const b64 = await fileToBase64(item.file);
+          const uploadRes = await fetch('/api/admin/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bucket: 'digitized-designs',
+              filename: item.file.name,
+              contentType: 'application/octet-stream',
+              base64: b64
+            })
+          });
+          const json = await uploadRes.json();
+          if (!uploadRes.ok) throw new Error(json.message || 'Machine file upload failed');
+          log(`✔ Uploaded ${item.label}: ${json.path}`);
+          uploadedMachineFiles.push({
+            format: item.format,
+            label: item.label,
+            name: item.file.name,
+            path: json.path,
+            publicUrl: json.publicUrl,
+            size: item.file.size
+          });
+        }
+
+        // 3. Persist Structured Product Record to Database via /api/admin/catalog
+        log('Creating database record in Supabase products table...');
+        const title = document.getElementById('prodTitle').value.trim();
+        const code = document.getElementById('prodCode').value.trim();
+        const price = Number(document.getElementById('prodPrice').value || 120);
+        const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${code.toLowerCase()}`;
+
+        const galleryUrls = uploadedImages.map(img => img.url);
+
+        const prodPayload = {
+          title,
+          code,
+          slug,
+          price,
+          category_id: 'd3b07384-d113-4ec5-a5d6-d05b5832a821', // Bridal
+          description: `Luxury bridal embroidery design with full multi-angle views and ${uploadedMachineFiles.length} production size files included.`,
+          image: primaryImageUrl,
+          gallery: galleryUrls,
+          design_file: uploadedMachineFiles.length > 0 ? JSON.stringify(uploadedMachineFiles) : null,
+          formats: [
+            { format: 'DST', machineBrand: 'Tajima', price, filesCount: uploadedMachineFiles.length },
+            { format: 'PES', machineBrand: 'Brother', price, filesCount: uploadedMachineFiles.length }
+          ],
+          total_stitch_count: 28400,
+          thread_colors: 4,
+          width: 120,
+          height: 120,
+          featured: true,
+          best_seller: true
+        };
+
+        const dbRes = await fetch('/api/admin/catalog', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create',
+            entity: 'product',
+            data: prodPayload
+          })
+        });
+
+        const dbJson = await dbRes.json();
+        if (!dbRes.ok) throw new Error(dbJson.message || 'Database creation failed');
+
+        log('🎉 SUCCESS! Product saved to Supabase successfully!');
+        log(`Product ID: ${dbJson.data.id}`);
+        log(`Gallery count: ${galleryUrls.length} images`);
+        log(`Machine files unlocked: ${uploadedMachineFiles.length} files`);
+
+        // Render Live Preview
+        renderStorefrontPreview(dbJson.data, uploadedImages, uploadedMachineFiles);
+
+      } catch (err) {
+        log(`❌ ERROR: ${err.message}`);
+        alert('Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Upload & Save to Live Storefront →';
+      }
+    }
+
+    function renderStorefrontPreview(prod, images, files) {
+      const wrap = document.getElementById('previewWrap');
+      wrap.style.display = 'block';
+      document.getElementById('storefrontMainImg').src = prod.image;
+      document.getElementById('storefrontBadge').innerText = prod.code;
+      document.getElementById('storefrontTitle').innerText = prod.title;
+      document.getElementById('storefrontPrice').innerText = `₹${prod.price}`;
+      document.getElementById('storefrontFilesCount').innerText = `✓ ${files.length} Machine Files Unlocked`;
+
+      const thumbsNav = document.getElementById('storefrontThumbs');
+      thumbsNav.innerHTML = images.map((img, idx) => `
+        <img src="${img.url}" class="${idx === 0 ? 'active' : ''}" title="${img.label}" onclick="switchPreview('${img.url}', this)">
+      `).join('');
+      wrap.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function switchPreview(url, el) {
+      document.getElementById('storefrontMainImg').src = url;
+      document.querySelectorAll('#storefrontThumbs img').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+    }
+  </script>
+</body>
+</html>

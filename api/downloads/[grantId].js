@@ -99,22 +99,38 @@ export default async function handler(req, res) {
     // If a real uploaded machine file exists, attempt to stream it
     if (product.design_file) {
       try {
-        const designPath = product.design_file.replace(/^\/+/, "");
-        const bucketUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-        const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-        const storageUrl = `${bucketUrl.replace(/\/$/, "")}/storage/v1/object/digitized-designs/${encodeURIComponent(designPath)}`;
-        const storageRes = await fetch(storageUrl, {
-          headers: { "Authorization": `Bearer ${serviceKey}`, "apikey": serviceKey }
-        });
-        if (storageRes.ok) {
-          const realBuffer = Buffer.from(await storageRes.arrayBuffer());
-          if (realBuffer.length > 0) {
-            fileBuffer = realBuffer;
-            // Determine extension from the stored file name
-            const storedName = designPath.split("/").pop() || "";
-            const storedExt = storedName.split(".").pop()?.toLowerCase();
-            if (storedExt && storedExt.length <= 4) {
-              fileExtension = storedExt;
+        let designPath = "";
+        let requestedName = "";
+        const rawDesign = typeof product.design_file === "string" ? product.design_file.trim() : "";
+        if (rawDesign.startsWith("[")) {
+          const parsed = JSON.parse(rawDesign);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const match = parsed.find(f => (f.format || "").toUpperCase() === (format || "").toUpperCase()) || parsed[0];
+            designPath = match.path || "";
+            requestedName = match.name || "";
+          }
+        } else {
+          designPath = rawDesign;
+        }
+
+        if (designPath) {
+          designPath = designPath.replace(/^\/+/, "");
+          const bucketUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+          const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+          const storageUrl = `${bucketUrl.replace(/\/$/, "")}/storage/v1/object/digitized-designs/${encodeURIComponent(designPath)}`;
+          const storageRes = await fetch(storageUrl, {
+            headers: { "Authorization": `Bearer ${serviceKey}`, "apikey": serviceKey }
+          });
+          if (storageRes.ok) {
+            const realBuffer = Buffer.from(await storageRes.arrayBuffer());
+            if (realBuffer.length > 0) {
+              fileBuffer = realBuffer;
+              // Determine extension from the stored file name
+              const storedName = requestedName || designPath.split("/").pop() || "";
+              const storedExt = storedName.split(".").pop()?.toLowerCase();
+              if (storedExt && storedExt.length <= 4) {
+                fileExtension = storedExt;
+              }
             }
           }
         }
