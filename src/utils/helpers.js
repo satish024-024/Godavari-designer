@@ -43,10 +43,31 @@ export function money(value) {
 }
 
 export function mediaUrl(id) {
-  if (typeof id === "string" && (id.startsWith("http://") || id.startsWith("https://") || id.startsWith("data:") || id.startsWith("./"))) {
-    return id;
+  if (!id || typeof id !== "string") {
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%23F4EDE4'/%3E%3Ctext x='50%25' y='50%25' font-family='serif' font-size='20' fill='%23C8A15A' text-anchor='middle' dominant-baseline='middle'%3EGodavari Designers%3C/text%3E%3C/svg%3E";
   }
-  return MediaLibrary.getMediaUrl(id, id);
+
+  const clean = id.trim();
+  if (clean.startsWith("http://") || clean.startsWith("https://") || clean.startsWith("data:") || clean.startsWith("./") || clean.startsWith("/")) {
+    return clean;
+  }
+
+  // Check if it's a Supabase storage path (e.g. images/..., media-library/..., designs/...)
+  if (clean.startsWith("images/") || clean.startsWith("media-library/") || clean.startsWith("videos/")) {
+    const subPath = clean.replace(/^(media-library|public)\//, "");
+    return `https://xpqduepvrlhzsofxcukn.supabase.co/storage/v1/object/public/media-library/${subPath}`;
+  }
+  if (clean.startsWith("designs/") || clean.startsWith("digitized-designs/")) {
+    const subPath = clean.replace(/^(digitized-designs|public)\//, "");
+    return `https://xpqduepvrlhzsofxcukn.supabase.co/storage/v1/object/public/digitized-designs/${subPath}`;
+  }
+
+  const registryUrl = MediaLibrary.getMediaUrl(clean, null);
+  if (registryUrl) {
+    return registryUrl;
+  }
+
+  return clean;
 }
 
 export function isMobileViewport() {

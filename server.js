@@ -1,4 +1,4 @@
-﻿import http from "http";
+import http from "http";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -33,7 +33,9 @@ const apiRoutes = {
   "/api/downloads/request": () => import("./api/downloads/request.js"),
   "/api/purchases/claim-guest": () => import("./api/purchases/claim-guest.js"),
   "/api/purchases": () => import("./api/purchases/index.js"),
-  "/api/support/payment": () => import("./api/support/payment.js")
+  "/api/support/payment": () => import("./api/support/payment.js"),
+  "/api/admin/upload": () => import("./api/admin/upload.js"),
+  "/api/admin/catalog": () => import("./api/admin/catalog.js")
 };
 
 function enhanceResponse(res) {

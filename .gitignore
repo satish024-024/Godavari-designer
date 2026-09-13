@@ -20,3 +20,5 @@ Thumbs.db
 scratch/
 .agents/
 skills-lock.json
+razorpay-cli/
+*.zip

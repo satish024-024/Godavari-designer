@@ -435,8 +435,18 @@ export const categoryService = {
 
   async createCategory(cat) {
     const dbCat = mapCategoryToDB(cat);
-    // If id is provided as a UUID, use it, otherwise let DB generate it
     if (cat.id && cat.id.includes('-')) dbCat.id = cat.id;
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create", entity: "category", data: dbCat })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) return mapCategoryFromDB(json.data);
+      }
+    } catch (_) {}
     const { data, error } = await supabase
       .from('categories')
       .insert(dbCat)
@@ -448,6 +458,17 @@ export const categoryService = {
 
   async updateCategory(id, cat) {
     const dbCat = mapCategoryToDB(cat);
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update", entity: "category", id, data: dbCat })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) return mapCategoryFromDB(json.data);
+      }
+    } catch (_) {}
     const { data, error } = await supabase
       .from('categories')
       .update(dbCat)
@@ -459,6 +480,17 @@ export const categoryService = {
   },
 
   async deleteCategory(id) {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", entity: "category", id })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) return true;
+      }
+    } catch (_) {}
     const { error } = await supabase
       .from('categories')
       .delete()
@@ -494,6 +526,17 @@ export const collectionService = {
   async createCollection(col) {
     const dbCol = mapCollectionToDB(col);
     if (col.id && col.id.includes('-')) dbCol.id = col.id;
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create", entity: "collection", data: dbCol })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) return mapCollectionFromDB(json.data);
+      }
+    } catch (_) {}
     const { data, error } = await supabase
       .from('collections')
       .insert(dbCol)
@@ -505,6 +548,17 @@ export const collectionService = {
 
   async updateCollection(id, col) {
     const dbCol = mapCollectionToDB(col);
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update", entity: "collection", id, data: dbCol })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) return mapCollectionFromDB(json.data);
+      }
+    } catch (_) {}
     const { data, error } = await supabase
       .from('collections')
       .update(dbCol)
@@ -516,6 +570,17 @@ export const collectionService = {
   },
 
   async deleteCollection(id) {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", entity: "collection", id })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) return true;
+      }
+    } catch (_) {}
     const { error } = await supabase
       .from('collections')
       .delete()
@@ -551,6 +616,17 @@ export const productService = {
   async createProduct(prod) {
     const dbProd = mapProductToDB(prod);
     if (prod.id && prod.id.includes('-')) dbProd.id = prod.id;
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create", entity: "product", data: dbProd })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) return mapProductFromDB(json.data);
+      }
+    } catch (_) {}
     const { data, error } = await supabase
       .from('products')
       .insert(dbProd)
@@ -562,6 +638,17 @@ export const productService = {
 
   async updateProduct(id, prod) {
     const dbProd = mapProductToDB(prod);
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update", entity: "product", id, data: dbProd })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.data) return mapProductFromDB(json.data);
+      }
+    } catch (_) {}
     const { data, error } = await supabase
       .from('products')
       .update(dbProd)
@@ -573,6 +660,17 @@ export const productService = {
   },
 
   async deleteProduct(id) {
+    try {
+      const res = await fetch("/api/admin/catalog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", entity: "product", id })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) return true;
+      }
+    } catch (_) {}
     const { error } = await supabase
       .from('products')
       .delete()
@@ -1001,8 +1099,43 @@ export const storageService = {
   async uploadMedia(file, bucket, path) {
     if (!(file instanceof File)) throw new Error("Choose a file before uploading.");
     if (file.size === 0) throw new Error("The selected file is empty.");
-    if (file.size > 25 * 1024 * 1024) throw new Error("Files must be 25 MB or smaller.");
+    if (file.size > 50 * 1024 * 1024) throw new Error("Files must be 50 MB or smaller.");
 
+    // Primary Production Route: Server-side API with Service Role Key (bypasses RLS)
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result;
+          const commaIdx = result.indexOf(",");
+          resolve(commaIdx !== -1 ? result.slice(commaIdx + 1) : result);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bucket,
+          path,
+          filename: file.name,
+          contentType: file.type || "application/octet-stream",
+          base64
+        })
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.publicUrl) return json.publicUrl;
+        if (json.path) return json.path;
+      }
+    } catch (apiErr) {
+      console.warn("Storage service: Server-side upload failed, falling back to client SDK:", apiErr);
+    }
+
+    // Secondary / Fallback Route: Direct Supabase Client Storage
     try {
       const { data, error } = await supabase.storage
         .from(bucket)
@@ -1020,7 +1153,6 @@ export const storageService = {
       if (error) throw error;
     } catch (err) {
       console.warn("Storage service: Remote bucket write failed, engaging client fallback:", err);
-      // Fail-safe: convert image file to high-quality compressed Data URL
       if (file.type && file.type.startsWith('image/')) {
         return await fileToDataUrl(file);
       }
