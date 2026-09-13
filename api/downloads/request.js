@@ -34,9 +34,15 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. Verify active entitlement in database
+    // 2. Verify product exists and resolve authoritative record
+    const product = await getProductById(productId);
+    if (!product) {
+      return res.status(404).json({ error: "PRODUCT_NOT_FOUND", message: "Design file metadata not found" });
+    }
+
+    // 3. Verify active entitlement in database
     const entitlement = await checkActiveEntitlement({
-      productId,
+      productId: product.id,
       userId: user ? user.id : null,
       guestTokenHash
     });
@@ -46,12 +52,6 @@ export default async function handler(req, res) {
         error: "ACCESS_DENIED",
         message: "No active commercial entitlement found for this design. Please purchase to unlock."
       });
-    }
-
-    // 3. Verify product exists
-    const product = await getProductById(productId);
-    if (!product) {
-      return res.status(404).json({ error: "PRODUCT_NOT_FOUND", message: "Design file metadata not found" });
     }
 
     // 4. Generate Single-Use 60-Second Download Grant

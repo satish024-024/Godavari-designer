@@ -181,9 +181,17 @@ export async function syncFromSupabase() {
 
       const seenSlugs = new Set();
       const combined = [];
+      const supabaseBySlug = new Map(supabaseProducts.map(sp => [sp.slug, sp]));
+      const supabaseByCode = new Map(supabaseProducts.filter(sp => sp.code).map(sp => [sp.code, sp]));
+
       for (const p of sanityProducts) {
         if (!seenSlugs.has(p.slug)) {
           seenSlugs.add(p.slug);
+          const match = supabaseBySlug.get(p.slug) || (p.code ? supabaseByCode.get(p.code) : null);
+          if (match && match.id) {
+            p.id = match.id;
+            p.supabaseId = match.id;
+          }
           combined.push(p);
         }
       }
