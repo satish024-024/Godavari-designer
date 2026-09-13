@@ -84,6 +84,10 @@
       "destination": "/src/$1"
     },
     {
+      "source": "/api/admin/sanity-publish",
+      "destination": "/api/admin/catalog.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },

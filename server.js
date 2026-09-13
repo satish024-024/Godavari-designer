@@ -36,7 +36,7 @@ const apiRoutes = {
   "/api/support/payment": () => import("./api/support/payment.js"),
   "/api/admin/upload": () => import("./api/admin/upload.js"),
   "/api/admin/catalog": () => import("./api/admin/catalog.js"),
-  "/api/admin/sanity-publish": () => import("./api/admin/sanity-publish.js")
+  "/api/admin/sanity-publish": () => import("./api/admin/catalog.js")
 };
 
 function enhanceResponse(res) {
