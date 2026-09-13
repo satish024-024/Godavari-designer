@@ -302,8 +302,15 @@ export function handleRouting() {
     return;
   }
 
-  // 4. Redirect already-authenticated users away from auth page
-  if (matchedRoute.page === "auth" && isAuthenticated()) {
+  // 4. Redirect already-authenticated users away from auth page (EXCEPT during password reset / recovery)
+  const isPasswordResetMode = 
+    queryParams.mode === "reset-confirm" ||
+    window.location.hash.includes("mode=reset-confirm") ||
+    window.location.hash.includes("type=recovery") ||
+    window.location.search.includes("type=recovery") ||
+    window.location.search.includes("mode=reset-confirm");
+
+  if (matchedRoute.page === "auth" && isAuthenticated() && !isPasswordResetMode) {
     window.location.hash = isAuthenticatedAdmin() ? "#/admin-dashboard" : "#/account";
     return;
   }

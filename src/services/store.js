@@ -305,9 +305,22 @@ export async function initAuth() {
         DB.setActiveUser(user);
         await processPendingCartItem();
         
-        // On OAuth sign-in, route to appropriate dashboard
-        if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-          const currentHash = window.location.hash;
+        // Check if this session is for password recovery / reset
+        const currentHash = window.location.hash || "";
+        const currentSearch = window.location.search || "";
+        const isRecoverySession = event === 'PASSWORD_RECOVERY' || 
+                                  currentHash.includes('type=recovery') || 
+                                  currentHash.includes('mode=reset-confirm') ||
+                                  currentSearch.includes('type=recovery') ||
+                                  currentSearch.includes('mode=reset-confirm');
+
+        if (isRecoverySession) {
+          // Keep user on the password reset confirmation form
+          if (!currentHash.includes('mode=reset-confirm')) {
+            window.location.hash = '#/auth?mode=reset-confirm';
+          }
+        } else if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+          // On OAuth sign-in or standard login, route to appropriate dashboard
           const isOnAuthPage = currentHash.includes('/auth') || 
                                currentHash.includes('access_token') ||
                                currentHash.includes('error_description');

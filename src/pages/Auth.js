@@ -3,23 +3,32 @@ import { authService, supabase, initSupabase } from "../services/supabase.js";
 import { escapeHtml, icon, attr } from "../utils/helpers.js";
 
 // Local Page State (Production Secure Email / Password / Google OAuth)
-let authMode = "signin"; // 'signin' | 'signup' | 'forgot' | 'reset-confirm'
+let authMode = "signin"; // 'signin' | 'signup' | 'forgot' | 'forgot-sent' | 'reset-confirm'
 let isAdminLoginRoute = false;
 let authError = "";
 let isSubmitting = false;
 let resetConfirmModeLoaded = false;
+let resetEmailSentTo = "";
 
 export function renderAuth() {
   // Detect admin login route and auto-switch to email/password mode
   const currentHash = window.location.hash || "";
+  const currentSearch = window.location.search || "";
   isAdminLoginRoute = currentHash.includes("/admin/login");
   if (isAdminLoginRoute) {
     authMode = "signin";
   }
 
-  // Sync password reset mode from URL query parameters
+  // Sync password reset mode from URL query parameters or hash fragments
   const params = ui.pageParams || {};
-  if (params.mode === "reset-confirm" && !resetConfirmModeLoaded) {
+  const isRecoveryUrl = 
+    params.mode === "reset-confirm" ||
+    currentHash.includes("mode=reset-confirm") ||
+    currentHash.includes("type=recovery") ||
+    currentSearch.includes("type=recovery") ||
+    currentSearch.includes("mode=reset-confirm");
+
+  if (isRecoveryUrl && !resetConfirmModeLoaded) {
     authMode = "reset-confirm";
     resetConfirmModeLoaded = true;
   }
@@ -416,7 +425,7 @@ export function renderAuth() {
     `;
   } else if (authMode === "forgot") {
     titleText = "Reset Password";
-    subtitleText = "Enter your email address to receive password recovery instructions.";
+    subtitleText = "Enter your registered email address to receive password recovery instructions.";
     formContentHtml = `
       <form id="forgotPasswordForm" style="display: grid; gap: 20px;">
         <label class="auth-label">
@@ -428,31 +437,75 @@ export function renderAuth() {
         </label>
         
         <button type="submit" class="auth-submit-btn" ${isSubmitting ? "disabled" : ""}>
-          ${isSubmitting ? `<div class="spinner"></div> Sending...` : "Send Reset Email"}
+          ${isSubmitting ? `<div class="spinner"></div> Sending Reset Link...` : "Send Password Reset Link"}
         </button>
 
         <div class="auth-footer-text">
-          Back to 
+          Remember your password? 
           <button type="button" id="toSignInTabBtn" class="auth-link" style="margin-left: 4px;">Sign In</button>
         </div>
       </form>
     `;
+  } else if (authMode === "forgot-sent") {
+    titleText = "Check Your Email";
+    subtitleText = "Password recovery instructions have been dispatched.";
+    formContentHtml = `
+      <div style="display: grid; gap: 20px; text-align: center;">
+        <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(200, 161, 90, 0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+          ${icon("mail", 28)}
+        </div>
+
+        <div style="font-size: 14px; line-height: 1.6; color: var(--navy);">
+          We have sent a secure recovery link to:<br/>
+          <strong style="color: var(--gold); font-size: 15px;">${escapeHtml(resetEmailSentTo)}</strong>
+        </div>
+
+        <div style="background: #fafaf9; border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 12px; color: var(--ink-soft); line-height: 1.6; text-align: left;">
+          <strong style="color: var(--navy); display: block; margin-bottom: 4px;">Next Steps:</strong>
+          1. Open your email inbox and click the reset link.<br/>
+          2. You will be taken back here to set your new password.<br/>
+          3. Check your spam or promotions folder if not found within 2 minutes.
+        </div>
+
+        <div style="display: grid; gap: 10px; margin-top: 6px;">
+          <button type="button" id="toSignInTabBtn" class="auth-submit-btn" style="text-decoration: none;">
+            Return to Sign In
+          </button>
+          
+          <button type="button" id="resendResetBtn" class="auth-link" style="font-size: 12px; color: var(--ink-soft);">
+            Didn't receive email? Try another address
+          </button>
+        </div>
+      </div>
+    `;
   } else if (authMode === "reset-confirm") {
     titleText = "Set New Password";
-    subtitleText = "Enter your new account password below.";
+    subtitleText = "Choose a strong new password for your Godavari account.";
     formContentHtml = `
       <form id="resetPasswordConfirmForm" style="display: grid; gap: 20px;">
         <label class="auth-label">
-          <span>New Password</span>
+          <span>New Password *</span>
           <div class="auth-input-wrapper">
             <span class="auth-input-icon">${icon("lock", 17)}</span>
             <input type="password" name="password" required placeholder="Min 6 characters" class="auth-input" autocomplete="new-password" />
           </div>
         </label>
+
+        <label class="auth-label">
+          <span>Confirm New Password *</span>
+          <div class="auth-input-wrapper">
+            <span class="auth-input-icon">${icon("lock", 17)}</span>
+            <input type="password" name="confirmPassword" required placeholder="Re-enter new password" class="auth-input" autocomplete="new-password" />
+          </div>
+        </label>
         
         <button type="submit" class="auth-submit-btn" ${isSubmitting ? "disabled" : ""}>
-          ${isSubmitting ? `<div class="spinner"></div> Updating...` : "Update Password"}
+          ${isSubmitting ? `<div class="spinner"></div> Updating Password...` : "Save New Password & Access Account"}
         </button>
+
+        <div class="auth-footer-text">
+          <button type="button" id="toSignInTabBtn" class="auth-link">Return to Sign In</button>
+        </div>
       </form>
     `;
   }
@@ -517,6 +570,15 @@ export function initAuthDelegates() {
   if (signupBtn) {
     signupBtn.addEventListener("click", () => {
       authMode = "signup";
+      authError = "";
+      triggerRender();
+    });
+  }
+
+  const resendResetBtn = document.getElementById("resendResetBtn");
+  if (resendResetBtn) {
+    resendResetBtn.addEventListener("click", () => {
+      authMode = "forgot";
       authError = "";
       triggerRender();
     });
@@ -597,7 +659,13 @@ export function initAuthDelegates() {
     forgotForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(forgotForm);
-      const email = formData.get("email");
+      const email = (formData.get("email") || "").trim();
+
+      if (!email) {
+        authError = "Please enter your email address.";
+        triggerRender();
+        return;
+      }
 
       isSubmitting = true;
       authError = "";
@@ -621,12 +689,13 @@ export function initAuthDelegates() {
         }
 
         if (isGoogleUser) {
-          throw new Error("Password recovery is not available for Google Sign-In accounts. Please log in with Google.");
+          throw new Error("Password recovery is not available for Google Sign-In accounts. Please click 'Continue with Google'.");
         }
 
         await authService.sendPasswordResetEmail(email);
-        showToast(`Reset email instructions sent to ${email}`);
-        authMode = "signin";
+        resetEmailSentTo = email;
+        showToast(`Reset instructions sent to ${email}`);
+        authMode = "forgot-sent";
       } catch (err) {
         authError = err.message || "Failed to request password reset.";
       } finally {
@@ -642,10 +711,17 @@ export function initAuthDelegates() {
     confirmForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const formData = new FormData(confirmForm);
-      const password = formData.get("password");
+      const password = (formData.get("password") || "").trim();
+      const confirmPassword = (formData.get("confirmPassword") || "").trim();
 
       if (password.length < 6) {
         authError = "Password must be at least 6 characters.";
+        triggerRender();
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        authError = "Passwords do not match. Please ensure both fields match.";
         triggerRender();
         return;
       }
@@ -656,14 +732,22 @@ export function initAuthDelegates() {
 
       try {
         await authService.updatePassword(password);
-        showToast("Password updated successfully! Please sign in.");
+        showToast("Password updated successfully! Welcome back.");
         
         // Remove mode parameter from hash to prevent re-entering confirm view
-        window.history.replaceState(null, "", "#/auth");
+        window.history.replaceState(null, "", window.location.pathname + "#/account");
         resetConfirmModeLoaded = false;
         authMode = "signin";
+
+        // Redirect directly into account
+        const { currentUser, getPostAuthRedirect } = await import("../services/store.js");
+        if (currentUser) {
+          window.location.hash = getPostAuthRedirect(currentUser);
+        } else {
+          window.location.hash = "#/account";
+        }
       } catch (err) {
-        authError = err.message || "Failed to update password.";
+        authError = err.message || "Failed to update password. Recovery link may have expired.";
       } finally {
         isSubmitting = false;
         triggerRender();
