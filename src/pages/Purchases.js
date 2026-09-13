@@ -287,40 +287,40 @@ export async function renderPurchaseDetail(queryParams = {}, routeParams = {}) {
             </div>
 
             <!-- Product Row -->
-            <div style="display: flex; gap: 18px; align-items: center; background: var(--ivory, #f8f6f2); border: 1px solid var(--border, #e6ded1); border-radius: 10px; padding: 18px;">
-              <div style="width: 80px; height: 80px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border, #e6ded1); flex-shrink: 0; background: #fff;">
+            <div class="receipt-product-row" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap; background: var(--ivory, #f8f6f2); border: 1px solid var(--border, #e6ded1); border-radius: 10px; padding: 16px;">
+              <div style="width: 72px; height: 72px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border, #e6ded1); flex-shrink: 0; background: #fff;">
                 <img src="${attr(mediaUrl(product?.image || '/banner.jpeg'))}" alt="${attr(product?.title || 'Design')}" style="width: 100%; height: 100%; object-fit: cover;" />
               </div>
-              <div style="flex: 1;">
+              <div style="flex: 1; min-width: 180px;">
                 <div style="font-size: 11px; font-weight: 700; color: var(--gold, #c8a15a); letter-spacing: 0.05em; text-transform: uppercase;">
                   ${escapeHtml(product?.code || "GD-DESIGN")}
                 </div>
-                <h3 style="font-family: var(--font-serif, serif); font-size: 20px; color: var(--navy, #111d42); margin: 2px 0 6px;">
+                <h3 style="font-family: var(--font-serif, serif); font-size: 18px; color: var(--navy, #111d42); margin: 2px 0 4px;">
                   ${escapeHtml(product?.title || "Embroidery Pattern")}
                 </h3>
-                <span style="font-size: 12px; color: var(--ink-soft, rgba(17,29,66,0.72)); display: block;">
+                <span style="font-size: 11.5px; color: var(--ink-soft, rgba(17,29,66,0.72)); display: block;">
                   Commercial DST & PES Machine Embroidery Stitch Files
                 </span>
               </div>
-              <div style="text-align: right;">
-                <span style="font-size: 12px; color: var(--ink-soft, rgba(17,29,66,0.72)); display: block;">Amount Paid</span>
-                <strong style="font-size: 22px; font-family: var(--font-serif, serif); color: var(--navy, #111d42);">${money(purchase.amount)}</strong>
+              <div style="text-align: right; min-width: 100px;">
+                <span style="font-size: 11px; color: var(--ink-soft, rgba(17,29,66,0.72)); display: block;">Amount Paid</span>
+                <strong style="font-size: 20px; font-family: var(--font-serif, serif); color: var(--navy, #111d42);">${money(purchase.amount)}</strong>
               </div>
             </div>
 
             <!-- Downloads Section -->
             ${isPaid ? `
-              <div style="background: #faf8f5; border: 1px dashed var(--gold, #c8a15a); border-radius: 10px; padding: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-                <div>
-                  <strong style="font-size: 14px; color: var(--navy, #111d42); display: block;">Instant Machine File Downloads</strong>
-                  <span style="font-size: 12px; color: var(--ink-soft, rgba(17,29,66,0.72));">Downloads are cryptographically signed and secured via single-use grants.</span>
+              <div style="background: #faf8f5; border: 1px dashed var(--gold, #c8a15a); border-radius: 10px; padding: 16px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                <div style="flex: 1; min-width: 200px;">
+                  <strong style="font-size: 13.5px; color: var(--navy, #111d42); display: block;">Instant Machine File Downloads</strong>
+                  <span style="font-size: 11.5px; color: var(--ink-soft, rgba(17,29,66,0.72));">Downloads are cryptographically signed and secured via single-use grants.</span>
                 </div>
-                <div style="display: flex; gap: 10px;">
-                  <button type="button" class="button button-primary" data-action="download-dst" data-id="${attr(product?.id)}" style="height: 40px; padding: 0 16px; font-size: 12.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; background: var(--navy, #111d42); color: #fff;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%; max-width: 320px;">
+                  <button type="button" class="button button-primary" data-action="download-dst" data-id="${attr(product?.id)}" style="flex: 1; min-width: 120px; height: 42px; padding: 0 16px; font-size: 12.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--navy, #111d42); color: #fff;">
                     ${icon("download", 14)}
                     <span>Download .DST</span>
                   </button>
-                  <button type="button" class="button button-primary" data-action="download-pes" data-id="${attr(product?.id)}" style="height: 40px; padding: 0 16px; font-size: 12.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; background: var(--navy, #111d42); color: #fff;">
+                  <button type="button" class="button button-primary" data-action="download-pes" data-id="${attr(product?.id)}" style="flex: 1; min-width: 120px; height: 42px; padding: 0 16px; font-size: 12.5px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--navy, #111d42); color: #fff;">
                     ${icon("download", 14)}
                     <span>Download .PES</span>
                   </button>
