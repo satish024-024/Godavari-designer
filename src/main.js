@@ -296,29 +296,49 @@ function render() {
     return;
   }
 
-  if (isMobileViewport()) {
-    app.innerHTML = renderMobileShell(pageContent);
-  } else {
-    app.innerHTML = `
-      <div class="site-shell desktop-shell">
-        ${renderHeader(false)}
-        <main>
-          ${pageContent}
-        </main>
-        ${renderFooter()}
-        ${renderFloatingActions()}
-        ${ui.searchOpen ? renderSearchOverlay() : ""}
-        ${ui.cartOpen ? renderCartDrawer() : ""}
-        ${ui.quoteOpen ? renderQuoteModal() : ""}
-        ${ui.storyOpen ? renderStoryModal() : ""}
-        ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
-        ${renderPaymentModal()}
-        ${renderToast()}
-      </div>
-    `;
+  try {
+    if (isMobileViewport()) {
+      app.innerHTML = renderMobileShell(pageContent);
+    } else {
+      app.innerHTML = `
+        <div class="site-shell desktop-shell">
+          ${renderHeader(false)}
+          <main>
+            ${pageContent}
+          </main>
+          ${renderFooter()}
+          ${renderFloatingActions()}
+          ${ui.searchOpen ? renderSearchOverlay() : ""}
+          ${ui.cartOpen ? renderCartDrawer() : ""}
+          ${ui.quoteOpen ? renderQuoteModal() : ""}
+          ${ui.storyOpen ? renderStoryModal() : ""}
+          ${ui.quickViewProductId ? renderQuickViewModal(ui.quickViewProductId) : ""}
+          ${renderPaymentModal()}
+          ${renderToast()}
+        </div>
+      `;
+    }
+    afterRender();
+  } catch (renderErr) {
+    console.error("DOM render caught error:", renderErr);
+    // Reset quick view to prevent permanent modal lock
+    if (ui.quickViewProductId) {
+      ui.quickViewProductId = null;
+    }
+    try {
+      app.innerHTML = `
+        <div class="site-shell desktop-shell">
+          ${renderHeader(false)}
+          <main>
+            ${pageContent}
+          </main>
+          ${renderFooter()}
+          ${renderToast()}
+        </div>
+      `;
+      afterRender();
+    } catch (_) {}
   }
-
-  afterRender();
 }
 
 
@@ -1052,7 +1072,7 @@ document.addEventListener("click", (event) => {
   // Buy Now via Razorpay Standard Architecture (Requires Authentication)
   if (action === "buy-now") {
     const id = trigger.dataset.id;
-    const p = site.products.find(x => x.id === id);
+    const p = site.products.find(x => x.id === id || x._id === id || x.slug === id);
 
     if (!currentUser) {
       sessionStorage.setItem("godavari_pending_buy_now", JSON.stringify({
@@ -1314,6 +1334,7 @@ document.addEventListener("click", (event) => {
 
   // --- Quick View Actions ---
   if (action === "quick-view") {
+    closePanels();
     ui.quickViewProductId = trigger.dataset.id;
     triggerRender();
   }
@@ -1329,7 +1350,7 @@ document.addEventListener("click", (event) => {
 
   if (action === "qv-add-cart") {
     const format = document.getElementById("qvFileFormat")?.value || "DST";
-    addToCart(trigger.dataset.id);
+    addToCart(trigger.dataset.id, format);
     showToast(`Added design with format ${format}`);
     closePanels();
     triggerRender();
