@@ -27,6 +27,7 @@ import {
   supabase,
   initSupabase
 } from "../services/supabase.js";
+import { renderQuickUpload, initQuickUploadEvents } from "./QuickUpload.js";
 
 // ==========================================
 // ADMIN NAVIGATION STRUCTURE
@@ -42,6 +43,7 @@ const adminNav = [
   {
     group: "Catalog",
     items: [
+      { id: "quick-upload", label: "⚡ Quick Uploader", icon: "zap", path: "/admin/quick-upload" },
       { id: "products", label: "Products", icon: "package", path: "/admin/products" },
       { id: "categories", label: "Categories", icon: "tag", path: "/admin/categories" },
       { id: "collections", label: "Collections", icon: "layers", path: "/admin/collections" }
@@ -435,6 +437,26 @@ function renderDashboardOverview() {
       <div class="admin-module-header">
         <h1 class="admin-module-title">Dashboard Overview</h1>
         <p class="admin-module-subtitle">Welcome back, ${currentUser ? currentUser.name : "Admin"}. Here is a snapshot of your storefront.</p>
+      </div>
+
+      <!-- Quick Uploader Highlight Banner -->
+      <div style="background: linear-gradient(135deg, #111D42 0%, #1a2a5e 100%); border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; padding: 22px 26px; color: #fff; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 4px 16px rgba(17,29,66,0.12);">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <span style="background: rgba(212,175,55,0.2); color: #d4af37; border: 1px solid rgba(212,175,55,0.4); padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">
+              ⚡ Sanity Cloud Powered
+            </span>
+          </div>
+          <h2 style="font-size: 18px; margin: 0 0 6px; color: #fff; font-weight: 700;">
+            Fast & Simple Design Uploader
+          </h2>
+          <p style="font-size: 13px; color: rgba(255,255,255,0.8); margin: 0; max-width: 520px; line-height: 1.5;">
+            Upload any embroidery design easily. Just give a title, select a category, and drop your image & machine file (.DST / .PES / .ZIP). Published directly to Sanity Cloud and instantly live on your website!
+          </p>
+        </div>
+        <a href="#/admin/quick-upload" class="button" style="background: #d4af37; color: #111D42; font-weight: 700; font-size: 14px; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(212,175,55,0.35); white-space: nowrap;">
+          <i data-lucide="zap"></i> Open Quick Uploader &rarr;
+        </a>
       </div>
 
       <div class="admin-stats-grid">
@@ -2633,6 +2655,14 @@ function renderSettingsModule() {
 function renderModule(section) {
   const moduleMap = {
     "dashboard": () => renderDashboardOverview(),
+    "quick-upload": () => {
+      setTimeout(() => initQuickUploadEvents(), 0);
+      return renderQuickUpload();
+    },
+    "upload": () => {
+      setTimeout(() => initQuickUploadEvents(), 0);
+      return renderQuickUpload();
+    },
     "products": () => renderProductsModule(),
     "categories": () => renderCategoriesModule(),
     "collections": () => renderCollectionsModule(),
@@ -2688,6 +2718,10 @@ export function renderAdminDashboard(params = {}) {
             <span style="font-weight:600;">${activeSection.charAt(0).toUpperCase() + activeSection.slice(1).replace("-", " ")}</span>
           </div>
           <div class="admin-topbar-actions">
+            <a href="#/admin/quick-upload" class="admin-topbar-link" style="background: linear-gradient(135deg, #d4af37, #b8860b); color: #111D42; font-weight: 700; padding: 6px 14px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(212,175,55,0.3);">
+              <i data-lucide="zap"></i>
+              ⚡ Quick Upload
+            </a>
             <a href="#/" class="admin-topbar-link">
               <i data-lucide="external-link"></i>
               View Site
@@ -2735,6 +2769,11 @@ export function initAdminDashboardDelegates() {
       resetLoadedState();
       navigate("/");
     });
+  }
+
+  // Initialize Quick Uploader form events if active on screen
+  if (document.getElementById("quickUploadForm")) {
+    initQuickUploadEvents();
   }
 
   if (eventsBound) return;

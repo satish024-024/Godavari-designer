@@ -54,6 +54,8 @@ const routes = {
   "/admin": { page: "admin-dashboard", title: "Admin Portal | Godavari", requiresAdmin: true },
   "/admin-dashboard": { page: "admin-dashboard", title: "Admin Portal | Godavari", requiresAdmin: true },
   // Admin sub-routes — all protected
+  "/admin/quick-upload": { page: "admin-dashboard", title: "⚡ Quick Uploader | Admin Portal", requiresAdmin: true },
+  "/admin/upload": { page: "admin-dashboard", title: "⚡ Quick Uploader | Admin Portal", requiresAdmin: true },
   "/admin/products": { page: "admin-dashboard", title: "Products | Admin Portal", requiresAdmin: true },
   "/admin/categories": { page: "admin-dashboard", title: "Categories | Admin Portal", requiresAdmin: true },
   "/admin/collections": { page: "admin-dashboard", title: "Collections | Admin Portal", requiresAdmin: true },
