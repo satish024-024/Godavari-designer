@@ -414,6 +414,43 @@ export const defaultSite = {
         { format: "EXP", machineBrand: "Bernina", machineModel: "E16", hoopSize: "200mm x 200mm", price: 48 },
         { format: "JEF", machineBrand: "Janome", machineModel: "MC550E", hoopSize: "200mm x 200mm", price: 48 }
       ]
+    },
+    {
+      id: "jc1916-krishna-tilak-motif-all-sizes",
+      code: "JC1916",
+      slug: "jc1916-krishna-tilak-motif-all-sizes",
+      title: "Divine Krishna Tilak Motif - Full Set (All Sizes)",
+      description: "Authentic divine Krishna / Tilak eye motif digitized machine embroidery design set (Code: JC1916). Includes complete multi-size package: 3-inch, 4-inch, 5-inch, 7-inch, and 8-inch Tajima DST embroidery files ready for commercial single-head and multi-head machines.",
+      price: 100,
+      category: "Blouse Designs",
+      collection: "blouses",
+      image: "https://cdn.sanity.io/images/6l7i886u/production/5f0ed42d0807d7ddc4c067b07743ca1f0c3279bc-320x246.jpg",
+      gallery: ["https://cdn.sanity.io/images/6l7i886u/production/5f0ed42d0807d7ddc4c067b07743ca1f0c3279bc-320x246.jpg"],
+      stitchCount: 45000,
+      threadColors: 6,
+      dimensions: "3\", 4\", 5\", 7\", 8\" All Sizes Included",
+      machineFormats: ["DST", "ZIP"],
+      designFile: "https://cdn.sanity.io/files/6l7i886u/production/bb6d80a414f0010115cfe37c20d506b77ae6fdde.zip",
+      featured: true,
+      bestSeller: true,
+      tags: ["divine", "krishna", "tilak", "JC1916", "all-sizes", "DST", "multi-size"],
+      seoTitle: "Divine Krishna Tilak Motif Multi-Size Embroidery Set (JC1916) | Godavari",
+      seoDescription: "Download the complete 5-size Divine Krishna Tilak motif machine embroidery bundle (3, 4, 5, 7, 8 inch) in DST format for ₹100.",
+      createdAt: "2026-09-13T08:45:00.000Z",
+      updatedAt: "2026-09-13T08:45:00.000Z",
+      width: 200,
+      height: 200,
+      backStitchCount: 25000,
+      handStitchCount: 20000,
+      totalStitchCount: 45000,
+      rpm: 850,
+      estimatedEmbroideryTime: 35,
+      difficultyLevel: "Intermediate",
+      recommendedFabrics: ["Silk", "Cotton", "Raw Silk", "Velvet", "Denim"],
+      formats: [
+        { format: "DST", machineBrand: "Tajima", machineModel: "All Multi-Head", hoopSize: "3\", 4\", 5\", 7\", 8\" All Sizes", price: 100 },
+        { format: "ZIP", machineBrand: "Universal", machineModel: "Full 5-Size Archive", hoopSize: "Complete Bundle", price: 100 }
+      ]
     }
   ],
   stories: {
