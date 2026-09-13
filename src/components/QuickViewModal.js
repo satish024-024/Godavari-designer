@@ -102,16 +102,12 @@ export function renderQuickViewModal(productId) {
             
             <div class="specs-table">
               <div class="specs-row">
-                <span>Stitch Breakdown</span>
-                <strong>${totalStitch.toLocaleString()} total (${backStitch.toLocaleString()} back, ${handStitch.toLocaleString()} hand)</strong>
+                <span>Total Stitches</span>
+                <strong>${totalStitch.toLocaleString()}</strong>
               </div>
               <div class="specs-row">
                 <span>Dimensions (W x H)</span>
                 <strong>${width}mm x ${height}mm (${escapeHtml(dimensionsText)})</strong>
-              </div>
-              <div class="specs-row">
-                <span>Machine Speed & Time</span>
-                <strong>${rpm} RPM &bull; ~${estTime} mins</strong>
               </div>
               <div class="specs-row">
                 <span>Thread Colors & Difficulty</span>

@@ -367,8 +367,8 @@ export function renderProductDetail() {
                 <span style="color: var(--navy); font-weight: 700;">${escapeHtml(formatDimensionValue(product, product.width))} x ${escapeHtml(formatDimensionValue(product, product.height))}</span>
               </div>
               <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
-                <span style="color: var(--ink-soft); font-weight: 600;">Stitches Breakdown</span>
-                <span style="color: var(--navy); font-weight: 700;">${totalStitches.toLocaleString()} total (${backStitches.toLocaleString()} back)</span>
+                <span style="color: var(--ink-soft); font-weight: 600;">Total Stitches</span>
+                <span style="color: var(--navy); font-weight: 700;">${totalStitches.toLocaleString()}</span>
               </div>
               <div class="spec-row" style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(230,222,209,0.5); padding-bottom: 8px;">
                 <span style="color: var(--ink-soft); font-weight: 600;">Thread Colors</span>
@@ -395,31 +395,6 @@ export function renderProductDetail() {
                 <span style="color: var(--ink-soft); font-weight: 600;">Recommended Fabrics</span>
                 <span style="color: var(--navy); font-weight: 700; text-align: right;">${escapeHtml(fabricsList)}</span>
               </div>
-            </div>
-          </div>
-
-          <!-- Interactive Range Input & Est Time display -->
-          <div style="border: 1px solid var(--border); border-radius: 12px; padding: 20px; background: #fff; margin-bottom: 20px; box-shadow: var(--shadow);">
-            <h3 style="font-family: var(--font-serif); font-size: 18px; color: var(--navy); margin: 0 0 14px;">
-              ${icon("activity", 16)} Speed & Time Calculator
-            </h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <span style="font-size: 13px; color: var(--ink-soft); font-weight: 500;">Embroidery Speed</span>
-              <span style="font-size: 15px; color: var(--navy); font-weight: 700;" id="rpmValueDisplay">${product.rpm || 850} RPM</span>
-            </div>
-            
-            <input 
-              type="range" 
-              id="rpmSlider" 
-              min="300" 
-              max="1200" 
-              step="50" 
-              value="${product.rpm || 850}" 
-              style="width: 100%; cursor: pointer; margin-bottom: 16px;"
-            />
-            
-            <div id="estTimeDisplay" style="background: #eef7fe; border-radius: 8px; padding: 12px; text-align: center; color: #1677d2; font-size: 16px; font-weight: 700;">
-              Estimated Time: ${formattedDuration}
             </div>
           </div>
 
@@ -736,38 +711,6 @@ export function renderProductDetail() {
                 </button>
               </div>
             </div>
-
-            <div style="border: 1px solid var(--border); border-radius: 16px; padding: 28px; background: #fff; margin-top: 24px; box-shadow: 0 14px 40px rgba(17, 29, 66, 0.08);">
-              <h3 style="font-family: var(--font-serif); font-size: 20px; color: var(--navy); margin: 0 0 18px;">
-                ${icon("scroll-text", 18)} Stitch Details (Back + Hands)
-              </h3>
-              
-              <!-- Back and Hands Stitch Counts Breakdown -->
-              <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--ink-soft); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px dashed var(--border);">
-                <span>Back Stitches: <strong style="color: var(--navy);">${backStitches.toLocaleString()}</strong></span>
-                <span>Hands Stitches: <strong style="color: var(--navy);">${handStitches.toLocaleString()}</strong></span>
-              </div>
-              
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 15px; color: var(--ink-soft); font-weight: 500;">Embroidery Speed</span>
-                <span style="font-size: 18px; color: var(--navy); font-weight: 700;" id="rpmValueDisplay">${product.rpm || 850} RPM</span>
-              </div>
-              
-              <!-- Interactive Range Input -->
-              <input 
-                type="range" 
-                id="rpmSlider" 
-                min="300" 
-                max="1200" 
-                step="50" 
-                value="${product.rpm || 850}" 
-                style="width: 100%; cursor: pointer;"
-              />
-              
-              <div id="estTimeDisplay" style="background: #eef7fe; border-radius: 12px; padding: 18px; text-align: center; color: #1677d2; font-size: 20px; font-weight: 700; transition: all 0.2s ease;">
-                Estimated Time: ${formattedDuration}
-              </div>
-            </div>
           </div>
 
           <!-- Right Column: Sidebar Info -->
@@ -809,29 +752,8 @@ export function renderProductDetail() {
                   </div>
                 </div>
                 <div class="spec-row">
-                  <span style="font-weight:700; color:var(--navy);">Stitch Details</span>
-                  <div style="display:grid; gap:4px; color:var(--navy);">
-                    <strong>Back: ${backStitches.toLocaleString()}</strong>
-                    <strong>Hand: ${handStitches.toLocaleString()}</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div style="border:1px solid var(--border); border-radius: 12px; background:#fff; padding: 24px; margin-bottom: 20px;">
-              <h3 style="font-family: var(--font-serif); font-size: 22px; color: var(--navy); margin: 0 0 16px;">Stitch Details (Back + Hands)</h3>
-              <div style="display:grid; gap:12px; color:var(--navy);">
-                <div style="display:flex; justify-content:space-between; gap:12px;">
-                  <span style="font-weight:600;">Embroidery Speed</span>
-                  <strong>${product.rpm || 850} RPM</strong>
-                </div>
-                <div style="display:flex; justify-content:space-between; gap:12px;">
-                  <span style="font-weight:600;">Estimated Time</span>
-                  <strong>${formattedDuration}</strong>
-                </div>
-                <div style="display:flex; justify-content:space-between; gap:12px;">
-                  <span style="font-weight:600;">Total Stitch Count</span>
-                  <strong>${totalStitches.toLocaleString()}</strong>
+                  <span style="font-weight:700; color:var(--navy);">Total Stitch Count</span>
+                  <strong style="color:var(--navy);">${totalStitches.toLocaleString()}</strong>
                 </div>
               </div>
             </div>
