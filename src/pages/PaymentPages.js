@@ -63,6 +63,8 @@ export function renderPaymentProcessing(queryParams = {}) {
   `;
 }
 
+let isFetchingStatus = false;
+
 export function renderPaymentSuccess(queryParams = {}) {
   const purchaseId = queryParams.purchaseId;
 
@@ -71,21 +73,33 @@ export function renderPaymentSuccess(queryParams = {}) {
     activePollingTimer = null;
   }
 
+  if (!purchaseId) {
+    window.location.hash = "#/catalog";
+    return "";
+  }
+
   if (!activeStatusCache || activeStatusCache.purchase?.id !== purchaseId) {
-    fetchServerPaymentStatus(purchaseId).then(data => {
-      if (data) {
-        if (data.status === "AUTHORIZED") {
-          window.location.hash = `#/payment/pending?purchaseId=${encodeURIComponent(purchaseId)}`;
-          return;
+    if (!isFetchingStatus) {
+      isFetchingStatus = true;
+      fetchServerPaymentStatus(purchaseId).then(data => {
+        isFetchingStatus = false;
+        if (data) {
+          if (data.status === "AUTHORIZED") {
+            window.location.hash = `#/payment/pending?purchaseId=${encodeURIComponent(purchaseId)}`;
+            return;
+          }
+          if (data.status === "FAILED") {
+            window.location.hash = `#/payment/failed?purchaseId=${encodeURIComponent(purchaseId)}`;
+            return;
+          }
+          activeStatusCache = data;
+          import("../services/store.js").then(m => m.triggerRender());
         }
-        if (data.status === "FAILED") {
-          window.location.hash = `#/payment/failed?purchaseId=${encodeURIComponent(purchaseId)}`;
-          return;
-        }
-        activeStatusCache = data;
-        import("../services/store.js").then(m => m.triggerRender());
-      }
-    });
+      }).catch(err => {
+        isFetchingStatus = false;
+        console.error("fetchServerPaymentStatus error:", err);
+      });
+    }
 
     return `
       <section class="payment-lifecycle-section" style="min-height: 80vh; padding: 120px 20px 80px; display: grid; place-items: center; background: var(--ivory, #f8f6f2);">

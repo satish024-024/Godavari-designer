@@ -69,7 +69,7 @@ import { renderQuickViewModal } from "./components/QuickViewModal.js";
 import { renderBottomNavigation } from "./components/BottomNavigation.js";
 import { renderMobileDrawer } from "./components/MobileDrawer.js";
 import { renderMobileShell } from "./components/mobile/MobileShell.js";
-import { renderPaymentModal, initPaymentModalDelegates, openPaymentModal } from "./components/PaymentModal.js?v=10";
+import { renderPaymentModal, initPaymentModalDelegates, openPaymentModal } from "./components/PaymentModal.js";
 import { 
   renderPaymentProcessing, 
   renderPaymentSuccess, 
@@ -86,24 +86,25 @@ import {
 } from "./pages/Purchases.js";
 import { 
   openPreCheckout, 
+  closePreCheckout,
   downloadDesignFile, 
   initiatePayment 
 } from "./services/paymentService.js";
 
 
 // Pages
-import { renderHome } from "./pages/Home.js?v=10";
-import { renderCatalog, catalogState } from "./pages/Catalog.js?v=10";
-import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js?v=10";
-import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js?v=10";
-import { renderCart } from "./pages/Cart.js?v=10";
-import { renderWishlist } from "./pages/Wishlist.js?v=10";
-import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js?v=10";
-import { renderAuth, initAuthDelegates } from "./pages/Auth.js?v=10";
-import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js?v=10";
-import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js?v=10";
-import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js?v=10";
-import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js?v=10";
+import { renderHome } from "./pages/Home.js";
+import { renderCatalog, catalogState } from "./pages/Catalog.js";
+import { renderProductDetail, initProductDetailEvents } from "./pages/ProductDetail.js";
+import { renderCustomOrder, initCustomOrderEvents } from "./pages/CustomOrder.js";
+import { renderCart } from "./pages/Cart.js";
+import { renderWishlist } from "./pages/Wishlist.js";
+import { renderCheckout, initCheckoutEvents } from "./pages/Checkout.js";
+import { renderAuth, initAuthDelegates } from "./pages/Auth.js";
+import { renderAdminDashboard, initAdminDashboardDelegates } from "./pages/AdminDashboard.js";
+import { renderNotFound, initNotFoundEvents } from "./pages/NotFound.js";
+import { renderOrderTracking, initOrderTrackingDelegates } from "./pages/OrderTracking.js";
+import { renderAccount, initAccountDelegates, loadAccountData } from "./pages/Account.js";
 
 // Company & Support Pages
 import {
@@ -1066,6 +1067,20 @@ document.addEventListener("click", (event) => {
     if (p) {
       openPreCheckout(p);
     } else if (id) {
+      initiatePayment(id);
+    }
+    return;
+  }
+
+  // Pre-Checkout Modal Payment & Close Actions
+  if (action === "close-precheckout") {
+    closePreCheckout();
+    return;
+  }
+
+  if (action === "start-razorpay-checkout") {
+    const id = trigger.dataset.id;
+    if (id) {
       initiatePayment(id);
     }
     return;
